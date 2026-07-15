@@ -117,7 +117,7 @@ From POI sheet or long-press menu on map point → "Open in Google Maps / Apple 
 ### §4.2 Boot sequence (main.ts)
 
 1. `routes.dispatch(location)` — if path is `/share`, run share flow (§9.3) which ends in a
-   `location.replace('/?…')` or renders Import sheet; otherwise continue.
+   `location.replace(BASE + '?…')` or renders Import sheet; otherwise continue.
 2. `urlState.parse(location.search)` → validated partial state (§5.2); merge into defaults.
 3. Create store (§5.1); mount AppShell (§8).
 4. `loader.loadRegistries()` → validated layer registry (build-time imported JSON, validated again
@@ -145,6 +145,7 @@ All mutations go through typed store actions; components never write each other'
 interface AppState {
   view: { lat: number; lng: number; zoom: number };            // clamped §12.3
   year: number;                                                 // YEAR_MIN..currentYear
+  requestedLayerId: string | null;                              // URL `l` override, resolved by §6.1
   timeLayer: {
     activeLayerId: string | null;                               // resolved by §6.1
     opacity: number;                                            // 0..1, default 1
@@ -255,11 +256,14 @@ All provider responses pass `security/validate.ts` schema guards before entering
 ### §6.1 Layer resolution algorithm (providers/layers/resolve.ts — pure function)
 
 ```
-resolve(year, viewBbox, registry, urlOverrideId?) -> { activeLayerId | null, reason, candidates }
+resolve(year, viewBbox, zoom, registry, currentYear, requestedLayerId?)
+  -> { activeLayerId | null, reason, candidates }
 
-0. if urlOverrideId exists in enabled registry AND its coverage intersects viewBbox → pick it (reason 'ok').
+0. if requestedLayerId exists in enabled registry AND type=="raster-era" AND coverage intersects
+   viewBbox AND zoom within tiles.minzoom..maxzoom → pick it (reason 'ok').
 1. enabled = entries minus (flags.requiresFeatureFlag set and flag not enabled at build).
 2. candidates = enabled where type=="raster-era" AND coverage intersects viewBbox
+   AND zoom within tiles.minzoom..maxzoom
    (bbox intersection; antimeridian not handled in v1 — Japan-only data).
 3. if candidates empty → { null, reason: registry empty ? 'registry-empty' : 'no-coverage' }.
 4. score(e) = (year within e.era) ? 0 : min(|year − e.era.from|, |year − e.era.to|).
@@ -359,8 +363,9 @@ external strings with `textContent`; styles in co-named CSS file; i18n via keys 
 
 ### §8.3 Sheet ↔ history integration
 
-Opening a sheet does `history.pushState({sheet}, '')`; `popstate` closes it (Android back /
-iOS edge-swipe). Guard against state desync: on `popstate`, if no sheet open, ignore.
+Opening a sheet does `history.replaceState({sheet}, '')`; `popstate` closes the active sheet
+(Android back / iOS edge-swipe) without stacking one entry per sheet transition. Guard against
+state desync: on `popstate`, if no sheet open, ignore.
 
 ## §9 Integration contracts
 
@@ -370,21 +375,23 @@ iOS edge-swipe). Guard against state desync: on `popstate`, if no sheet open, ig
 
 `parseSharedLocation(raw: string): ParseResult` per research/map-app-integration.md §2.
 Input cap: 4096 chars (reject beyond, reason `invalid`). Recognizers in order: `geo:` URI →
-plain `lat,lng` pair → Apple `maps.apple.com` (`ll`, optional `q` label) → Google full URLs
-(`q=`, `query=`, `/@lat,lng,{z}z`) → Google/goo.gl shortlink hosts → reason `shortlink` →
+Apple `maps.apple.com` (`ll`, optional `q` label) → Google full URLs
+(`q=`, `query=`, `/@lat,lng,{z}z`, including `maps.google.co.jp`) →
+Google/goo.gl shortlink hosts → reason `shortlink` → generic plain `lat,lng` pair →
 otherwise `no-coords`. Never fetches (ADR-005). Output coords re-validated (§12.3). Label:
 decoded, control-stripped, ≤120 chars. Table-driven test suite ≥ 25 cases incl. adversarial
 (issue 34).
 
-### §9.3 `/share` route (integrations/shareRoute.ts)
+### §9.3 Base-relative share route, path ending `/share` (integrations/shareRoute.ts)
 
-Registered in manifest `share_target`: `{ action: "/share", method: "GET",
+Registered in manifest `share_target`: `{ action: "share", method: "GET",
 params: { title: "title", text: "text", url: "url" } }` and `protocol_handlers`:
-`[{ protocol: "geo", url: "/share?text=%s" }]` (research doc §1). Flow: concat `url ?? text ?? title`
-→ parser → ok: `location.replace('/?lat=…&lng=…&z={zoom??16}&label=…')`; fail: render app with
+`[{ protocol: "geo", url: "share?text=%s" }]` (research doc §1). Flow: concat `url ?? text ?? title`
+→ parser → ok: `location.replace(BASE + '?lat=…&lng=…&z={zoom??16}&label=…')`; fail: render app with
 ImportSheet open, prefilled raw text (truncated for display), guidance keyed by reason
 (`shortlink` → "共有リンクは短縮URLでした。マップアプリで『座標をコピー』するか、URL全体を貼り付けてください").
-GitHub Pages SPA: deploy copies `index.html` → `404.html` so `/share` resolves (issue 06).
+GitHub Pages SPA: deploy copies `index.html` → `404.html` so `/chronomap/share` and any path ending
+`/share` resolves (issue 06).
 
 ### §9.4 Outbound handoff (integrations/outbound.ts)
 
@@ -401,7 +408,8 @@ manually by owner at release.
 ## §10 PWA
 
 ### §10.1 Manifest
-`name: "chronomap"`, `short_name: "chronomap"`, `display: "standalone"`, `start_url: "/"`,
+`name: "chronomap"`, `short_name: "chronomap"`, `display: "standalone"`, `start_url: "."`,
+`scope: "."`,
 `theme_color`/`background_color` from design tokens, icons 192/512 + maskable (issue 30),
 `share_target` + `protocol_handlers` per §9.3.
 
@@ -470,15 +478,19 @@ Untrusted: B1, B2, B3 payload *content*; B4 availability; B6 third-party code at
 
 ```
 default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:
-  https://cyberjapandata.gsi.go.jp https://ktgis.net https://upload.wikimedia.org;
+  https://cyberjapandata.gsi.go.jp https://upload.wikimedia.org;
 connect-src 'self' https://ja.wikipedia.org https://en.wikipedia.org
-  https://commons.wikimedia.org; worker-src 'self'; manifest-src 'self';
+  https://commons.wikimedia.org; worker-src 'self' blob:; child-src blob:; manifest-src 'self';
 base-uri 'none'; form-action 'none'; object-src 'none'
 ```
 
+Konjaku-enabled builds append `https://ktgis.net` to `img-src` only when the same build-time flag
+that enables Konjaku registry entries is ON; the default v1 policy omits that host.
+
 Plus `<meta name="referrer" content="no-referrer">`. Verification item: MapLibre GL runtime may
-require `style-src` relaxation (blob workers use worker-src blob: — verify) — resolve during issue
-43 with documented final policy; any relaxation needs written justification in the issue.
+require `style-src` relaxation (blob workers use `worker-src blob:` and older engines may fall back
+to `child-src blob:` — verify) — resolve during issue 43 with documented final policy; any
+relaxation needs written justification in the issue.
 `frame-ancestors` cannot be expressed in meta CSP → residual clickjacking risk accepted & documented.
 
 ### §12.5 Supply chain & CI security (issues 04, 45)

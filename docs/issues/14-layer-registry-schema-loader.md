@@ -20,12 +20,15 @@ security control (a registry PR cannot introduce an unlisted egress host).
   `["raster-era","vector-dated"]` (v1 loader accepts entries but only `raster-era` is renderable),
   `era.from ≤ era.to` (via `x-` note; enforced in code), coverage = array of 4-number bboxes with
   range checks, `tiles.scheme` enum, zoom ints 0–22, `title` requires `ja` and `en`,
-  `attribution.text` non-empty, `flags.requiresFeatureFlag` string|null, `priority` int.
+  `attribution.text` non-empty, `attribution.url` optional URL, `attribution.license.name`
+  non-empty factual label, `attribution.license.url` optional URL, `flags.requiresFeatureFlag`
+  string|null, `priority` int. License labels must not imply CC/open-license status unless verified;
+  permission-gated sources may use labels such as "Provider terms / permission required".
 - `src/providers/layers/types.ts`: TS types mirroring the schema (hand-written, no codegen).
 - `src/providers/layers/loader.ts`: `loadRegistry(json: unknown[], env): LayerEntry[]` —
   structural validation (hand-rolled guards, no runtime schema lib — keep deps minimal), era/bbox
   semantic checks, drop-invalid-with-`console.warn`, filter entries whose
-  `flags.requiresFeatureFlag` is set but not truthy in `import.meta.env`, compute rolling eras
+  `flags.requiresFeatureFlag` is set unless `import.meta.env[flagName] === "true"`, compute rolling eras
   (`era.to === null` → currentYear, used by seamlessphoto).
   NOTE: schema allows `era.to: null` for rolling layers — reflect in schema + types.
 - `scripts/validate-registry.mjs` (Node, no deps): validates all `src/providers/layers/*.layers.json`
@@ -46,7 +49,7 @@ security control (a registry PR cannot introduce an unlisted egress host).
 ## Acceptance Criteria
 
 - [ ] Unit tests: valid fixture passes; each violation class (bad id, era inverted, 5-number bbox,
-      unknown host, missing ja title, bad scheme) is rejected by BOTH loader (drop) and script
+      unknown host, missing ja title, missing license name, bad scheme) is rejected by BOTH loader (drop) and script
       (exit 1) — table-driven fixtures under `tests/unit/fixtures/registry/`.
 - [ ] `npm run validate:registry` green in CI on the placeholder dataset.
 - [ ] Adding a fixture entry with host `evil.example` fails the script with a message naming the host.

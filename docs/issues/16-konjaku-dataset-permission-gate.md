@@ -27,12 +27,14 @@ human-approved before ON.
   - `attribution.text`: `今昔マップ on the web`（required on-screen credit), url to ktgis.net
   - `flags: { experimental: true, requiresFeatureFlag: "VITE_ENABLE_KONJAKU" }`, priority 15
     (above GSI when era matches better — drawn maps are the richer old-era experience).
-- Verification (recorded in PR): with the flag ON locally, 3 sample tiles per dataset render
-  correctly positioned (y-flip correct) over the basemap; note any CORS/hotlink failure →
-  if tiles fail, keep dataset committed, file findings on DESIGN §17.1.
+- Verification (recorded in PR): cross-check every selected region's `{dataset}`/`{era}` identifiers
+  and printed year ranges against the service page, then with the flag ON locally confirm at least
+  3 sample tiles per dataset render correctly positioned (y-flip correct) over the basemap; note any
+  CORS/hotlink failure → if tiles fail, keep dataset committed, file findings on DESIGN §17.1.
 - `docs/decisions/ADR-006`: append a "Gate checklist" section: [ ] owner contacted Saitama Univ.
-  (date), [ ] permission scope recorded, [ ] flag enabled in deploy workflow. **Code must not
-  flip the flag.**
+  (date/contact/source), [ ] permission scope recorded (app name/deployment URL, allowed use,
+  required attribution wording, OSS fork/redistribution expectations, caching/proxy constraints),
+  [ ] flag enabled in deploy workflow. **Code must not flip the flag.**
 - `.env.example` documenting `VITE_ENABLE_KONJAKU=false`.
 
 ## Detailed Requirements
@@ -52,6 +54,7 @@ human-approved before ON.
 - [ ] Screenshot evidence of correct tile alignment (flag ON, dev) in PR; y-flip regression test:
       overlay manager e2e asserts tile URL row computed for a known z/x matches TMS expectation
       (stub captures requested URL).
+- [ ] PR includes the full era-id/year-range cross-check table for every selected region/era.
 - [ ] ADR-006 gate checklist added, all boxes unchecked.
 
 ## Validation

@@ -40,7 +40,7 @@ No explicit CC license is stated on the tile service page. Therefore:
 | Permission not granted / no reply | No drawn-map layer in v1 | v1 remains complete with GSI aerial axis; Konjaku stays flag-OFF |
 | Single-university server availability | Layer outages | Error tiles treated as transparent; no SLA assumed; provider marked `experimental` |
 | CORS / hotlink policy unverified | Tiles may fail in browser | Verification step inside issue 16 before flag-ON request; raster tiles are loaded as images (no CORS needed for display, only for canvas readback which we do not do) |
-| Era identifiers not machine-readable | Manual transcription errors | Issue 16 acceptance criteria include a recorded manual cross-check of 3 sample tiles per dataset |
+| Era identifiers not machine-readable | Manual transcription errors | Issue 16 acceptance criteria include a full manual cross-check of all selected region era identifiers and year ranges against the service page, plus sample tile probes |
 
 ## Sources
 

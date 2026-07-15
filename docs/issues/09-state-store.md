@@ -20,9 +20,10 @@ subsystem subscribes to it; getting this right unblocks most of W1–W3.
   opacity 1, poi.enabled=true, sheet 'none', lang resolved later by 39 — default 'ja').
 - `src/state/store.ts`:
   ```ts
+  type ShallowPatch<S> = Partial<{ [K in keyof S]: S[K] }>;
   createStore<S>(initial: S): {
-    get(): S;                                  // returns current state (readonly typed)
-    set(patch: DeepPartial<S> | (s: S) => S): void;  // shallow-merge per top-level slice
+    get(): Readonly<S>;                        // returns current state (readonly typed)
+    set(patch: ShallowPatch<S> | ((s: Readonly<S>) => S)): void; // shallow top-level merge
     on<T>(selector: (s: S) => T, cb: (next: T, prev: T) => void): () => void; // dedup via Object.is
   }
   ```

@@ -15,14 +15,17 @@ issues (19/21) and future providers depend on behavior, not implementation.
 
 ## Scope
 
-- `resolve(input: { year: number; viewBbox: Bbox; registry: LayerEntry[]; overrideId?: string })
+- `resolve(input: { year: number; viewBbox: Bbox; zoom: number; currentYear: number;
+  registry: LayerEntry[]; overrideId?: string })
   → { activeLayerId: string | null; reason: 'ok'|'no-coverage'|'registry-empty';
       candidates: string[]; snapped: boolean }`
   implementing §6.1 steps 0–6 exactly:
-  - step 0 override honored only if enabled + coverage intersects;
-  - candidates = raster-era entries intersecting bbox (use `util/geo.ts` bbox intersection —
+  - step 0 override honored only if enabled + raster-era + coverage intersects + zoom within
+    `tiles.minzoom..maxzoom`;
+  - candidates = raster-era entries intersecting bbox and available at the current zoom (use
+    `util/geo.ts` bbox intersection —
     add `bboxIntersects(a, b)` there);
-  - score = 0 if year ∈ era else min distance to era endpoints (rolling `to:null` → currentYear);
+  - score = 0 if year ∈ era else min distance to era endpoints (rolling `to:null` → `currentYear`);
   - tie-break: smaller era span → higher priority → id ascending;
   - `snapped = score > 0`;
   - present-day preference: year ≥ currentYear−2 and `gsi-seamlessphoto` ∈ candidates → pick it.
@@ -37,7 +40,7 @@ issues (19/21) and future providers depend on behavior, not implementation.
 2. Performance: O(n log n) worst case; n ≤ 200 expected — no spatial index needed (comment this).
 3. Antimeridian: explicitly unsupported (Japan data); assert bboxes are minLng<maxLng in loader
    (14) so resolve can assume it — cross-check that 14 does this; if not, add here.
-4. Time source: `currentYear` passed in as parameter (`now: Date`) — no `Date.now()` inside
+4. Time source: `currentYear` passed in as a number — no `Date.now()` or `new Date()` inside
    (testability).
 
 ## Acceptance Criteria
@@ -45,7 +48,8 @@ issues (19/21) and future providers depend on behavior, not implementation.
 - [ ] Fixture suite (uses real ids from 15 + synthetic entries) covering: year inside one era;
       year between two eras (nearest wins); exact tie (span tie-break); tie again (priority);
       override valid/invalid/out-of-coverage; viewport outside all coverage; empty registry;
-      rolling era; present-day preference; flag-filtered konjaku absent. ≥ 20 cases.
+      rolling era; present-day preference; zoom below minzoom returns no available candidate;
+      flag-filtered konjaku absent. ≥ 20 cases.
 - [ ] Property test: for random year/bbox within Japan, result is stable across 2 calls and
       `activeLayerId ∈ candidates ∪ {null}`.
 - [ ] 100% branch coverage on resolve.ts.

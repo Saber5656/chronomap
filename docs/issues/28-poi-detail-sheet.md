@@ -26,6 +26,8 @@ untrusted text; §12.2 A5).
 - Footer: `poi.attribution` (`Text: Wikipedia (CC BY-SA)`) linking the article.
 - Sheet behavior (host from 22): half-height default, drag to full/close; selection change while
   open swaps content in place (no close/reopen flicker).
+- Deselect behavior: if `poi.selectedId` is cleared while `ui.sheet === 'poi'`, the controller closes
+  the sheet explicitly instead of rendering an empty open sheet.
 - Peek behavior: sheet must not cover the slider dock at half height (layout: sheet max-height
   `calc(50dvh - dock)`).
 
@@ -43,6 +45,7 @@ untrusted text; §12.2 A5).
       Wikipedia link href/rel/target correct.
 - [ ] e2e: select another pin while open → content swaps, exactly one summary request per
       selection (spy).
+- [ ] e2e: clearing selection closes the POI sheet and leaves no empty dialog visible.
 - [ ] e2e error path: 500 stub → error text + retry works.
 - [ ] e2e: swipe-down closes; history back closes; slider remains visible/usable at half height.
 

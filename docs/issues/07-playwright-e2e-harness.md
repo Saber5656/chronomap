@@ -16,8 +16,8 @@ public services. All later e2e specs (issues 12, 19, 28, 35, 43…) build on the
 
 - Dev dep `@playwright/test`; `playwright.config.ts`: projects `mobile-chromium`
   (Pixel-class viewport 390×844, touch, `geolocation` permission granted, locale `ja-JP`) and
-  `webkit-smoke` (same viewport, tagged `@smoke` specs only); `webServer` = `npm run preview`
-  (built app) with `reuseExistingServer`.
+  `webkit-smoke` (same viewport, tagged `@smoke` specs only); `webServer` command builds before
+  previewing, e.g. `npm run build && npm run preview`, with `reuseExistingServer`.
 - `tests/e2e/stubs/network.ts` exporting `stubUpstream(page)`:
   - `**cyberjapandata.gsi.go.jp/**` and `**ktgis.net/**` → fulfill 256×256 checkerboard PNG
     (committed fixture `tests/e2e/stubs/tile.png`); optionally 404 for configured layer ids/zooms
@@ -41,7 +41,7 @@ public services. All later e2e specs (issues 12, 19, 28, 35, 43…) build on the
 
 ## Acceptance Criteria
 
-- [ ] `npm run e2e` passes locally against the built app with the network cable conceptually
+- [ ] `npm run e2e` passes from a clean checkout against the built app with the network cable conceptually
       unplugged (all upstream stubbed).
 - [ ] CI runs the chromium project green; artifacts (trace on failure) uploaded.
 - [ ] `assertNoUnstubbedRequests` demonstrably fails when a stub is disabled (shown in PR, not committed).

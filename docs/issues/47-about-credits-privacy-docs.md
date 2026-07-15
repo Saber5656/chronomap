@@ -35,8 +35,11 @@ location data flows must be user-visible), and the repo's public face for OSS re
 
 ## Detailed Requirements
 
-1. Privacy text must match actual behavior (cross-check against 13/25/31 implementations —
-   listing localStorage keys exactly: `chronomap.lang`, `chronomap.onboarded`).
+1. Privacy text must match actual behavior (cross-check against 13/25/31/32 implementations):
+   list localStorage keys exactly (`chronomap.lang`, `chronomap.onboarded`), disclose persistent
+   service-worker CacheStorage for the app shell, and disclose that only after an explicit user
+   action, outbound map handoff opens the chosen third-party map app/site with the selected
+   coordinates under that provider's terms/privacy policy.
 2. About content lazy-loaded (dynamic import — §14).
 3. No marketing fluff; factual, short, bilingual parity (i18n parity spec covers keys).
 4. Screenshot placeholder only (real capture at 48).
@@ -44,7 +47,9 @@ location data flows must be user-visible), and the repo's public face for OSS re
 ## Acceptance Criteria
 
 - [ ] e2e: menu → About → sections render; provider rows match loaded registry; privacy list
-      shows the two localStorage keys; all links have correct hrefs + noopener.
+      shows the two localStorage keys, CacheStorage behavior, and explicit user-triggered outbound
+      coordinate handoff to third-party provider terms/privacy; all links have correct hrefs +
+      noopener.
 - [ ] README renders correctly on GitHub (manual check), bilingual, all links resolve.
 - [ ] i18n parity spec passes with new keys; Konjaku row hidden with flag OFF.
 - [ ] Registry-driven credits: adding a fixture provider in a test shows a new row (unit or e2e).

@@ -18,8 +18,9 @@ not discovered.
 - `index.html`: add `<meta http-equiv="Content-Security-Policy" content="…">` starting from the
   §12.4 policy verbatim, and `<meta name="referrer" content="no-referrer">`.
 - Verification matrix (the core work — record results in the PR and as code comments):
-  1. MapLibre GL worker: does it require `worker-src blob:`? (bundler-dependent). If yes, add
-     `worker-src 'self' blob:` — narrowest form.
+  1. MapLibre GL worker: does it require `worker-src blob:` and the older-engine fallback
+     `child-src blob:`? (bundler-dependent). If yes, add `worker-src 'self' blob:` plus
+     `child-src blob:` — narrowest form.
   2. MapLibre runtime `<style>` injection or inline style attributes needing `style-src`
      relaxation: test built app with policy active; prefer extracting to static CSS; only if
      impossible, add the narrowest relaxation with written justification.
@@ -29,6 +30,8 @@ not discovered.
 - Host lists: generate the `img-src`/`connect-src` host sets from `src/security/hosts.ts` (24) at
   build time (small vite plugin or a build script asserting index.html matches hosts.ts — pick
   the simpler: a unit test string-comparing the meta against a canonical policy builder function).
+  The default v1 policy excludes Konjaku hosts when the Konjaku feature flag is OFF; a Konjaku-enabled
+  build path appends `https://ktgis.net` to `img-src` using the same flag gate as the registry.
 - Document (docs/decisions/ADR-005 amendment or `src/security/README.md`): final policy, what
   meta-CSP cannot do (`frame-ancestors`, report-uri), and the rule "new provider host ⇒ update
   hosts.ts ⇒ policy test fails until meta updated".
@@ -37,7 +40,8 @@ not discovered.
 
 1. The final policy must block: inline script injection, cross-origin fetch to non-allowlisted
    hosts, form posts, object/embed, base tag hijack (e2e-verified below).
-2. Konjaku host `ktgis.net` stays in img-src even while flag OFF (static policy; documented).
+2. Konjaku host `ktgis.net` is absent from the default policy while the flag is OFF, and present only
+   in the Konjaku-enabled policy/build path.
 3. No `unsafe-eval`; if MapLibre requires it (it should not in v5), STOP and escalate via a new
    issue rather than adding it.
 
@@ -48,6 +52,7 @@ not discovered.
 - [ ] e2e negative: injected `<img src="https://evil.example/x.png">` and `fetch('https://evil.example')`
       from console context produce violation events / rejections (blocked).
 - [ ] Unit: policy-builder test pins meta content to hosts.ts (drift fails).
+- [ ] Unit: default policy excludes `ktgis.net`; Konjaku-enabled policy includes it.
 - [ ] PR contains the 4-point verification matrix with outcomes.
 
 ## Validation

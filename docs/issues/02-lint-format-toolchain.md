@@ -19,7 +19,8 @@ enforceable rather than aspirational, so weaker implementation agents cannot reg
   `tests/**`; plus:
   - `no-restricted-properties`: forbid `innerHTML`, `outerHTML`, `insertAdjacentHTML`,
     `document.write` (error, message pointing to DESIGN §12.3).
-  - `no-restricted-globals`/syntax: forbid `eval`, `new Function`.
+  - `no-restricted-globals`/syntax: forbid `eval`; `no-new-func: error` to forbid
+    `Function` constructors explicitly.
   - `@typescript-eslint/no-explicit-any: error`, `no-console: ["warn", { allow: ["warn","error"] }]`.
 - `.prettierrc.json` (defaults + `printWidth: 100`), `.prettierignore` (`dist`, `docs`),
   `.editorconfig` (2-space, LF, final newline).
@@ -28,8 +29,9 @@ enforceable rather than aspirational, so weaker implementation agents cannot reg
 ## Detailed Requirements
 
 1. `npm run lint` and `npm run format:check` pass on the issue-01 skeleton after formatting it.
-2. Rules must be errors (not warnings) for the restricted sinks; add one negative test: a scratch
-   file using `innerHTML` must fail lint (demonstrate in PR description, do not commit it).
+2. Rules must be errors (not warnings) for the restricted sinks; add negative checks: scratch files
+   using `innerHTML` and `new Function` must fail lint (demonstrate in PR description, do not commit
+   them).
 3. Do not disable type-aware linting for `src/`.
 
 ## Acceptance Criteria

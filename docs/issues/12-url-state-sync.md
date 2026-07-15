@@ -20,13 +20,15 @@ mechanism; deep links are the foundation the map-app integrations (W5) reuse.
     `timeLayer.opacity`, `poi.enabled` and after 500 ms debounce call
     `history.replaceState(null, '', serialized)`; never `pushState` for view changes.
   - Respect the sheet-history integration (§8.3): view sync must use `replaceState` only, so it
-    composes with sheet `pushState` from issue 28/36 without history spam.
+    composes with sheet `replaceState` from issue 22/28/36 without history spam.
 - Share action (registered on MenuButton slot, menu itself is issue 33's context or MenuButton
   from §8 #11 — implement the minimal MenuButton here with a single "share view" item; later
   issues append items):
   - If `navigator.share` available: share `{ title: 'chronomap', url }`; else clipboard write +
     toast "リンクをコピーしました" (string via i18n key `share.copied`).
-  - Shared URL = `location.origin + BASE_URL + serialized` current state.
+  - Shared URL = a normalized absolute URL built from `serialized` and
+    `new URL(import.meta.env.BASE_URL, location.origin)`, so `base: './'` and `/chronomap/` both
+    produce valid links.
 - `src/app/onboardingHooks` NOT here (42).
 
 ## Detailed Requirements

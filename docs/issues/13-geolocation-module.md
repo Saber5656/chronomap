@@ -27,7 +27,8 @@ only). "現在地から過去を遡る" is the product's opening move — this m
 - On success: `actions.setFix`, `mapController.flyToUser(fix)` (zoom 15, max duration 1.5 s,
   respect `prefers-reduced-motion` → jumpTo), draw accuracy circle + dot as a GeoJSON source
   (`chronomap-user`) with circle layers; circle radius = `fix.accuracyM` (geodesic approximation
-  acceptable: circle paint radius via `metersToPixelsAtLat` helper in `util/geo.ts` — add it).
+  acceptable: circle paint radius via `metersToPixelsAtLat` helper from `util/geo.ts`, specified
+  in issue 03).
 - Fix marker is removed when a new deep link/share navigation replaces the view? No — keep until
   next fix or page reload (simplest consistent rule; document).
 

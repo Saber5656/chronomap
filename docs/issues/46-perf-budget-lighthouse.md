@@ -16,8 +16,8 @@ This lands late (after all features) to measure the real v1.
 
 - Dev dep `@lhci/cli`; `lighthouserc.json`: `collect` against `npm run preview` URL (built app,
   SW active), settings: mobile emulation, simulated 4G; `assert` category scores:
-  performance ≥ 90, pwa: all installable audits pass, accessibility ≥ 90 (41 made it true),
-  best-practices ≥ 95; budgets: script ≤ 350 KB gzip, stylesheet ≤ 40 KB, total ≤ 600 KB
+  performance ≥ 90, accessibility ≥ 90 (41 made it true), best-practices ≥ 95; budgets:
+  script ≤ 350 KB gzip, stylesheet ≤ 40 KB, total ≤ 600 KB
   (excluding stubbed tiles — LHCI hits real page: ensure tile hosts unreachable→graceful? No:
   run LHCI with `--collect.settings.blockedUrlPatterns` for tile/API hosts so runs are hermetic
   and §13 offline states render — document that performance is measured on the shell).
@@ -25,6 +25,9 @@ This lands late (after all features) to measure the real v1.
   3 runs, median); `continue-on-error: false`.
 - Bundle report: `vite build` rollup output sizes echoed + compared in the job log; hard gate via
   LHCI budgets only (single source of truth).
+- PWA installability is checked outside LHCI category assertions because Lighthouse 12+ removed the
+  PWA category. Use Playwright/Chrome DevTools protocol checks for manifest, service worker
+  registration, and installability signals.
 - Fix violations found (likely: code-split About/onboarding via dynamic import — 42 already lazy;
   verify; MapLibre is the floor — document actual numbers in PR).
 
@@ -42,7 +45,8 @@ This lands late (after all features) to measure the real v1.
       pasted in PR.
 - [ ] Budget regression demo: adding a 500 KB dummy import fails the job (demonstrated, not
       committed).
-- [ ] PWA category: installability audits all pass (30/31 verified end-to-end here).
+- [ ] PWA installability checks all pass via Playwright/Chrome DevTools protocol (30/31 verified
+      end-to-end here).
 
 ## Validation
 

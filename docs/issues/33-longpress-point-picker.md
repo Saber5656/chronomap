@@ -18,10 +18,12 @@ location) — the inbound counterpart lands via share/import; this is the in-app
   - Validate coords (§12.3), drop marker (GeoJSON source `chronomap-picked`, distinct pin style),
     open anchored action popover:
     1. i18n `picker.travelHere` (`ここを起点に時間旅行`) → `actions.setView({lat,lng,zoom:
-       max(current,15)})` → URL sync picks it up; popover closes; marker persists until map tap.
+       max(current,15)})` with a `programmaticPickerRecenter` guard → URL sync picks it up;
+       popover closes; marker persists until map tap.
     2. i18n `picker.openInMaps` → 32's `showMapHandoffMenu(lat,lng)`.
     3. i18n `picker.copyCoords` (`座標をコピー`) → clipboard `{lat},{lng}` + toast.
-  - Dismissal: outside tap / Esc / map move → remove marker + popover.
+  - Dismissal: outside tap / Esc / user-driven map move → remove marker + popover. The
+    `picker.travelHere` programmatic recenter does not dismiss the marker.
 - Marker style: hollow ring pin, distinct from POI pins and user-location dot.
 - Desktop parity: `contextmenu` triggers the same flow (10 already emits).
 
@@ -36,7 +38,7 @@ location) — the inbound counterpart lands via share/import; this is the in-app
 ## Acceptance Criteria
 
 - [ ] e2e (touch): long-press empty map area → marker + popover; "travel here" recenters ≥z15 and
-      updates URL after settle; marker cleared on map tap.
+      updates URL after settle; marker remains after the recenter and is cleared on map tap.
 - [ ] e2e: "copy coords" puts `35.681236,139.767125`-format text on clipboard + toast.
 - [ ] e2e: pan gesture does not open the popover (regression).
 - [ ] Unit: popover placement flip logic (pure geometry helper).

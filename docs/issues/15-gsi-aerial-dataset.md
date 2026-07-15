@@ -54,7 +54,8 @@ extension per research/gsi-tiles.md §2. `scheme: "xyz"`, `tileSize: 256`, `regi
 - [ ] Unit fixture updated so resolve() tests (17) can use the real dataset ids.
 - [ ] PR description contains the 9-row verification table (URL probed, status 200, attribution
       string source).
-- [ ] Every entry has ja+en titles, license block, and `flags.requiresFeatureFlag: null`.
+- [ ] Every entry has ja+en titles, an `attribution.license` block matching the schema from 14, and
+      `flags.requiresFeatureFlag: null`.
 
 ## Validation
 

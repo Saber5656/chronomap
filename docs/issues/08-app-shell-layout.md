@@ -18,10 +18,11 @@ DESIGN §8 fixes a component inventory with a uniform contract so later UI issue
 - `src/util/dom.ts`: `el(tag, attrs?, children?)` typed helper creating elements; sets attributes
   via `setAttribute`, text via `textContent` (NO html string API — lint enforces).
 - `src/app/appShell.ts`: mounts into `#app`:
-  - `.shell` grid: `header.controls-top` (right-aligned column: LocateButton slot, PoiToggle slot,
-    MenuButton slot), `main.map-region` (`#map` container + CoverageBanner slot + LayerInfoBadge
-    slot), `footer.slider-dock` (TimeSlider slot + OpacityControl slot), `#sheet-host`,
-    `#toast-host`.
+  - `.shell`: full-viewport shell whose `#map` fills the viewport; `header.controls-top`,
+    `footer.slider-dock`, `#sheet-host`, and `#toast-host` are absolutely positioned overlays above
+    the map, not ordinary document rows. Slots: controls-top (LocateButton, PoiToggle, MenuButton),
+    `main.map-region` (`#map` container + CoverageBanner slot + LayerInfoBadge slot),
+    slider-dock (TimeSlider slot + OpacityControl slot), `#sheet-host`, `#toast-host`.
   - Slot API: `getSlot(name): HTMLElement` for the named slots above.
 - `src/ui/styles/base.css`: reset (box-sizing, margin 0), CSS custom properties (design tokens:
   `--color-bg`, `--color-accent`, `--color-text`, `--radius`, `--shadow`, `--z-map/-chrome/-sheet/

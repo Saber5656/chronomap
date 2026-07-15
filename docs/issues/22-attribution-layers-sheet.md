@@ -20,7 +20,7 @@ doubles as the "what am I looking at" affordance.
   activeLayerId null). Tap → `actions.openSheet('layers')`.
 - `src/ui/components/LayersSheet.ts` rendered by the BottomSheet host (build the minimal
   BottomSheet host here per §8 #9 — first sheet consumer; PoiSheet (28) reuses it):
-  - Host: swipe-down + X close, `history.pushState` integration per §8.3, focus trap,
+  - Host: swipe-down + X close, `history.replaceState` integration per §8.3, focus trap,
     `role="dialog"` `aria-modal="true"`.
   - Content rows: (1) basemap: GSI pale + attribution link; (2) active past layer: title, era,
     provider, `attribution.text` linking `attribution.url`, license name/url; (3) POI source row

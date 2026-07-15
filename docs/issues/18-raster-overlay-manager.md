@@ -14,7 +14,7 @@ and resolution wiring drive it through the store.
 
 ## Scope
 
-- `createOverlayManager(mapController, store)`:
+- `createOverlayManager(mapController, store) → { destroy(): void }`:
   - Subscribes to `timeLayer.activeLayerId` + `timeLayer.opacity`.
   - `setLayer(entry | null, opacity)`: source id `chronomap-past-src-{entryId}`, layer id
     `chronomap-past-{entryId}`; raster source from registry entry (`tiles: [urlTemplate]`,
@@ -31,6 +31,8 @@ and resolution wiring drive it through the store.
   - `raster-fade-duration: 0` on sources (we own the fade; avoids double-fading).
 - Tile errors (404 out-of-coverage): rely on MapLibre default (missing tile = transparent); add
   an `error` listener filtering AJAX tile errors to debug log only — never toasts (§13).
+- `destroy()`: unsubscribe from store listeners, remove map error listener, cancel any in-flight
+  rAF transition, and remove owned past sources/layers without mutating a disposed map.
 
 ## Detailed Requirements
 
@@ -40,6 +42,8 @@ and resolution wiring drive it through the store.
 3. Works with `scheme: "tms"` entries (Konjaku): requested tile y must be flipped by MapLibre —
    e2e stub asserts requested URL for a known viewport/zoom.
 4. Null layer (no-coverage) → removes past layer entirely (basemap only).
+5. Calling `destroy()` twice is safe and leaves no store subscriptions, map listeners, or animation
+   callbacks active.
 
 ## Acceptance Criteria
 
@@ -48,7 +52,8 @@ and resolution wiring drive it through the store.
 - [ ] e2e scrub-storm test passes the no-leak assertion.
 - [ ] e2e TMS URL assertion for a konjaku fixture entry (flag ON in test env only).
 - [ ] Unit: transition state machine (idle→fading→idle, supersede path) extracted as a pure
-      helper and tested with fake rAF.
+      helper and tested with fake rAF; manager teardown test proves subscriptions/listeners/rAF are
+      cleaned up.
 
 ## Validation
 
