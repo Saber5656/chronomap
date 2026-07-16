@@ -6,7 +6,7 @@
 このリポジトリのアプリケーションコードは MIT License です。詳細は [LICENSE](LICENSE)
 を参照してください。
 
-地図タイル、今昔マップ、Wikipedia / Wikimedia の記事本文や画像には、それぞれ提供元の
+地図タイル、今昔マップ、Wikipedia / Wikimedia の記事本文には、それぞれ提供元の
 利用条件と表示義務があります。fork や再配布でも、提供元の attribution を保持してください。
 
 必要な表示文言と参照先は [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) にまとめています。
