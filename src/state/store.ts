@@ -72,10 +72,7 @@ export function createStore<S>(initial: S): Store<S> {
     }
   }
 
-  function on<T>(
-    selector: (state: S) => T,
-    callback: (next: T, previous: T) => void,
-  ): () => void {
+  function on<T>(selector: (state: S) => T, callback: (next: T, previous: T) => void): () => void {
     const subscription: Subscription<S> = {
       active: true,
       selected: selector(state),

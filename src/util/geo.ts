@@ -3,12 +3,7 @@ export type GeoPoint = Readonly<{
   lng: number;
 }>;
 
-export type BoundingBox = readonly [
-  west: number,
-  south: number,
-  east: number,
-  north: number,
-];
+export type BoundingBox = readonly [west: number, south: number, east: number, north: number];
 
 const MEAN_EARTH_RADIUS_METERS = 6_371_008.8;
 const WEB_MERCATOR_RADIUS_METERS = 6_378_137;
@@ -37,17 +32,10 @@ export function haversineMeters(a: GeoPoint, b: GeoPoint): number {
 export function viewportDiagonalMeters(bbox: BoundingBox): number {
   const [west, south, east, north] = bbox;
 
-  return haversineMeters(
-    { lat: south, lng: west },
-    { lat: north, lng: east },
-  );
+  return haversineMeters({ lat: south, lng: west }, { lat: north, lng: east });
 }
 
-export function metersToPixelsAtLat(
-  meters: number,
-  latitude: number,
-  zoom: number,
-): number {
+export function metersToPixelsAtLat(meters: number, latitude: number, zoom: number): number {
   const earthCircumference = 2 * Math.PI * WEB_MERCATOR_RADIUS_METERS;
   const groundResolution =
     (Math.cos(degreesToRadians(latitude)) * earthCircumference) /

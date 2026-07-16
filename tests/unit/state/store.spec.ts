@@ -38,8 +38,14 @@ describe("createStore", () => {
   it("notifies subscriptions in registration order", () => {
     const store = createStore({ count: 0 });
     const order: string[] = [];
-    store.on((state) => state.count, () => order.push("first"));
-    store.on((state) => state.count, () => order.push("second"));
+    store.on(
+      (state) => state.count,
+      () => order.push("first"),
+    );
+    store.on(
+      (state) => state.count,
+      () => order.push("second"),
+    );
     store.set({ count: 1 });
     expect(order).toEqual(["first", "second"]);
   });
@@ -131,7 +137,7 @@ describe("createStore", () => {
     expect(store.get().count).toBe(3);
   });
 
-  it("defers re-entrant work raised during a flush to the next microtask", async () => {
+  it("defers re-entrant work raised during a flush to the next microtask", () => {
     const tasks: Array<() => void> = [];
     vi.stubGlobal("queueMicrotask", (task: () => void) => tasks.push(task));
     try {
@@ -172,7 +178,7 @@ describe("createStore", () => {
   it("allows a listener to unsubscribe another listener during notification", () => {
     const store = createStore({ count: 0 });
     const removed = vi.fn();
-    let unsubscribe = () => undefined;
+    let unsubscribe: () => void = () => undefined;
     store.on(
       (state) => state.count,
       () => unsubscribe(),
