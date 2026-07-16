@@ -40,6 +40,11 @@ export default tseslint.config(
       "no-restricted-syntax": [
         "error",
         {
+          selector:
+            ":matches(CallExpression, NewExpression)[callee.type='MemberExpression']:matches([callee.object.name='window'], [callee.object.name='globalThis']):matches([callee.computed=false][callee.property.name='Function'], [callee.computed=true][callee.property.value='Function'])",
+          message: noEvalMessage,
+        },
+        {
           selector: "CallExpression[callee.type='MemberExpression'][callee.property.name='eval']",
           message: noEvalMessage,
         },
@@ -47,6 +52,11 @@ export default tseslint.config(
           selector:
             "CallExpression[callee.type='MemberExpression'][callee.computed=true][callee.property.value='eval']",
           message: noEvalMessage,
+        },
+        {
+          selector:
+            "CallExpression[callee.type='MemberExpression'][callee.object.type='MemberExpression'][callee.object.object.name='window']:matches([callee.object.computed=false][callee.object.property.name='document'], [callee.object.computed=true][callee.object.property.value='document']):matches([callee.computed=false][callee.property.name='write'], [callee.computed=true][callee.property.value='write'])",
+          message: safeDomMessage,
         },
       ],
     },
