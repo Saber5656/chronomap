@@ -16,22 +16,36 @@ interface Subscription<S> {
 export function createStore<S>(initial: S): Store<S> {
   let state = initial;
   let notifying = false;
+  let flushing = false;
   let flushScheduled = false;
-  const subscriptions: Subscription<S>[] = [];
+  const subscriptions = new Set<Subscription<S>>();
   const pending: Array<ShallowPatch<S> | ((state: Readonly<S>) => S)> = [];
 
   function flushPending(): void {
     flushScheduled = false;
+    flushing = true;
     const queued = pending.splice(0);
-    for (const patch of queued) {
-      set(patch);
+    let index = 0;
+    try {
+      for (; index < queued.length; index += 1) {
+        set(queued[index]!);
+      }
+    } finally {
+      if (index + 1 < queued.length) {
+        pending.unshift(...queued.slice(index + 1));
+      }
+      flushing = false;
+      if (pending.length > 0 && !flushScheduled) {
+        flushScheduled = true;
+        queueMicrotask(flushPending);
+      }
     }
   }
 
   function set(patch: ShallowPatch<S> | ((state: Readonly<S>) => S)): void {
-    if (notifying) {
+    if (notifying || (flushScheduled && !flushing)) {
       pending.push(patch);
-      if (!flushScheduled) {
+      if (!flushing && !flushScheduled) {
         flushScheduled = true;
         queueMicrotask(flushPending);
       }
@@ -41,7 +55,7 @@ export function createStore<S>(initial: S): Store<S> {
     state = typeof patch === "function" ? patch(state) : { ...state, ...patch };
     notifying = true;
     try {
-      for (const subscription of subscriptions) {
+      for (const subscription of [...subscriptions]) {
         if (!subscription.active) {
           continue;
         }
@@ -68,9 +82,11 @@ export function createStore<S>(initial: S): Store<S> {
       selector,
       callback: callback as (next: unknown, previous: unknown) => void,
     };
-    subscriptions.push(subscription);
+    subscriptions.add(subscription);
     return () => {
+      if (!subscription.active) return;
       subscription.active = false;
+      subscriptions.delete(subscription);
     };
   }
 

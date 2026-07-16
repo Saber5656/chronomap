@@ -23,8 +23,6 @@ export interface AppActions {
 }
 
 export function createActions(store: Store<AppState>): AppActions {
-  let toastId = store.get().ui.toast?.id ?? 0;
-
   return {
     setView(view) {
       const coordinates = latLng(view.lat, view.lng);
@@ -111,10 +109,12 @@ export function createActions(store: Store<AppState>): AppActions {
       store.set((state) => ({ ...state, ui: { ...state.ui, sheet: "none" } }));
     },
     showToast(kind, text) {
-      toastId += 1;
       store.set((state) => ({
         ...state,
-        ui: { ...state.ui, toast: { id: toastId, kind, text } },
+        ui: {
+          ...state.ui,
+          toast: { id: (state.ui.toast?.id ?? 0) + 1, kind, text },
+        },
       }));
     },
     setLang(lang) {

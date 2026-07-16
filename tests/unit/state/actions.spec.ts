@@ -123,4 +123,13 @@ describe("createActions", () => {
     actions.showToast("info", "next");
     expect(store.get().ui.toast?.id).toBe(8);
   });
+
+  it("shares monotonic toast ids across action instances", () => {
+    const store = createStore(createInitialState(new Date(2026, 0, 1)));
+    const first = createActions(store);
+    const second = createActions(store);
+    first.showToast("info", "first");
+    second.showToast("error", "second");
+    expect(store.get().ui.toast).toEqual({ id: 2, kind: "error", text: "second" });
+  });
 });

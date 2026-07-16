@@ -114,6 +114,110 @@ describe("createStore", () => {
     expect(seen).toEqual([1, 2, 3]);
   });
 
+  it("preserves call order while a re-entrant flush is pending", async () => {
+    const store = createStore({ count: 0 });
+    const seen: number[] = [];
+    store.on(
+      (state) => state.count,
+      (next) => {
+        seen.push(next);
+        if (next === 1) store.set({ count: 2 });
+      },
+    );
+    store.set({ count: 1 });
+    store.set({ count: 3 });
+    await Promise.resolve();
+    expect(seen).toEqual([1, 2, 3]);
+    expect(store.get().count).toBe(3);
+  });
+
+  it("defers re-entrant work raised during a flush to the next microtask", async () => {
+    const tasks: Array<() => void> = [];
+    vi.stubGlobal("queueMicrotask", (task: () => void) => tasks.push(task));
+    try {
+      const store = createStore({ count: 0 });
+      const seen: number[] = [];
+      store.on(
+        (state) => state.count,
+        (next) => {
+          seen.push(next);
+          if (next === 1) store.set({ count: 2 });
+          if (next === 2) store.set({ count: 3 });
+        },
+      );
+      store.set({ count: 1 });
+      tasks.shift()?.();
+      expect(seen).toEqual([1, 2]);
+      expect(tasks).toHaveLength(1);
+      tasks.shift()?.();
+      expect(seen).toEqual([1, 2, 3]);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("does not notify subscriptions added during the current update", () => {
+    const store = createStore({ count: 0 });
+    const added = vi.fn();
+    store.on(
+      (state) => state.count,
+      () => store.on((state) => ({ count: state.count }), added),
+    );
+    store.set({ count: 1 });
+    expect(added).not.toHaveBeenCalled();
+    store.set({ count: 2 });
+    expect(added).toHaveBeenCalledOnce();
+  });
+
+  it("allows a listener to unsubscribe another listener during notification", () => {
+    const store = createStore({ count: 0 });
+    const removed = vi.fn();
+    let unsubscribe = () => undefined;
+    store.on(
+      (state) => state.count,
+      () => unsubscribe(),
+    );
+    unsubscribe = store.on((state) => state.count, removed);
+    store.set({ count: 1 });
+    store.set({ count: 2 });
+    expect(removed).not.toHaveBeenCalled();
+  });
+
+  it("keeps queued work runnable when a callback throws during a flush", () => {
+    const tasks: Array<() => void> = [];
+    vi.stubGlobal("queueMicrotask", (task: () => void) => tasks.push(task));
+    try {
+      const store = createStore({ count: 0 });
+      const unsubscribe = store.on(
+        (state) => state.count,
+        (next) => {
+          if (next === 1) store.set({ count: 2 });
+          if (next === 2) {
+            store.set({ count: 3 });
+            throw new Error("boom");
+          }
+        },
+      );
+      store.set({ count: 1 });
+      store.set({ count: 4 });
+      expect(tasks).toHaveLength(1);
+      expect(() => tasks.shift()?.()).toThrow("boom");
+      expect(tasks).toHaveLength(1);
+      unsubscribe();
+      tasks.shift()?.();
+      expect(store.get().count).toBe(3);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("allows repeated unsubscribe calls", () => {
+    const store = createStore({ count: 0 });
+    const unsubscribe = store.on((state) => state.count, vi.fn());
+    unsubscribe();
+    expect(() => unsubscribe()).not.toThrow();
+  });
+
   it("continues to accept sets after a callback throws", () => {
     const store = createStore({ count: 0 });
     const unsubscribe = store.on(
