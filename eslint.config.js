@@ -15,6 +15,9 @@ export default tseslint.config(
   })),
   {
     files: typedFiles,
+    linterOptions: {
+      noInlineConfig: true,
+    },
     languageOptions: {
       parserOptions: {
         projectService: true,
