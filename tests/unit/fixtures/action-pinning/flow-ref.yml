@@ -1,0 +1,5 @@
+name: Flow mapping
+jobs:
+  verify:
+    steps:
+      - { uses: actions/checkout@v4 }

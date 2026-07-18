@@ -1,0 +1,6 @@
+name: Block scalar
+jobs:
+  verify:
+    steps:
+      - run: |
+          uses: actions/checkout@v4

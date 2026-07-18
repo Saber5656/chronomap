@@ -35,6 +35,9 @@ jobs:
       - name: Validate registry
         run: npm run validate:registry --if-present
 
+      - name: Check GitHub Action pinning
+        run: npm run check:pins
+
       - name: Lint
         run: npm run lint
 
@@ -53,3 +56,15 @@ jobs:
       - name: Audit development dependencies
         continue-on-error: true
         run: npm audit --audit-level=high || true
+
+  dependency-review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Review dependency changes
+        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: high
+          comment-summary-in-pr: never

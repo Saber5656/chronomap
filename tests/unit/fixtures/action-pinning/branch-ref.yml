@@ -1,0 +1,5 @@
+name: Branch reference
+jobs:
+  verify:
+    steps:
+      - uses: actions/checkout@main

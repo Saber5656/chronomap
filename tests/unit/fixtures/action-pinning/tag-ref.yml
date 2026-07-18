@@ -1,0 +1,5 @@
+name: Tag reference
+jobs:
+  verify:
+    steps:
+      - uses: actions/checkout@v4
