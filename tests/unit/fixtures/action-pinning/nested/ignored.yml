@@ -1,0 +1,5 @@
+name: Nested workflow fixture
+jobs:
+  verify:
+    steps:
+      - uses: actions/checkout@v4

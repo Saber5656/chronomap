@@ -70,11 +70,92 @@ describe("check-action-pinning", () => {
     expect(findUnpinnedActions("block-scalar.yml", blockScalarFixture)).toEqual([]);
   });
 
-  it("discovers yml and yaml workflow files deterministically", async () => {
+  it("accepts an alias that resolves to a pinned scalar action reference", () => {
+    const source = `
+x-action: &pinned-action actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+jobs:
+  verify:
+    steps:
+      - uses: *pinned-action
+`;
+
+    expect(findUnpinnedActions("pinned-alias.yml", source)).toEqual([]);
+  });
+
+  it("rejects an alias that resolves to a mutable scalar action reference", () => {
+    const source = `
+x-action: &mutable-action actions/checkout@v4
+jobs:
+  verify:
+    steps:
+      - uses: *mutable-action
+`;
+
+    expect(findUnpinnedActions("mutable-alias.yml", source)).toEqual([
+      expect.objectContaining({ reference: "actions/checkout@v4" }),
+    ]);
+  });
+
+  it.each([
+    ["unresolved", "*missing-action", "<unresolved-alias>"],
+    ["collection", "*action-map", "<non-string>"],
+    ["cyclic collection", "*cyclic-action", "<non-string>"],
+  ])("rejects a %s action alias", (_name, uses, reference) => {
+    const source = `
+x-action-map: &action-map
+  action: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+x-cyclic-action: &cyclic-action
+  self: *cyclic-action
+jobs:
+  verify:
+    steps:
+      - uses: ${uses}
+`;
+
+    expect(findUnpinnedActions("invalid-alias.yml", source)).toEqual([
+      expect.objectContaining({ reference }),
+    ]);
+  });
+
+  it("inspects only canonical job and step uses keys", () => {
+    const source = `
+uses: actions/checkout@v4
+on:
+  workflow_dispatch:
+    inputs:
+      uses:
+        description: This input name is unrelated to an action reference
+jobs:
+  reusable:
+    uses: owner/repo/.github/workflows/ci.yml@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+    with:
+      uses: actions/checkout@v4
+  verify:
+    env:
+      uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        env:
+          uses: actions/checkout@v4
+        with:
+          uses: actions/checkout@v4
+`;
+
+    expect(findUnpinnedActions("unrelated-uses.yml", source)).toEqual([]);
+  });
+
+  it("discovers only immediate yml and yaml workflow files deterministically", async () => {
     const files = await collectWorkflowFiles("tests/unit/fixtures/action-pinning");
 
     expect(files).toContain("tests/unit/fixtures/action-pinning/tag-ref.yml");
     expect(files).toContain("tests/unit/fixtures/action-pinning/valid-flow.yaml");
+    expect(files).not.toContain("tests/unit/fixtures/action-pinning/nested/ignored.yml");
     expect(files).toEqual([...files].sort());
+  });
+
+  it("supports an explicit workflow file target", async () => {
+    const workflow = "tests/unit/fixtures/action-pinning/valid.yml";
+
+    expect(await collectWorkflowFiles(workflow)).toEqual([workflow]);
   });
 });

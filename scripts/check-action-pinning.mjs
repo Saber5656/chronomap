@@ -2,7 +2,7 @@ import { lstat, readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
-import { isScalar, LineCounter, parseDocument, visit } from "yaml";
+import { isAlias, isMap, isScalar, isSeq, LineCounter, parseDocument } from "yaml";
 
 const WORKFLOW_EXTENSION = /\.ya?ml$/i;
 const OWNER = "[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?";
@@ -27,7 +27,7 @@ export async function collectWorkflowFiles(target) {
   }
 
   const entries = await readdir(target, { withFileTypes: true });
-  const nestedFiles = [];
+  const workflowFiles = [];
 
   for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
     const entryPath = path.join(target, entry.name);
@@ -38,17 +38,44 @@ export async function collectWorkflowFiles(target) {
 
     if (entry.isFile()) {
       if (WORKFLOW_EXTENSION.test(entry.name)) {
-        nestedFiles.push(entryPath);
+        workflowFiles.push(entryPath);
       }
-      continue;
-    }
-
-    if (entry.isDirectory()) {
-      nestedFiles.push(...(await collectWorkflowFiles(entryPath)));
     }
   }
 
-  return nestedFiles;
+  return workflowFiles;
+}
+
+function resolveNode(document, node) {
+  return isAlias(node) ? node.resolve(document) : node;
+}
+
+function resolveMap(document, node) {
+  const resolved = resolveNode(document, node);
+  return isMap(resolved) ? resolved : undefined;
+}
+
+function resolveSequence(document, node) {
+  const resolved = resolveNode(document, node);
+  return isSeq(resolved) ? resolved : undefined;
+}
+
+function findPair(map, key) {
+  return map.items.find((pair) => isScalar(pair.key) && pair.key.value === key);
+}
+
+function resolveUsesReference(document, value) {
+  if (value === null || (isScalar(value) && value.value === null)) {
+    return "<missing>";
+  }
+
+  const resolved = resolveNode(document, value);
+
+  if (isAlias(value) && resolved === undefined) {
+    return "<unresolved-alias>";
+  }
+
+  return isScalar(resolved) && typeof resolved.value === "string" ? resolved.value : "<non-string>";
 }
 
 export function findUnpinnedActions(file, source) {
@@ -68,25 +95,44 @@ export function findUnpinnedActions(file, source) {
 
   const findings = [];
 
-  visit(document, {
-    Pair(_key, pair) {
-      if (!isScalar(pair.key) || pair.key.value !== "uses") {
-        return;
-      }
+  function inspectUsesPair(pair) {
+    const reference = resolveUsesReference(document, pair.value);
+    const line = lineCounter.linePos(isScalar(pair.key) ? (pair.key.range?.[0] ?? 0) : 0).line || 1;
 
-      const reference =
-        pair.value === null || (isScalar(pair.value) && pair.value.value === null)
-          ? "<missing>"
-          : isScalar(pair.value) && typeof pair.value.value === "string"
-            ? pair.value.value
-            : "<non-string>";
-      const line = lineCounter.linePos(pair.key.range?.[0] ?? 0).line || 1;
+    if (!PINNED_ACTION.test(reference)) {
+      findings.push({ file, line, reference });
+    }
+  }
 
-      if (!PINNED_ACTION.test(reference)) {
-        findings.push({ file, line, reference });
+  const root = resolveMap(document, document.contents);
+  const jobsPair = root ? findPair(root, "jobs") : undefined;
+  const jobs = jobsPair ? resolveMap(document, jobsPair.value) : undefined;
+
+  for (const jobPair of jobs?.items ?? []) {
+    const job = resolveMap(document, jobPair.value);
+
+    if (!job) {
+      continue;
+    }
+
+    const reusableWorkflowPair = findPair(job, "uses");
+
+    if (reusableWorkflowPair) {
+      inspectUsesPair(reusableWorkflowPair);
+    }
+
+    const stepsPair = findPair(job, "steps");
+    const steps = stepsPair ? resolveSequence(document, stepsPair.value) : undefined;
+
+    for (const stepNode of steps?.items ?? []) {
+      const step = resolveMap(document, stepNode);
+      const actionPair = step ? findPair(step, "uses") : undefined;
+
+      if (actionPair) {
+        inspectUsesPair(actionPair);
       }
-    },
-  });
+    }
+  }
 
   return findings;
 }
