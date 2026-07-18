@@ -204,6 +204,46 @@ describe("loadRegistry", () => {
       "tiles.urlTemplate",
     ],
     [
+      "tile token in URL fragment",
+      (entry: Record<string, unknown>) => {
+        entry.tiles = {
+          ...(entry.tiles as object),
+          urlTemplate: "https://cyberjapandata.gsi.go.jp/xyz/{z}/{x}#{y}",
+        };
+      },
+      "tiles.urlTemplate",
+    ],
+    [
+      "tile token in URL query",
+      (entry: Record<string, unknown>) => {
+        entry.tiles = {
+          ...(entry.tiles as object),
+          urlTemplate: "https://cyberjapandata.gsi.go.jp/xyz/{z}/{x}?row={y}",
+        };
+      },
+      "tiles.urlTemplate",
+    ],
+    [
+      "bare URL fragment delimiter",
+      (entry: Record<string, unknown>) => {
+        entry.tiles = {
+          ...(entry.tiles as object),
+          urlTemplate: "https://cyberjapandata.gsi.go.jp/xyz/{z}/{x}/{y}.png#",
+        };
+      },
+      "tiles.urlTemplate",
+    ],
+    [
+      "bare URL query delimiter",
+      (entry: Record<string, unknown>) => {
+        entry.tiles = {
+          ...(entry.tiles as object),
+          urlTemplate: "https://cyberjapandata.gsi.go.jp/xyz/{z}/{x}/{y}.png?",
+        };
+      },
+      "tiles.urlTemplate",
+    ],
+    [
       "non-HTTPS attribution URL",
       (entry: Record<string, unknown>) => {
         entry.attribution = {
@@ -296,6 +336,30 @@ describe("loadRegistry", () => {
     expect(warnings).toHaveLength(1);
     expect(warnings[0]?.field).toBe("tiles.urlTemplate");
     expect(warnings[0]?.reason).toContain("evil.example");
+  });
+
+  it("requires the Konjaku feature flag for every ktgis.net entry", () => {
+    const entry = validEntry();
+    entry.tiles = {
+      ...(entry.tiles as object),
+      urlTemplate: "https://ktgis.net/kjmapw/{z}/{x}/{y}.png",
+    };
+
+    const ungated = load([entry]);
+    entry.flags = { experimental: true, requiresFeatureFlag: "VITE_ENABLE_KONJAKU" };
+    const gatedOff = load([entry]);
+    const gatedOn = load([entry], { VITE_ENABLE_KONJAKU: "true" });
+    entry.flags = { experimental: true, requiresFeatureFlag: "VITE_ENABLE_OTHER" };
+    const wronglyGated = load([entry], { VITE_ENABLE_OTHER: "true" });
+
+    expect(ungated.entries).toEqual([]);
+    expect(ungated.warnings).toEqual([
+      expect.objectContaining({ field: "flags.requiresFeatureFlag" }),
+    ]);
+    expect(gatedOff).toEqual({ entries: [], warnings: [] });
+    expect(gatedOn.entries).toHaveLength(1);
+    expect(wronglyGated.entries).toEqual([]);
+    expect(wronglyGated.warnings[0]?.field).toBe("flags.requiresFeatureFlag");
   });
 
   it("bounds an unknown-host diagnostic", () => {

@@ -11,6 +11,8 @@ const defaultAllowlistPath = resolve(defaultRegistryDirectory, "allowed-hosts.js
 const defaultSchemaPath = resolve(defaultRegistryDirectory, "registry.schema.json");
 const idPattern = /^[a-z0-9-]{1,64}$/;
 const regionPattern = /^(?:[A-Z]{2}|GLOBAL)$/;
+const konjakuHost = "ktgis.net";
+const konjakuFeatureFlag = "VITE_ENABLE_KONJAKU";
 
 function error(file, index, field, reason) {
   return { file, index, field, reason };
@@ -35,6 +37,14 @@ function tileAuthority(value) {
 
 function boundedHost(host) {
   return host.length <= 120 ? host : `${host.slice(0, 117)}...`;
+}
+
+function hostname(value) {
+  try {
+    return new URL(value).hostname;
+  } catch {
+    return null;
+  }
 }
 
 function checkKeys(errors, file, index, field, value, allowed) {
@@ -116,7 +126,7 @@ function validateBbox(errors, file, index, bbox, bboxIndex) {
   }
 }
 
-function validateEntry(entry, file, index, allowedHosts) {
+function validateEntry(entry, file, index, allowedHosts, currentYear) {
   const errors = [];
   if (!isRecord(entry)) {
     return { errors: [error(file, index, "entry", "must be an object")], id: null };
@@ -165,11 +175,7 @@ function validateEntry(entry, file, index, allowedHosts) {
       errors.push(error(file, index, "era.from", "must be an integer"));
     if (!(entry.era.to === null || Number.isInteger(entry.era.to))) {
       errors.push(error(file, index, "era.to", "must be an integer or null"));
-    } else if (
-      Number.isInteger(entry.era.from) &&
-      entry.era.to !== null &&
-      entry.era.from > entry.era.to
-    ) {
+    } else if (Number.isInteger(entry.era.from) && entry.era.from > (entry.era.to ?? currentYear)) {
       errors.push(error(file, index, "era", "from must be less than or equal to to"));
     }
   }
@@ -221,6 +227,11 @@ function validateEntry(entry, file, index, allowedHosts) {
             "tiles.urlTemplate",
             `host ${boundedHost(tileUrl.hostname)} is not allowlisted`,
           ),
+        );
+      }
+      if (/[?#]/u.test(entry.tiles.urlTemplate)) {
+        errors.push(
+          error(file, index, "tiles.urlTemplate", "must not contain a query string or fragment"),
         );
       }
       if (!["{z}", "{x}", "{y}"].every((token) => entry.tiles.urlTemplate.includes(token))) {
@@ -340,6 +351,21 @@ function validateEntry(entry, file, index, allowedHosts) {
         error(file, index, "flags.requiresFeatureFlag", "must be a non-blank string or null"),
       );
     }
+    if (
+      isRecord(entry.tiles) &&
+      typeof entry.tiles.urlTemplate === "string" &&
+      hostname(entry.tiles.urlTemplate) === konjakuHost &&
+      entry.flags.requiresFeatureFlag !== konjakuFeatureFlag
+    ) {
+      errors.push(
+        error(
+          file,
+          index,
+          "flags.requiresFeatureFlag",
+          `${konjakuHost} tiles must require ${konjakuFeatureFlag}`,
+        ),
+      );
+    }
   }
   if (!Number.isInteger(entry.priority))
     errors.push(error(file, index, "priority", "must be an integer"));
@@ -351,13 +377,17 @@ export function validateRegistryDocument(
   allowedHosts,
   file = "<memory>",
   seenIds = new Map(),
+  currentYear = new Date().getFullYear(),
 ) {
+  if (!Number.isInteger(currentYear)) {
+    return [error(file, -1, "currentYear", "must be an integer")];
+  }
   if (!Array.isArray(document)) {
     return [error(file, -1, "registry", "root must be an array")];
   }
   const errors = [];
   for (const [index, entry] of document.entries()) {
-    const result = validateEntry(entry, file, index, allowedHosts);
+    const result = validateEntry(entry, file, index, allowedHosts, currentYear);
     errors.push(...result.errors);
     if (result.id !== null) {
       const firstLocation = seenIds.get(result.id);
@@ -462,11 +492,14 @@ export async function runValidator(args = [], output = console) {
         : await discoverRegistryFiles(defaultRegistryDirectory);
     const errors = [];
     const seenIds = new Map();
+    const currentYear = new Date().getFullYear();
     for (const file of files) {
       try {
         await assertRegularFile(file);
         const document = await parseJsonFile(file);
-        errors.push(...validateRegistryDocument(document, allowedHosts, file, seenIds));
+        errors.push(
+          ...validateRegistryDocument(document, allowedHosts, file, seenIds, currentYear),
+        );
       } catch (cause) {
         const reason = cause instanceof Error ? cause.message : String(cause);
         errors.push(error(file, -1, "file", reason));

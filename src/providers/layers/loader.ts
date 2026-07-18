@@ -12,6 +12,8 @@ const ID_PATTERN = /^[a-z0-9-]{1,64}$/;
 const REGION_PATTERN = /^(?:[A-Z]{2}|GLOBAL)$/;
 const TILE_TYPES = new Set<LayerType>(["raster-era", "vector-dated"]);
 const TILE_SCHEMES = new Set<TileScheme>(["xyz", "tms"]);
+const KONJAKU_HOST = "ktgis.net";
+const KONJAKU_FEATURE_FLAG = "VITE_ENABLE_KONJAKU";
 const allowedHosts = new Set<string>(allowedHostsJson);
 
 interface ParseSuccess {
@@ -133,6 +135,9 @@ function parseTileUrl(value: unknown): string | ParseFailure {
     if (!allowedHosts.has(url.hostname)) {
       return fail("tiles.urlTemplate", `host ${boundedHost(url.hostname)} is not allowlisted`);
     }
+    if (/[?#]/u.test(value)) {
+      return fail("tiles.urlTemplate", "must not contain a query string or fragment");
+    }
     if (!["{z}", "{x}", "{y}"].every((token) => value.includes(token))) {
       return fail("tiles.urlTemplate", "must contain {z}, {x}, and {y}");
     }
@@ -221,6 +226,15 @@ function parseEntry(value: unknown, currentYear: number): ParseResult {
     !(flags.requiresFeatureFlag === null || nonBlankString(flags.requiresFeatureFlag))
   ) {
     return fail("flags", "must contain experimental boolean and non-blank feature flag or null");
+  }
+  if (
+    new URL(urlTemplate).hostname === KONJAKU_HOST &&
+    flags.requiresFeatureFlag !== KONJAKU_FEATURE_FLAG
+  ) {
+    return fail(
+      "flags.requiresFeatureFlag",
+      `${KONJAKU_HOST} tiles must require ${KONJAKU_FEATURE_FLAG}`,
+    );
   }
   if (!Number.isInteger(value.priority)) return fail("priority", "must be an integer");
 

@@ -74,6 +74,12 @@ describe("validate-registry CLI", () => {
     expect(tilePattern.test(canonicalTile.replace("https://", "HTTPS://"))).toBe(false);
     expect(tilePattern.test(canonicalTile.replace(".go.jp/", ".go.jp:443/"))).toBe(false);
     expect(tilePattern.test(canonicalTile.replace("https://", "https:////"))).toBe(false);
+    expect(tilePattern.test("https://cyberjapandata.gsi.go.jp/xyz/{z}/{x}#{y}")).toBe(false);
+    expect(tilePattern.test("https://cyberjapandata.gsi.go.jp/xyz/{z}/{x}?row={y}")).toBe(false);
+    expect(tilePattern.test(`${canonicalTile}#`)).toBe(false);
+    expect(tilePattern.test(`${canonicalTile}?`)).toBe(false);
+    expect(tilePattern.test("https://cyberjapandata.gsi.go.jp?z={z}&x={x}&y={y}")).toBe(false);
+    expect(tilePattern.test("https://cyberjapandata.gsi.go.jp#{z}{x}{y}")).toBe(false);
   });
 
   it("aggregates all named structural and semantic violations", async () => {
@@ -153,6 +159,22 @@ describe("validate-registry CLI", () => {
       "tiles.urlTemplate",
     ],
     [
+      "tile token in URL fragment",
+      (entry) => (entry.tiles.urlTemplate = "https://cyberjapandata.gsi.go.jp/xyz/{z}/{x}#{y}"),
+      "tiles.urlTemplate",
+    ],
+    [
+      "tile token in URL query",
+      (entry) => (entry.tiles.urlTemplate = "https://cyberjapandata.gsi.go.jp/xyz/{z}/{x}?row={y}"),
+      "tiles.urlTemplate",
+    ],
+    [
+      "bare URL fragment delimiter",
+      (entry) => (entry.tiles.urlTemplate += "#"),
+      "tiles.urlTemplate",
+    ],
+    ["bare URL query delimiter", (entry) => (entry.tiles.urlTemplate += "?"), "tiles.urlTemplate"],
+    [
       "non-HTTPS attribution",
       (entry) => (entry.attribution.url = "http://example.com"),
       "attribution.url",
@@ -189,6 +211,72 @@ describe("validate-registry CLI", () => {
     expect(result.code).toBe(1);
     expect(result.stderr).toContain("duplicate id valid-raster");
     expect(result.stderr).toContain("first declared at");
+  });
+
+  it("rejects rolling eras that start after the validator current year", async () => {
+    const document = await validDocument();
+    document[0].era = { from: 2026, to: null };
+
+    const boundaryErrors = validateRegistryDocument(
+      document,
+      allowedHosts,
+      "future-rolling.layers.json",
+      new Map(),
+      2026,
+    );
+    document[0].era.from = 2027;
+    const futureErrors = validateRegistryDocument(
+      document,
+      allowedHosts,
+      "future-rolling.layers.json",
+      new Map(),
+      2026,
+    );
+
+    expect(boundaryErrors).toEqual([]);
+    expect(futureErrors).toEqual([expect.objectContaining({ field: "era" })]);
+  });
+
+  it.each([Number.NaN, Number.POSITIVE_INFINITY, 2026.5])(
+    "fails closed when the injected validator current year is not an integer (%s)",
+    async (currentYear) => {
+      const document = await validDocument();
+
+      const errors = validateRegistryDocument(
+        document,
+        allowedHosts,
+        "bad-current-year.layers.json",
+        new Map(),
+        currentYear,
+      );
+
+      expect(errors).toEqual([
+        expect.objectContaining({ field: "currentYear", reason: "must be an integer" }),
+      ]);
+    },
+  );
+
+  it("requires the Konjaku feature flag for every ktgis.net entry", async () => {
+    const document = await validDocument();
+    document[0].tiles.urlTemplate = "https://ktgis.net/kjmapw/{z}/{x}/{y}.png";
+
+    const ungatedErrors = validateRegistryDocument(document, allowedHosts, "konjaku.layers.json");
+    document[0].flags.requiresFeatureFlag = "VITE_ENABLE_OTHER";
+    const wronglyGatedErrors = validateRegistryDocument(
+      document,
+      allowedHosts,
+      "konjaku.layers.json",
+    );
+
+    expect(ungatedErrors).toEqual([
+      expect.objectContaining({
+        field: "flags.requiresFeatureFlag",
+        reason: "ktgis.net tiles must require VITE_ENABLE_KONJAKU",
+      }),
+    ]);
+    expect(wronglyGatedErrors).toEqual([
+      expect.objectContaining({ field: "flags.requiresFeatureFlag" }),
+    ]);
   });
 
   it("fails closed for malformed registry JSON", async () => {

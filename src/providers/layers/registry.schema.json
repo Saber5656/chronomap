@@ -17,7 +17,7 @@
     },
     "tileUrlTemplate": {
       "type": "string",
-      "pattern": "^https://[^/@\\s\\u0000-\\u001F\\u007F:]+(?:/[^\\s\\u0000-\\u001F\\u007F]*)?$",
+      "pattern": "^https://[^/?#@\\s\\u0000-\\u001F\\u007F:]+(?:/[^?#\\s\\u0000-\\u001F\\u007F]*)?$",
       "allOf": [{ "pattern": "\\{z\\}" }, { "pattern": "\\{x\\}" }, { "pattern": "\\{y\\}" }]
     },
     "bbox": {
@@ -70,7 +70,7 @@
             "from": { "type": "integer" },
             "to": { "type": ["integer", "null"] }
           },
-          "x-chronomap-constraint": "from <= to when to is not null"
+          "x-chronomap-constraint": "from <= to when to is not null; otherwise from <= the injected currentYear"
         },
         "region": {
           "type": "string",
@@ -92,7 +92,7 @@
             "maxzoom": { "type": "integer", "minimum": 0, "maximum": 22 },
             "tileSize": { "enum": [256, 512] }
           },
-          "x-chronomap-constraint": "minzoom <= maxzoom; urlTemplate contains {z}, {x}, and {y}; hostname is allowlisted"
+          "x-chronomap-constraint": "minzoom <= maxzoom; urlTemplate contains {z}, {x}, and {y} in its path; hostname is allowlisted; ktgis.net requires VITE_ENABLE_KONJAKU"
         },
         "attribution": {
           "type": "object",

@@ -41,7 +41,7 @@
       "text": "Provider terms / permission required",
       "license": { "name": "Provider terms / permission required" }
     },
-    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_VECTOR" },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
     "priority": -1
   }
 ]
