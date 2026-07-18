@@ -7,6 +7,7 @@ import { promisify } from "node:util";
 import { afterEach, describe, expect, it } from "vitest";
 
 import {
+  assertSchemaContract,
   discoverRegistryFiles,
   validateRegistryDocument,
 } from "../../../scripts/validate-registry.mjs";
@@ -333,7 +334,7 @@ describe("validate-registry CLI", () => {
     expect(result.stderr).toContain("allowlist must be a non-empty array");
   });
 
-  it("rejects registry, schema, and allowlist symlinks", async () => {
+  it("rejects registry, canonical schema contract, and allowlist symlinks", async () => {
     const directory = await temporaryDirectory();
     const registryLink = resolve(directory, "linked.layers.json");
     const schemaLink = resolve(directory, "schema.json");
@@ -343,12 +344,19 @@ describe("validate-registry CLI", () => {
     await symlink(resolve("src/providers/layers/allowed-hosts.json"), allowlistLink);
 
     const registryResult = await run([registryLink]);
-    const schemaResult = await run(["--schema", schemaLink, fixture("valid.layers.json")]);
     const allowlistResult = await run(["--allowlist", allowlistLink, fixture("valid.layers.json")]);
 
     expect(registryResult.stderr).toContain("is not a regular file");
-    expect(schemaResult.stderr).toContain("is not a regular file");
+    await expect(assertSchemaContract(schemaLink)).rejects.toThrow("is not a regular file");
     expect(allowlistResult.stderr).toContain("is not a regular file");
+  });
+
+  it("rejects custom schema options instead of pretending to apply them", async () => {
+    const result = await run(["--schema", fixture("non-array.json"), fixture("valid.layers.json")]);
+
+    expect(result.code).toBe(1);
+    expect(result.stderr).toContain("unknown option --schema");
+    expect(result.stdout).toBe("");
   });
 
   it("fails default discovery when a matching entry is not a regular file", async () => {

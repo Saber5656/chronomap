@@ -432,7 +432,9 @@ async function loadAllowlist(path) {
   return new Set(value);
 }
 
-async function loadSchema(path) {
+// The committed JSON Schema is the editor/data contract. Build enforcement is the
+// dependency-free validator above, whose conformance is covered by parity tests.
+export async function assertSchemaContract(path) {
   await assertRegularFile(path);
   const value = await parseJsonFile(path);
   if (!isRecord(value) || value.$schema !== "https://json-schema.org/draft/2020-12/schema") {
@@ -464,27 +466,27 @@ export async function discoverRegistryFiles(directory) {
 function parseArguments(args) {
   const files = [];
   let allowlistPath = defaultAllowlistPath;
-  let schemaPath = defaultSchemaPath;
   for (let index = 0; index < args.length; index += 1) {
     const argument = args[index];
-    if (argument === "--allowlist" || argument === "--schema") {
+    if (argument === "--allowlist") {
       const value = args[index + 1];
       if (value === undefined) throw new Error(`${argument} requires a path`);
-      if (argument === "--allowlist") allowlistPath = resolve(value);
-      else schemaPath = resolve(value);
+      allowlistPath = resolve(value);
       index += 1;
+    } else if (argument.startsWith("--")) {
+      throw new Error(`unknown option ${argument}`);
     } else {
       files.push(resolve(argument));
     }
   }
-  return { files, allowlistPath, schemaPath };
+  return { files, allowlistPath };
 }
 
 export async function runValidator(args = [], output = console) {
   let options;
   try {
     options = parseArguments(args);
-    await loadSchema(options.schemaPath);
+    await assertSchemaContract(defaultSchemaPath);
     const allowedHosts = await loadAllowlist(options.allowlistPath);
     const files =
       options.files.length > 0
