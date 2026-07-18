@@ -1,0 +1,272 @@
+[
+  {
+    "id": "BAD ID",
+    "type": "raster-era",
+    "provider": "gsi",
+    "title": { "ja": "不正ID", "en": "Bad id" },
+    "era": { "from": 2000, "to": 2001 },
+    "region": "JP",
+    "coverage": [[128, 30, 146, 45]],
+    "tiles": {
+      "urlTemplate": "https://cyberjapandata.gsi.go.jp/a/{z}/{x}/{y}.png",
+      "scheme": "xyz",
+      "minzoom": 0,
+      "maxzoom": 22,
+      "tileSize": 256
+    },
+    "attribution": { "text": "Terms", "license": { "name": "Provider terms" } },
+    "flags": { "experimental": false, "requiresFeatureFlag": null },
+    "priority": 1
+  },
+  {
+    "id": "bad-era",
+    "type": "raster-era",
+    "provider": "gsi",
+    "title": { "ja": "不正年代", "en": "Bad era" },
+    "era": { "from": 2001, "to": 2000 },
+    "region": "JP",
+    "coverage": [[128, 30, 146, 45]],
+    "tiles": {
+      "urlTemplate": "https://cyberjapandata.gsi.go.jp/a/{z}/{x}/{y}.png",
+      "scheme": "xyz",
+      "minzoom": 0,
+      "maxzoom": 22,
+      "tileSize": 256
+    },
+    "attribution": { "text": "Terms", "license": { "name": "Provider terms" } },
+    "flags": { "experimental": false, "requiresFeatureFlag": null },
+    "priority": 1
+  },
+  {
+    "id": "bad-bbox-length",
+    "type": "raster-era",
+    "provider": "gsi",
+    "title": { "ja": "不正範囲", "en": "Bad bbox" },
+    "era": { "from": 2000, "to": 2001 },
+    "region": "JP",
+    "coverage": [[128, 30, 146, 45, 50]],
+    "tiles": {
+      "urlTemplate": "https://cyberjapandata.gsi.go.jp/a/{z}/{x}/{y}.png",
+      "scheme": "xyz",
+      "minzoom": 0,
+      "maxzoom": 22,
+      "tileSize": 256
+    },
+    "attribution": { "text": "Terms", "license": { "name": "Provider terms" } },
+    "flags": { "experimental": false, "requiresFeatureFlag": null },
+    "priority": 1
+  },
+  {
+    "id": "bad-bbox-range",
+    "type": "raster-era",
+    "provider": "gsi",
+    "title": { "ja": "範囲外", "en": "Out of range bbox" },
+    "era": { "from": 2000, "to": 2001 },
+    "region": "JP",
+    "coverage": [[-181, 45, 181, 30]],
+    "tiles": {
+      "urlTemplate": "https://cyberjapandata.gsi.go.jp/a/{z}/{x}/{y}.png",
+      "scheme": "xyz",
+      "minzoom": 0,
+      "maxzoom": 22,
+      "tileSize": 256
+    },
+    "attribution": { "text": "Terms", "license": { "name": "Provider terms" } },
+    "flags": { "experimental": false, "requiresFeatureFlag": null },
+    "priority": 1
+  },
+  {
+    "id": "evil-host",
+    "type": "raster-era",
+    "provider": "gsi",
+    "title": { "ja": "不正ホスト", "en": "Evil host" },
+    "era": { "from": 2000, "to": 2001 },
+    "region": "JP",
+    "coverage": [[128, 30, 146, 45]],
+    "tiles": {
+      "urlTemplate": "https://evil.example/a/{z}/{x}/{y}.png",
+      "scheme": "xyz",
+      "minzoom": 0,
+      "maxzoom": 22,
+      "tileSize": 256
+    },
+    "attribution": { "text": "Terms", "license": { "name": "Provider terms" } },
+    "flags": { "experimental": false, "requiresFeatureFlag": null },
+    "priority": 1
+  },
+  {
+    "id": "missing-ja",
+    "type": "raster-era",
+    "provider": "gsi",
+    "title": { "en": "Missing ja" },
+    "era": { "from": 2000, "to": 2001 },
+    "region": "JP",
+    "coverage": [[128, 30, 146, 45]],
+    "tiles": {
+      "urlTemplate": "https://cyberjapandata.gsi.go.jp/a/{z}/{x}/{y}.png",
+      "scheme": "xyz",
+      "minzoom": 0,
+      "maxzoom": 22,
+      "tileSize": 256
+    },
+    "attribution": { "text": "Terms", "license": { "name": "Provider terms" } },
+    "flags": { "experimental": false, "requiresFeatureFlag": null },
+    "priority": 1
+  },
+  {
+    "id": "missing-license-name",
+    "type": "raster-era",
+    "provider": "gsi",
+    "title": { "ja": "ライセンス名なし", "en": "Missing license name" },
+    "era": { "from": 2000, "to": 2001 },
+    "region": "JP",
+    "coverage": [[128, 30, 146, 45]],
+    "tiles": {
+      "urlTemplate": "https://cyberjapandata.gsi.go.jp/a/{z}/{x}/{y}.png",
+      "scheme": "xyz",
+      "minzoom": 0,
+      "maxzoom": 22,
+      "tileSize": 256
+    },
+    "attribution": { "text": "Terms", "license": {} },
+    "flags": { "experimental": false, "requiresFeatureFlag": null },
+    "priority": 1
+  },
+  {
+    "id": "bad-scheme",
+    "type": "raster-era",
+    "provider": "gsi",
+    "title": { "ja": "不正方式", "en": "Bad scheme" },
+    "era": { "from": 2000, "to": 2001 },
+    "region": "JP",
+    "coverage": [[128, 30, 146, 45]],
+    "tiles": {
+      "urlTemplate": "https://cyberjapandata.gsi.go.jp/a/{z}/{x}/{y}.png",
+      "scheme": "quadkey",
+      "minzoom": 0,
+      "maxzoom": 22,
+      "tileSize": 256
+    },
+    "attribution": { "text": "Terms", "license": { "name": "Provider terms" } },
+    "flags": { "experimental": false, "requiresFeatureFlag": null },
+    "priority": 1
+  },
+  {
+    "id": "bad-zoom",
+    "type": "raster-era",
+    "provider": "gsi",
+    "title": { "ja": "不正ズーム", "en": "Bad zoom" },
+    "era": { "from": 2000, "to": 2001 },
+    "region": "JP",
+    "coverage": [[128, 30, 146, 45]],
+    "tiles": {
+      "urlTemplate": "https://cyberjapandata.gsi.go.jp/a/{z}/{x}/{y}.png",
+      "scheme": "xyz",
+      "minzoom": 12.5,
+      "maxzoom": 23,
+      "tileSize": 128
+    },
+    "attribution": { "text": "Terms", "license": { "name": "Provider terms" } },
+    "flags": { "experimental": false, "requiresFeatureFlag": null },
+    "priority": 1
+  },
+  {
+    "id": "unknown-extra",
+    "type": "raster-era",
+    "provider": "gsi",
+    "title": { "ja": "未知field", "en": "Unknown field", "extra": "reject" },
+    "era": { "from": 2000, "to": 2001 },
+    "region": "JP",
+    "coverage": [[128, 30, 146, 45]],
+    "tiles": {
+      "urlTemplate": "https://cyberjapandata.gsi.go.jp/a/{z}/{x}/{y}.png",
+      "scheme": "xyz",
+      "minzoom": 0,
+      "maxzoom": 22,
+      "tileSize": 256
+    },
+    "attribution": { "text": "Terms", "license": { "name": "Provider terms" } },
+    "flags": { "experimental": false, "requiresFeatureFlag": null },
+    "priority": 1,
+    "extra": "reject"
+  },
+  {
+    "id": "bad-attribution-url",
+    "type": "raster-era",
+    "provider": "gsi",
+    "title": { "ja": "不正URL", "en": "Bad URL" },
+    "era": { "from": 2000, "to": 2001 },
+    "region": "JP",
+    "coverage": [[128, 30, 146, 45]],
+    "tiles": {
+      "urlTemplate": "https://cyberjapandata.gsi.go.jp:443/a/{z}/{x}/{y}.png",
+      "scheme": "xyz",
+      "minzoom": 0,
+      "maxzoom": 22,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "Terms",
+      "url": "http://example.com",
+      "license": { "name": "Provider terms" }
+    },
+    "flags": { "experimental": false, "requiresFeatureFlag": null },
+    "priority": 1
+  },
+  {
+    "id": "duplicate-id",
+    "type": "vector-dated",
+    "provider": "gsi",
+    "title": { "ja": "重複1", "en": "Duplicate one" },
+    "era": { "from": 2000, "to": 2001 },
+    "region": "JP",
+    "coverage": [[128, 30, 146, 45]],
+    "tiles": {
+      "urlTemplate": "https://cyberjapandata.gsi.go.jp/a/{z}/{x}/{y}.pbf",
+      "scheme": "xyz",
+      "minzoom": 0,
+      "maxzoom": 22,
+      "tileSize": 512
+    },
+    "attribution": { "text": "Terms", "license": { "name": "Provider terms" } },
+    "flags": { "experimental": false, "requiresFeatureFlag": null },
+    "priority": 1
+  },
+  {
+    "id": "duplicate-id",
+    "type": "vector-dated",
+    "provider": "gsi",
+    "title": { "ja": "重複2", "en": "Duplicate two" },
+    "era": { "from": 2000, "to": 2001 },
+    "region": "JP",
+    "coverage": [[128, 30, 146, 45]],
+    "tiles": {
+      "urlTemplate": "https://cyberjapandata.gsi.go.jp/a/{z}/{x}/{y}.pbf",
+      "scheme": "xyz",
+      "minzoom": 0,
+      "maxzoom": 22,
+      "tileSize": 512
+    },
+    "attribution": { "text": "Terms", "license": { "name": "Provider terms" } },
+    "flags": { "experimental": false, "requiresFeatureFlag": null },
+    "priority": 1
+  },
+  {
+    "id": "missing-required",
+    "type": "raster-era",
+    "title": { "ja": "必須なし", "en": "Missing required" },
+    "era": { "from": 2000, "to": 2001 },
+    "region": "JP",
+    "coverage": [[128, 30, 146, 45]],
+    "tiles": {
+      "urlTemplate": "https://cyberjapandata.gsi.go.jp/a/{z}/{x}/{y}.png",
+      "scheme": "xyz",
+      "minzoom": 0,
+      "maxzoom": 22,
+      "tileSize": 256
+    },
+    "attribution": { "text": "Terms", "license": { "name": "Provider terms" } },
+    "flags": { "experimental": false, "requiresFeatureFlag": null },
+    "priority": 1
+  }
+]

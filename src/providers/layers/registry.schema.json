@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chronomap.example/schemas/layer-registry.schema.json",
+  "title": "Chronomap time-layer registry",
+  "type": "array",
+  "items": { "$ref": "#/$defs/layerEntry" },
+  "$defs": {
+    "nonBlankString": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "httpsUrl": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://[^/@\\s\\u0000-\\u001F\\u007F]+(?:[/?#][^\\s\\u0000-\\u001F\\u007F]*)?$"
+    },
+    "tileUrlTemplate": {
+      "type": "string",
+      "pattern": "^https://[^/@\\s\\u0000-\\u001F\\u007F:]+(?:/[^\\s\\u0000-\\u001F\\u007F]*)?$",
+      "allOf": [{ "pattern": "\\{z\\}" }, { "pattern": "\\{x\\}" }, { "pattern": "\\{y\\}" }]
+    },
+    "bbox": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "prefixItems": [
+        { "type": "number", "minimum": -180, "maximum": 180 },
+        { "type": "number", "minimum": -90, "maximum": 90 },
+        { "type": "number", "minimum": -180, "maximum": 180 },
+        { "type": "number", "minimum": -90, "maximum": 90 }
+      ],
+      "items": false,
+      "x-chronomap-constraint": "minLng < maxLng and minLat < maxLat"
+    },
+    "layerEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "provider",
+        "title",
+        "era",
+        "region",
+        "coverage",
+        "tiles",
+        "attribution",
+        "flags",
+        "priority"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]{1,64}$" },
+        "type": { "enum": ["raster-era", "vector-dated"] },
+        "provider": { "$ref": "#/$defs/nonBlankString" },
+        "title": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ja", "en"],
+          "properties": {
+            "ja": { "$ref": "#/$defs/nonBlankString" },
+            "en": { "$ref": "#/$defs/nonBlankString" }
+          }
+        },
+        "era": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["from", "to"],
+          "properties": {
+            "from": { "type": "integer" },
+            "to": { "type": ["integer", "null"] }
+          },
+          "x-chronomap-constraint": "from <= to when to is not null"
+        },
+        "region": {
+          "type": "string",
+          "pattern": "^(?:[A-Z]{2}|GLOBAL)$"
+        },
+        "coverage": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/bbox" }
+        },
+        "tiles": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["urlTemplate", "scheme", "minzoom", "maxzoom", "tileSize"],
+          "properties": {
+            "urlTemplate": { "$ref": "#/$defs/tileUrlTemplate" },
+            "scheme": { "enum": ["xyz", "tms"] },
+            "minzoom": { "type": "integer", "minimum": 0, "maximum": 22 },
+            "maxzoom": { "type": "integer", "minimum": 0, "maximum": 22 },
+            "tileSize": { "enum": [256, 512] }
+          },
+          "x-chronomap-constraint": "minzoom <= maxzoom; urlTemplate contains {z}, {x}, and {y}; hostname is allowlisted"
+        },
+        "attribution": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["text", "license"],
+          "properties": {
+            "text": { "$ref": "#/$defs/nonBlankString" },
+            "url": { "$ref": "#/$defs/httpsUrl" },
+            "license": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name"],
+              "properties": {
+                "name": { "$ref": "#/$defs/nonBlankString" },
+                "url": { "$ref": "#/$defs/httpsUrl" }
+              }
+            }
+          }
+        },
+        "flags": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["experimental", "requiresFeatureFlag"],
+          "properties": {
+            "experimental": { "type": "boolean" },
+            "requiresFeatureFlag": {
+              "anyOf": [{ "$ref": "#/$defs/nonBlankString" }, { "type": "null" }]
+            }
+          }
+        },
+        "priority": { "type": "integer" }
+      }
+    }
+  },
+  "x-chronomap-constraint": "entry ids are globally unique"
+}

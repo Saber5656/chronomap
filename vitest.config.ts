@@ -4,7 +4,7 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: false,
-    include: ["tests/unit/**/*.spec.ts"],
+    include: ["tests/unit/**/*.spec.{ts,mjs}"],
     coverage: {
       provider: "v8",
       reporter: ["text", "lcov"],
