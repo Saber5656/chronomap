@@ -1,0 +1,47 @@
+[
+  {
+    "id": "valid-raster",
+    "type": "raster-era",
+    "provider": "gsi",
+    "title": { "ja": "有効なラスター", "en": "Valid raster" },
+    "era": { "from": 2020, "to": null },
+    "region": "JP",
+    "coverage": [[128, 30, 146.5, 45.8]],
+    "tiles": {
+      "urlTemplate": "https://cyberjapandata.gsi.go.jp/xyz/sample/{z}/{x}/{y}.png",
+      "scheme": "xyz",
+      "minzoom": 0,
+      "maxzoom": 22,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "Provider attribution",
+      "url": "https://example.com/terms",
+      "license": { "name": "Provider terms", "url": "https://example.com/license" }
+    },
+    "flags": { "experimental": false, "requiresFeatureFlag": null },
+    "priority": 10
+  },
+  {
+    "id": "valid-vector",
+    "type": "vector-dated",
+    "provider": "future-provider",
+    "title": { "ja": "有効なベクター", "en": "Valid vector" },
+    "era": { "from": 1900, "to": 1950 },
+    "region": "GLOBAL",
+    "coverage": [[-180, -90, 180, 90]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/vector/{z}/{x}/{y}.pbf",
+      "scheme": "tms",
+      "minzoom": 2,
+      "maxzoom": 18,
+      "tileSize": 512
+    },
+    "attribution": {
+      "text": "Provider terms / permission required",
+      "license": { "name": "Provider terms / permission required" }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": -1
+  }
+]

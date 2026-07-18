@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit",
     "preview": "vite preview",
     "lint": "eslint .",
+    "validate:registry": "node scripts/validate-registry.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run --coverage",
