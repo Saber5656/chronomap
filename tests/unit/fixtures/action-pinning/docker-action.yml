@@ -1,0 +1,5 @@
+name: Docker action
+jobs:
+  verify:
+    steps:
+      - uses: docker://alpine:3.19

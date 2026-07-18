@@ -1,0 +1,5 @@
+name: Non-string value
+jobs:
+  verify:
+    steps:
+      - uses: 42

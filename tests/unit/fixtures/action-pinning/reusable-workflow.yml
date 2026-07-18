@@ -1,0 +1,4 @@
+name: Reusable workflow
+jobs:
+  verify:
+    uses: owner/repo/.github/workflows/ci.yml@main

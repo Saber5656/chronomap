@@ -1,0 +1,5 @@
+name: Short SHA
+jobs:
+  verify:
+    steps:
+      - uses: actions/checkout@9c091bb
