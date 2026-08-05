@@ -1,0 +1,5 @@
+name: Local action
+jobs:
+  verify:
+    steps:
+      - uses: ./local-action
