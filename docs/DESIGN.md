@@ -214,8 +214,8 @@ JSON Schema (draft 2020-12) for an array of entries:
     "minzoom": 10, "maxzoom": 17, "tileSize": 256
   },
   "attribution": { "text": "地理院タイル（国土地理院）",
-                   "url": "https://maps.gsi.go.jp/development/ichiran.html" },
-  "license": { "name": "GSI Terms (attribution only)", "url": "…" },
+                   "url": "https://maps.gsi.go.jp/development/ichiran.html",
+                   "license": { "name": "GSI Terms (attribution only)", "url": "…" } },
   "flags": { "experimental": false, "requiresFeatureFlag": null },  // e.g. "VITE_ENABLE_KONJAKU"
   "priority": 10                                // higher wins ties (§6.1)
 }
