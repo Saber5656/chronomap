@@ -1,2 +1,10 @@
-/** Placeholder for DESIGN §4.1 provider layer ownership. */
-export {};
+export { loadRegistry } from "./loader";
+export type {
+  Bbox,
+  LayerEntry,
+  LayerRegistryEntry,
+  LayerType,
+  RegistryEnv,
+  RegistryWarning,
+  TileScheme,
+} from "./types";

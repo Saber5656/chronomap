@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "check:pins": "node scripts/check-action-pinning.mjs",
+    "validate:registry": "node scripts/validate-registry.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run --coverage",

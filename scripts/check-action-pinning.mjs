@@ -10,6 +10,7 @@ const ACTION_PATH_SEGMENT = "[A-Za-z0-9_.-]+";
 const PINNED_ACTION = new RegExp(
   `^${OWNER}\\/${ACTION_PATH_SEGMENT}(?:\\/${ACTION_PATH_SEGMENT})*@[0-9a-f]{40}$`,
 );
+const LOCAL_REUSABLE_WORKFLOW = /^\.\/\.github\/workflows\/[A-Za-z0-9][A-Za-z0-9._-]*\.ya?ml$/;
 
 export async function collectWorkflowFiles(target) {
   const targetStat = await lstat(target);
@@ -95,11 +96,13 @@ export function findUnpinnedActions(file, source) {
 
   const findings = [];
 
-  function inspectUsesPair(pair) {
+  function inspectUsesPair(pair, { allowLocalReusableWorkflow = false } = {}) {
     const reference = resolveUsesReference(document, pair.value);
     const line = lineCounter.linePos(isScalar(pair.key) ? (pair.key.range?.[0] ?? 0) : 0).line || 1;
+    const isAllowedLocalWorkflow =
+      allowLocalReusableWorkflow && LOCAL_REUSABLE_WORKFLOW.test(reference);
 
-    if (!PINNED_ACTION.test(reference)) {
+    if (!PINNED_ACTION.test(reference) && !isAllowedLocalWorkflow) {
       findings.push({ file, line, reference });
     }
   }
@@ -118,7 +121,7 @@ export function findUnpinnedActions(file, source) {
     const reusableWorkflowPair = findPair(job, "uses");
 
     if (reusableWorkflowPair) {
-      inspectUsesPair(reusableWorkflowPair);
+      inspectUsesPair(reusableWorkflowPair, { allowLocalReusableWorkflow: true });
     }
 
     const stepsPair = findPair(job, "steps");
@@ -160,13 +163,13 @@ async function main(targets) {
     if (findings.length > 0) {
       for (const finding of findings) {
         console.error(
-          `${finding.file}:${finding.line}: uses '${finding.reference}' must be pinned to a full 40-character commit SHA.`,
+          `${finding.file}:${finding.line}: uses '${finding.reference}' must be a same-commit local reusable workflow at job scope or a remote reference pinned to a full 40-character commit SHA.`,
         );
       }
       process.exitCode = 1;
     } else {
       console.log(
-        `Checked ${workflowFiles.length} workflow file(s): every action is pinned to a full commit SHA.`,
+        `Checked ${workflowFiles.length} workflow file(s): remote references are pinned and local reusable workflows use same-commit paths.`,
       );
     }
   } catch (error) {

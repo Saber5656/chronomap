@@ -82,6 +82,90 @@ jobs:
     expect(findUnpinnedActions("pinned-alias.yml", source)).toEqual([]);
   });
 
+  it.each(["ci.yml", "deploy-checks.yaml"])(
+    "accepts same-commit local reusable workflow %s at job scope",
+    (filename) => {
+      const source = `
+jobs:
+  verify:
+    uses: ./.github/workflows/${filename}
+`;
+
+      expect(findUnpinnedActions("local-reusable-workflow.yml", source)).toEqual([]);
+    },
+  );
+
+  it.each([
+    [
+      "step-level local workflow",
+      `
+jobs:
+  verify:
+    steps:
+      - uses: ./.github/workflows/ci.yml
+`,
+      "./.github/workflows/ci.yml",
+    ],
+    [
+      "nested local workflow",
+      `
+jobs:
+  verify:
+    uses: ./.github/workflows/nested/ci.yml
+`,
+      "./.github/workflows/nested/ci.yml",
+    ],
+    [
+      "local workflow path traversal",
+      `
+jobs:
+  verify:
+    uses: ./.github/workflows/../ci.yml
+`,
+      "./.github/workflows/../ci.yml",
+    ],
+    [
+      "local path outside the workflow directory",
+      `
+jobs:
+  verify:
+    uses: ./.github/actions/ci.yml
+`,
+      "./.github/actions/ci.yml",
+    ],
+    [
+      "local workflow with a non-YAML extension",
+      `
+jobs:
+  verify:
+    uses: ./.github/workflows/README.md
+`,
+      "./.github/workflows/README.md",
+    ],
+    [
+      "dynamic local workflow",
+      `
+jobs:
+  verify:
+    uses: "./.github/workflows/\${{ inputs.name }}.yml"
+`,
+      "./.github/workflows/${{ inputs.name }}.yml",
+    ],
+    [
+      "local workflow with a mutable ref",
+      `
+jobs:
+  verify:
+    uses: ./.github/workflows/ci.yml@main
+`,
+      "./.github/workflows/ci.yml@main",
+    ],
+  ])("rejects a %s reference", (_name, source, reference) => {
+    expect(findUnpinnedActions("invalid-local-workflow.yml", source)).toEqual([
+      expect.objectContaining({ reference }),
+    ]);
+  });
+
   it("rejects an alias that resolves to a mutable scalar action reference", () => {
     const source = `
 x-action: &mutable-action actions/checkout@v4
