@@ -1,0 +1,5 @@
+name: Spaced key
+jobs:
+  verify:
+    steps:
+      - uses : actions/checkout@main
