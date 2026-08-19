@@ -28,6 +28,21 @@ const cases: ParseCase[] = [
     expected: { ok: true, lat: -35.68, lng: -139.76, zoom: 16, source: "geo" },
   },
   {
+    name: "geo URI accepts a four-digit altitude",
+    input: "geo:35.3606,138.7274,3776",
+    expected: { ok: true, lat: 35.3606, lng: 138.7274, source: "geo" },
+  },
+  {
+    name: "geo URI accepts a large decimal altitude",
+    input: "geo:35.3606,138.7274,3776.24",
+    expected: { ok: true, lat: 35.3606, lng: 138.7274, source: "geo" },
+  },
+  {
+    name: "geo URI accepts a negative altitude",
+    input: "geo:31.5,35.5,-430.5",
+    expected: { ok: true, lat: 31.5, lng: 35.5, source: "geo" },
+  },
+  {
     name: "geo URI ignores unsupported query parameters",
     input: "geo:35,139?foo=bar&z=not-a-number",
     expected: { ok: true, lat: 35, lng: 139, source: "geo" },

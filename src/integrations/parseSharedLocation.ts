@@ -9,8 +9,9 @@ const CLOSING_BRACKET_PAIRS = new Map<string, string>([
   ["}", "{"],
 ]);
 const COORDINATE = "-?\\d{1,3}(?:\\.\\d+)?";
+const ALTITUDE = "[+-]?\\d+(?:\\.\\d+)?";
 const GEO_COORDINATE_PATTERN = new RegExp(
-  `^(${COORDINATE}),(${COORDINATE})(?:,${COORDINATE})?$`,
+  `^(${COORDINATE}),(${COORDINATE})(?:,${ALTITUDE})?$`,
   "u",
 );
 const EXACT_PAIR_PATTERN = new RegExp(`^\\s*(${COORDINATE})\\s*,\\s*(${COORDINATE})\\s*$`, "u");
