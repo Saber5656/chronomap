@@ -13,6 +13,7 @@ export default defineConfig({
         "src/state/store.ts",
         "src/security/validate.ts",
         "src/state/urlState.ts",
+        "src/integrations/parseSharedLocation.ts",
       ],
       thresholds: {
         statements: 80,
@@ -30,6 +31,12 @@ export default defineConfig({
           branches: 95,
           functions: 95,
           lines: 95,
+        },
+        "src/integrations/parseSharedLocation.ts": {
+          statements: 100,
+          branches: 100,
+          functions: 100,
+          lines: 100,
         },
       },
     },
