@@ -2,6 +2,12 @@ import { label as validateLabel, latLng, zoom as validateZoom } from "../securit
 
 const RAW_LENGTH_LIMIT = 4_096;
 const URLISH_TOKEN_PATTERN = /(?<![\p{L}\p{N}_])(?:[a-z][a-z\d+.-]*:)[^\s]+/iu;
+const TRAILING_PROSE_PUNCTUATION_PATTERN = /[.,;!?"'…。，、]+$/u;
+const CLOSING_BRACKET_PAIRS = new Map<string, string>([
+  [")", "("],
+  ["]", "["],
+  ["}", "{"],
+]);
 const COORDINATE = "-?\\d{1,3}(?:\\.\\d+)?";
 const GEO_COORDINATE_PATTERN = new RegExp(
   `^(${COORDINATE}),(${COORDINATE})(?:,${COORDINATE})?$`,
@@ -132,9 +138,34 @@ function parseGoogle(url: URL, hostname: string): ParseResult | null {
   return makeSuccess("google", pathCoordinates, parseGooglePathZoom(pathMatch[3]), null);
 }
 
+function trimTrailingUrlProsePunctuation(token: string): string {
+  let trimmed = token;
+
+  for (;;) {
+    const withoutSentencePunctuation = trimmed.replace(TRAILING_PROSE_PUNCTUATION_PATTERN, "");
+    if (withoutSentencePunctuation !== trimmed) {
+      trimmed = withoutSentencePunctuation;
+      continue;
+    }
+
+    const closingBracket = trimmed.at(-1)!;
+    const openingBracket = CLOSING_BRACKET_PAIRS.get(closingBracket);
+    if (openingBracket === undefined) return trimmed;
+
+    let bracketBalance = 0;
+    for (const character of trimmed) {
+      if (character === openingBracket) bracketBalance += 1;
+      if (character === closingBracket) bracketBalance -= 1;
+    }
+    if (bracketBalance >= 0) return trimmed;
+
+    trimmed = trimmed.slice(0, -1);
+  }
+}
+
 function parseUrlCandidate(token: string): URL | null {
   try {
-    return new URL(token);
+    return new URL(trimTrailingUrlProsePunctuation(token));
   } catch {
     return null;
   }

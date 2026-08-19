@@ -215,6 +215,21 @@ const cases: ParseCase[] = [
     expected: { ok: true, lat: 34.7, lng: 135.4, label: "Osaka", source: "apple" },
   },
   {
+    name: "Apple Maps URL ignores trailing sentence punctuation",
+    input: "Open https://maps.apple.com/?ll=34.7%2C135.4.",
+    expected: { ok: true, lat: 34.7, lng: 135.4, source: "apple" },
+  },
+  {
+    name: "Google Maps URL ignores unmatched prose closers",
+    input: "Open (https://www.google.com/maps/@35.68,139.76,15z).",
+    expected: { ok: true, lat: 35.68, lng: 139.76, zoom: 15, source: "google" },
+  },
+  {
+    name: "Apple Maps URL preserves balanced trailing brackets",
+    input: "https://maps.apple.com/?ll=34.7%2C135.4&q=(Osaka)",
+    expected: { ok: true, lat: 34.7, lng: 135.4, label: "(Osaka)", source: "apple" },
+  },
+  {
     name: "javascript URI skips URL recognizers",
     input: "javascript:alert(1)",
     expected: { ok: false, reason: "no-coords" },
