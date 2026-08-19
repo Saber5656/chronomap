@@ -67,6 +67,23 @@ body {
   );
   --top-controls-inline-size: 240px;
   --top-chrome-gap: 12px;
+  --slider-dock-max-block-size: 96px;
+  --slider-dock-control-block-size: 44px;
+  --slider-dock-padding-block-start: 8px;
+  --slider-dock-padding-block-end: 8px;
+  --slider-dock-safe-area-budget: calc(
+    var(--slider-dock-max-block-size) - var(--slider-dock-control-block-size) -
+      var(--slider-dock-padding-block-start) - var(--slider-dock-padding-block-end)
+  );
+  --slider-dock-safe-area-bottom: clamp(
+    0px,
+    env(safe-area-inset-bottom, 0px),
+    var(--slider-dock-safe-area-budget)
+  );
+  --slider-dock-block-size: calc(
+    var(--slider-dock-control-block-size) + var(--slider-dock-padding-block-start) +
+      var(--slider-dock-padding-block-end) + var(--slider-dock-safe-area-bottom)
+  );
 
   position: relative;
   display: grid;
@@ -156,25 +173,11 @@ body {
 }
 
 .layer-info-badge-slot {
-  inset-block-start: max(4rem, calc(3.25rem + env(safe-area-inset-top, 0px)));
+  inset-block-end: calc(var(--slider-dock-block-size) + 0.75rem);
   inset-inline-start: max(0.75rem, env(safe-area-inset-left, 0px));
 }
 
 .slider-dock {
-  --slider-dock-max-block-size: 96px;
-  --slider-dock-control-block-size: 44px;
-  --slider-dock-padding-block-start: 8px;
-  --slider-dock-padding-block-end: 8px;
-  --slider-dock-safe-area-budget: calc(
-    var(--slider-dock-max-block-size) - var(--slider-dock-control-block-size) -
-      var(--slider-dock-padding-block-start) - var(--slider-dock-padding-block-end)
-  );
-  --slider-dock-safe-area-bottom: clamp(
-    0px,
-    env(safe-area-inset-bottom, 0px),
-    var(--slider-dock-safe-area-budget)
-  );
-
   inset-inline: 0;
   inset-block-end: 0;
   z-index: var(--z-chrome);
@@ -183,10 +186,7 @@ body {
   align-items: center;
   gap: 0.75rem;
   width: 100%;
-  height: calc(
-    var(--slider-dock-control-block-size) + var(--slider-dock-padding-block-start) +
-      var(--slider-dock-padding-block-end) + var(--slider-dock-safe-area-bottom)
-  );
+  height: var(--slider-dock-block-size);
   max-height: var(--slider-dock-max-block-size);
   min-height: calc(
     var(--slider-dock-control-block-size) + var(--slider-dock-padding-block-start) +
