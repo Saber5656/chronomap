@@ -132,13 +132,18 @@ body {
   width: min(100%, 14rem);
   min-width: 44px;
   min-height: var(--top-controls-slot-block-size);
-  pointer-events: auto;
+  pointer-events: none;
 }
 
 .map-region > .shell-slot {
   position: absolute;
   z-index: var(--z-chrome);
   max-width: calc(100% - 1.5rem);
+  pointer-events: none;
+}
+
+.controls-top > .shell-slot > *,
+.map-region > .shell-slot > * {
   pointer-events: auto;
 }
 
