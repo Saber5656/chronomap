@@ -228,6 +228,7 @@ body {
   inset-block-end: 0;
   z-index: var(--z-sheet);
   max-height: 100%;
+  padding-block-start: env(safe-area-inset-top, 0px);
   padding-block-end: max(0.75rem, env(safe-area-inset-bottom, 0px));
   padding-inline: max(0.75rem, env(safe-area-inset-left, 0px))
     max(0.75rem, env(safe-area-inset-right, 0px));
