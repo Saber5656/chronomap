@@ -12,7 +12,7 @@ const PLAIN_PAIR_PATTERN = new RegExp(
   `(?<![\\p{L}\\p{N}_.+-])(${COORDINATE})[,\\s]+(${COORDINATE})(?![\\p{L}\\p{N}_])`,
   "u",
 );
-const GOOGLE_PATH_PATTERN = new RegExp(`@(${COORDINATE}),(${COORDINATE})(?:,(\\d+)z)?`, "u");
+const GOOGLE_PATH_PATTERN = new RegExp(`@(${COORDINATE}),(${COORDINATE})(?:,(\\d+)z)?(?=$|/)`, "u");
 const DECIMAL_PATTERN = /^[+-]?(?:(?:\d+(?:\.\d*)?)|(?:\.\d+))(?:[eE][+-]?\d+)?$/u;
 const GOOGLE_HOSTS = new Set([
   "www.google.com",

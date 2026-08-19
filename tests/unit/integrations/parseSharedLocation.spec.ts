@@ -145,6 +145,16 @@ const cases: ParseCase[] = [
     expected: { ok: false, reason: "no-coords" },
   },
   {
+    name: "Google path does not partially match an oversized longitude",
+    input: "https://www.google.com/maps/@35,1390,15z",
+    expected: { ok: false, reason: "no-coords" },
+  },
+  {
+    name: "Google path does not partially match a coordinate suffix",
+    input: "https://www.google.com/maps/@35,139foo",
+    expected: { ok: false, reason: "no-coords" },
+  },
+  {
     name: "Google host matching is case insensitive",
     input: "https://WWW.GOOGLE.COM/maps?q=35,139",
     expected: { ok: true, lat: 35, lng: 139, source: "google" },
