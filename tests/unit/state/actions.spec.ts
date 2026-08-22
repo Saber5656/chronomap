@@ -108,6 +108,27 @@ describe("createActions", () => {
     expect(store.get().ui.sheet).toBe("none");
   });
 
+  it("opens an import request with bounded in-memory prefill and clears it on close", () => {
+    const { store, actions } = setup();
+    actions.openImportSheet({
+      prefill: `${"x".repeat(4_096)}overflow`,
+      reason: "shortlink",
+      autofocus: false,
+    });
+
+    expect(store.get().ui).toMatchObject({
+      sheet: "import",
+      importRequest: {
+        prefill: "x".repeat(4_096),
+        reason: "shortlink",
+        autofocus: false,
+      },
+    });
+
+    actions.closeSheet();
+    expect(store.get().ui.importRequest).toBeNull();
+  });
+
   it("creates monotonic toasts and changes language", () => {
     const { store, actions } = setup();
     actions.showToast("info", "first");

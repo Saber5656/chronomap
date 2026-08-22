@@ -16,6 +16,8 @@ export type {
 export { mount as mountLayerInfoBadge } from "./LayerInfoBadge";
 export type { LayerInfoBadgeController, LayerInfoBadgeOptions } from "./LayerInfoBadge";
 export { mount as mountLayersSheet } from "./LayersSheet";
+export { mount as mountImportSheet } from "./ImportSheet";
+export type { ImportSheetController, ImportSheetOptions } from "./ImportSheet";
 export type {
   BasemapInfo,
   LayersSheetController,

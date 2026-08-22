@@ -7,8 +7,14 @@ const mocks = vi.hoisted(() => ({
       isStyleLoaded: () => true,
       getLayer: vi.fn(() => undefined),
       getSource: vi.fn(() => undefined),
+      addLayer: vi.fn(),
+      addSource: vi.fn(),
       removeLayer: vi.fn(),
       removeSource: vi.fn(),
+      project: vi.fn(() => ({ x: 195, y: 422 })),
+      getContainer: vi.fn(() => ({
+        getBoundingClientRect: () => ({ left: 0, top: 0 }),
+      })),
       on: vi.fn(),
       off: vi.fn(),
     })),
@@ -66,6 +72,46 @@ describe("production bootstrap", () => {
     expect(button?.textContent).toBe("日本語");
     expect(button?.getAttribute("aria-label")).toBe("日本語");
 
+    runtime.destroy();
+  });
+
+  it("mounts the import sheet even when layer options are absent", () => {
+    const parent = document.createElement("div");
+    const runtime = bootstrap(parent, new Date(2026, 0, 1));
+    const menuTrigger = parent.querySelector<HTMLButtonElement>(".menu-trigger");
+    const importButton = parent.querySelector<HTMLButtonElement>("[data-menu-item='import']");
+
+    menuTrigger?.click();
+    importButton?.click();
+
+    expect(parent.querySelector(".bottom-sheet[role='dialog']")).not.toBeNull();
+    expect(parent.querySelector("#chronomap-import-input")).not.toBeNull();
+    runtime.destroy();
+  });
+
+  it("connects a parsed import label to the picked-point marker", () => {
+    const parent = document.createElement("div");
+    document.body.append(parent);
+    const runtime = bootstrap(parent, new Date(2026, 0, 1), {
+      layerRegistry: [],
+      basemap: {
+        id: "gsi-pale",
+        title: { ja: "GSI", en: "GSI" },
+        attribution: { text: "GSI", url: "https://example.test/gsi" },
+      },
+    });
+    const menuTrigger = parent.querySelector<HTMLButtonElement>(".menu-trigger");
+    const importButton = parent.querySelector<HTMLButtonElement>("[data-menu-item='import']");
+
+    menuTrigger?.click();
+    importButton?.click();
+    const input = parent.querySelector<HTMLTextAreaElement>("#chronomap-import-input");
+    if (input === null) throw new Error("Expected import input.");
+    input.value = "https://maps.apple.com/?ll=35.681236,139.767125&q=Tokyo";
+    parent.querySelector<HTMLButtonElement>("[data-import-action='open']")?.click();
+
+    expect(runtime.pointPicker.getPickedPoint()).toEqual({ lat: 35.681236, lng: 139.767125 });
+    expect(parent.querySelector(".point-picker-label-callout")?.textContent).toBe("Tokyo");
     runtime.destroy();
   });
 

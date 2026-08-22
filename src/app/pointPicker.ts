@@ -1,6 +1,6 @@
 import type { Map as MapLibreMap, Source } from "maplibre-gl";
 
-import { latLng } from "../security/validate";
+import { label as validateLabel, latLng } from "../security/validate";
 import { createActions } from "../state/actions";
 import type { AppState } from "../state/appState";
 import type { Store } from "../state/store";
@@ -119,11 +119,16 @@ export interface PointPickerOptions {
 
 export interface PointPickerController {
   getPickedPoint(): PickerPoint | null;
+  /** Show an externally supplied point, optionally with a text-only label callout. */
+  setPickedPoint(point: PickerPoint, label?: string): void;
   destroy(): void;
 }
 
 type PickerAction = "travelHere" | "openInMaps" | "copyCoords";
-type PickedPointGeoJson = GeoJSON.FeatureCollection<GeoJSON.Point, { kind: "picked" }>;
+type PickedPointGeoJson = GeoJSON.FeatureCollection<
+  GeoJSON.Point,
+  { kind: "picked"; label?: string }
+>;
 type GeoJsonSourceWithData = Source & {
   type: "geojson";
   setData(data: PickedPointGeoJson): void | Promise<void>;
@@ -148,15 +153,17 @@ function emptyPickedPointData(): PickedPointGeoJson {
   return { type: "FeatureCollection", features: [] };
 }
 
-function pickedPointData(point: PickerPoint | null): PickedPointGeoJson {
+function pickedPointData(point: PickerPoint | null, label: string | null): PickedPointGeoJson {
   if (point === null) return emptyPickedPointData();
 
+  const properties =
+    label === null ? { kind: "picked" as const } : { kind: "picked" as const, label };
   return {
     type: "FeatureCollection",
     features: [
       {
         type: "Feature",
-        properties: { kind: "picked" },
+        properties,
         geometry: { type: "Point", coordinates: [point.lng, point.lat] },
       },
     ],
@@ -180,6 +187,7 @@ function cameraMatches(map: MapLibreMap, target: PickerPoint & { zoom: number })
 function noOpPointPicker(): PointPickerController {
   return {
     getPickedPoint: () => null,
+    setPickedPoint: () => undefined,
     destroy: () => undefined,
   };
 }
@@ -206,7 +214,9 @@ export function mountPointPicker(
   const openHandoffMenu = options.showHandoffMenu ?? showMapHandoffMenu;
   let destroyed = false;
   let pickedPoint: PickerPoint | null = null;
+  let pickedLabel: string | null = null;
   let popover: HTMLElement | null = null;
+  let labelCallout: HTMLElement | null = null;
   let unsubscribePopoverLanguage: (() => void) | undefined;
   let handoffMenu: MapHandoffMenuController | undefined;
   let programmaticPickerRecenter: (PickerPoint & { zoom: number }) | null = null;
@@ -219,7 +229,7 @@ export function mountPointPicker(
       return;
     }
 
-    const data = pickedPointData(pickedPoint);
+    const data = pickedPointData(pickedPoint, pickedLabel);
     const source = map.getSource(PICKED_POINT_SOURCE_ID);
     if (source === undefined) {
       map.addSource(PICKED_POINT_SOURCE_ID, { type: "geojson", data });
@@ -262,11 +272,18 @@ export function mountPointPicker(
     popover = null;
   }
 
+  function destroyLabelCallout(): void {
+    labelCallout?.remove();
+    labelCallout = null;
+  }
+
   function dismissPickedPoint(): void {
     if (pickedPoint === null && popover === null) return;
     programmaticPickerRecenter = null;
     pickedPoint = null;
+    pickedLabel = null;
     destroyPopover();
+    destroyLabelCallout();
     renderPickedPoint();
   }
 
@@ -304,6 +321,29 @@ export function mountPointPicker(
     popover.style.left = `${placement.left}px`;
     popover.style.top = `${placement.top}px`;
     popover.dataset.placement = placement.side;
+  }
+
+  function renderLabelCalloutPosition(): void {
+    if (labelCallout === null || pickedPoint === null) return;
+
+    const rect = labelCallout.getBoundingClientRect();
+    const placement = calculatePopoverPlacement(
+      anchorInParent(pickedPoint),
+      {
+        width: rect.width || 160,
+        height: rect.height || 44,
+      },
+      viewportSize(),
+      MAP_SAFE_AREA,
+    );
+    labelCallout.style.left = `${placement.left}px`;
+    labelCallout.style.top = `${placement.top}px`;
+    labelCallout.dataset.placement = placement.side;
+  }
+
+  function renderOverlayPositions(): void {
+    renderPopoverPosition();
+    renderLabelCalloutPosition();
   }
 
   function locale(): AppState["ui"]["lang"] {
@@ -409,15 +449,41 @@ export function mountPointPicker(
     buttons.get("travelHere")?.focus({ preventScroll: true });
   }
 
-  function handleLongPress(lngLat: MapLngLat): void {
-    const coordinates = latLng(lngLat.lat, lngLat.lng);
+  function renderLabelCallout(): void {
+    destroyLabelCallout();
+    if (pickedPoint === null || pickedLabel === null) return;
+
+    labelCallout = el(
+      "div",
+      {
+        class: "point-picker-label-callout",
+        role: "note",
+      },
+      pickedLabel,
+    );
+    parent.append(labelCallout);
+    renderLabelCalloutPosition();
+  }
+
+  function setPickedPoint(point: PickerPoint, label?: string): void {
+    if (destroyed) return;
+    const coordinates = latLng(point.lat, point.lng);
     if (coordinates === null) return;
 
     suppressMapClickUntil = Date.now() + MAP_CLICK_SUPPRESSION_MS;
     programmaticPickerRecenter = null;
     destroyPopover();
     pickedPoint = coordinates;
+    pickedLabel = validateLabel(label);
     renderPickedPoint();
+    renderLabelCallout();
+  }
+
+  function handleLongPress(lngLat: MapLngLat): void {
+    const coordinates = latLng(lngLat.lat, lngLat.lng);
+    if (coordinates === null) return;
+
+    setPickedPoint(coordinates);
     openPopover();
   }
 
@@ -440,6 +506,7 @@ export function mountPointPicker(
   }
 
   function handleMapMove(event: unknown): void {
+    renderOverlayPositions();
     if (programmaticPickerRecenter !== null) {
       if (eventHasOriginalEvent(event)) {
         dismissPickedPoint();
@@ -458,6 +525,7 @@ export function mountPointPicker(
   }
 
   function handleMapMoveEnd(): void {
+    renderOverlayPositions();
     if (programmaticPickerRecenter !== null && cameraMatches(map, programmaticPickerRecenter)) {
       programmaticPickerRecenter = null;
     }
@@ -477,10 +545,11 @@ export function mountPointPicker(
   map.on("rollstart", handleUserGestureStart);
   document.addEventListener("pointerdown", handleDocumentPointerDown);
   document.addEventListener("keydown", handleDocumentKeyDown);
-  window.addEventListener("resize", renderPopoverPosition);
+  window.addEventListener("resize", renderOverlayPositions);
 
   return {
     getPickedPoint: () => pickedPoint,
+    setPickedPoint,
     destroy() {
       if (destroyed) return;
       destroyed = true;
@@ -497,11 +566,13 @@ export function mountPointPicker(
       map.off("rollstart", handleUserGestureStart);
       document.removeEventListener("pointerdown", handleDocumentPointerDown);
       document.removeEventListener("keydown", handleDocumentKeyDown);
-      window.removeEventListener("resize", renderPopoverPosition);
+      window.removeEventListener("resize", renderOverlayPositions);
       destroyPopover();
+      destroyLabelCallout();
       handoffMenu?.destroy();
       handoffMenu = undefined;
       pickedPoint = null;
+      pickedLabel = null;
       programmaticPickerRecenter = null;
       removePickedPointLayers();
     },
