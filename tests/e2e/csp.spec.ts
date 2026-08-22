@@ -35,7 +35,7 @@ async function readViolations(page: Page): Promise<CspViolation[]> {
 
 test.beforeEach(async ({ page }) => {
   await installViolationRecorder(page);
-  await stubUpstream(page);
+  await stubUpstream(page, { passthroughHosts: ["evil.example"] });
 });
 
 test("keeps MapLibre, overlay, slider, picker, and menu journeys violation-free", async ({
