@@ -4,6 +4,8 @@ import { createActions } from "../../../src/state/actions";
 import { createInitialState } from "../../../src/state/appState";
 import { createStore } from "../../../src/state/store";
 import { mount, type BottomSheetOptions } from "../../../src/ui/components/BottomSheet";
+import { mount as mountImportSheet } from "../../../src/ui/components/ImportSheet";
+import { initI18n } from "../../../src/ui/i18n";
 
 interface FakeHistory {
   state: unknown;
@@ -123,5 +125,41 @@ describe("BottomSheet", () => {
     expect(store.get().ui.sheet).toBe("none");
     expect(parent.querySelector("[role='dialog']")).toBeNull();
     controller.destroy();
+  });
+
+  it("preserves programmatic prefill without moving focus to the input", () => {
+    const parent = document.createElement("div");
+    const opener = document.createElement("button");
+    opener.textContent = "open";
+    document.body.append(opener, parent);
+    opener.focus();
+    const store = createStore(createInitialState(new Date(2026, 0, 1)));
+    store.set((state) => ({
+      ...state,
+      ui: {
+        ...state.ui,
+        sheet: "import",
+        importRequest: {
+          prefill: "https://maps.app.goo.gl/example",
+          reason: "shortlink",
+          autofocus: false,
+        },
+      },
+    }));
+    const i18n = initI18n(store);
+    const history = fakeHistory();
+    const controller = mount(parent, store, {
+      history: history as unknown as NonNullable<BottomSheetOptions["history"]>,
+      location: { href: "https://example.test/chronomap/" },
+      renderers: { import: (content, sheetStore) => mountImportSheet(content, sheetStore) },
+    });
+
+    expect(parent.querySelector<HTMLTextAreaElement>("textarea")?.value).toBe(
+      "https://maps.app.goo.gl/example",
+    );
+    expect(document.activeElement).toBe(opener);
+
+    controller.destroy();
+    i18n.destroy();
   });
 });

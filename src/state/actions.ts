@@ -1,6 +1,6 @@
 import { latLng, MAX_ACCURACY_METERS, opacity, year, zoom } from "../security/validate";
 import type { Poi } from "../providers/poi/types";
-import type { AppState } from "./appState";
+import type { AppState, ImportFailureReason, ImportSheetRequest } from "./appState";
 import { POI_MAX } from "./appState";
 import type { Store } from "./store";
 
@@ -18,9 +18,28 @@ export interface AppActions {
   setGeoStatus(status: AppState["geo"]["status"]): void;
   setFix(fix: NonNullable<AppState["geo"]["fix"]> | null): void;
   openSheet(sheet: Exclude<AppState["ui"]["sheet"], "none">): void;
+  openImportSheet(options?: OpenImportSheetOptions): void;
   closeSheet(): void;
   showToast(kind: "info" | "error", text: string): void;
   setLang(lang: AppState["ui"]["lang"]): void;
+}
+
+export interface OpenImportSheetOptions {
+  readonly prefill?: string;
+  readonly reason?: ImportFailureReason | null;
+  readonly autofocus?: boolean;
+}
+
+const IMPORT_INPUT_LIMIT = 4_096;
+
+function importRequest(options: OpenImportSheetOptions = {}): ImportSheetRequest {
+  const prefill = typeof options.prefill === "string" ? options.prefill : "";
+  const reason = options.reason ?? null;
+  return {
+    prefill: prefill.slice(0, IMPORT_INPUT_LIMIT),
+    reason,
+    autofocus: options.autofocus ?? true,
+  };
 }
 
 export function createActions(store: Store<AppState>): AppActions {
@@ -106,10 +125,27 @@ export function createActions(store: Store<AppState>): AppActions {
       }));
     },
     openSheet(sheet) {
-      store.set((state) => ({ ...state, ui: { ...state.ui, sheet } }));
+      store.set((state) => ({
+        ...state,
+        ui: {
+          ...state.ui,
+          sheet,
+          importRequest: sheet === "import" ? (state.ui.importRequest ?? importRequest()) : null,
+        },
+      }));
+    },
+    openImportSheet(options = {}) {
+      const request = importRequest(options);
+      store.set((state) => ({
+        ...state,
+        ui: { ...state.ui, sheet: "import", importRequest: request },
+      }));
     },
     closeSheet() {
-      store.set((state) => ({ ...state, ui: { ...state.ui, sheet: "none" } }));
+      store.set((state) => ({
+        ...state,
+        ui: { ...state.ui, sheet: "none", importRequest: null },
+      }));
     },
     showToast(kind, text) {
       store.set((state) => ({

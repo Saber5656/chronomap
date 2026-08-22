@@ -32,6 +32,7 @@ import "./ui/components/CoverageBanner.css";
 import "./ui/components/TimeSlider.css";
 import "./ui/components/OpacityControl.css";
 import "./ui/components/BottomSheet.css";
+import "./ui/components/ImportSheet.css";
 import "./ui/components/LayerInfoBadge.css";
 import "./ui/components/LayersSheet.css";
 

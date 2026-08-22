@@ -14,6 +14,21 @@
   pointer-events: auto;
 }
 
+.point-picker-label-callout {
+  position: absolute;
+  z-index: var(--z-sheet);
+  max-width: min(18rem, calc(100vw - 1.5rem));
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgb(23 32 42 / 18%);
+  border-radius: 0.625rem;
+  background: var(--color-bg);
+  box-shadow: var(--shadow);
+  color: var(--color-text);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  pointer-events: none;
+}
+
 .point-picker-popover__item {
   min-width: 0;
   min-height: 44px;
