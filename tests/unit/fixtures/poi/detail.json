@@ -1,0 +1,7 @@
+{
+  "extract": "Tokyo Station is a railway station in Tokyo, Japan.",
+  "thumbnailUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/example.jpg",
+  "pageUrl": "https://ja.wikipedia.org/wiki/%E6%9D%B1%E4%BA%AC%E9%A7%85",
+  "attributionKey": "wikipedia-ccbysa",
+  "extract_html": "<script>alert('ignored')</script>"
+}

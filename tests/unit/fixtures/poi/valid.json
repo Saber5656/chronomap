@@ -1,0 +1,36 @@
+[
+  {
+    "id": "wikipedia-ja:12345",
+    "title": " 東京駅 ",
+    "lat": 35.6812367,
+    "lng": 139.7671254,
+    "distanceM": 12.5,
+    "source": {
+      "provider": "wikipedia",
+      "lang": "ja",
+      "url": "https://ja.wikipedia.org/wiki/%E6%9D%B1%E4%BA%AC%E9%A7%85"
+    }
+  },
+  {
+    "id": "wikipedia-en:67890",
+    "title": "Tokyo Station",
+    "lat": 35.681236,
+    "lng": 139.767125,
+    "source": {
+      "provider": "wikipedia",
+      "lang": "en",
+      "url": "https://en.wikipedia.org/wiki/Tokyo_Station"
+    }
+  },
+  {
+    "id": "commons:98765",
+    "title": "Old station photograph",
+    "lat": 35.681236,
+    "lng": 139.767125,
+    "source": {
+      "provider": "commons",
+      "lang": "en",
+      "url": "https://commons.wikimedia.org/wiki/File:Station.jpg"
+    }
+  }
+]

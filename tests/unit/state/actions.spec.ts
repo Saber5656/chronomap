@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { createActions } from "../../../src/state/actions";
-import { createInitialState, type Poi } from "../../../src/state/appState";
+import type { Poi } from "../../../src/providers/poi/types";
+import { createInitialState } from "../../../src/state/appState";
 import { createStore } from "../../../src/state/store";
 
 function setup() {

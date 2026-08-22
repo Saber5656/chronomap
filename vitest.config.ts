@@ -21,6 +21,7 @@ export default defineConfig({
         "src/security/validate.ts",
         "src/state/urlState.ts",
         "src/integrations/parseSharedLocation.ts",
+        "src/providers/poi/**/*.ts",
       ],
       thresholds: {
         statements: 80,
@@ -50,6 +51,12 @@ export default defineConfig({
           branches: 100,
           functions: 100,
           lines: 100,
+        },
+        "src/providers/poi/guards.ts": {
+          statements: 95,
+          branches: 95,
+          functions: 95,
+          lines: 95,
         },
       },
     },

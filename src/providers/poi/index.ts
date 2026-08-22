@@ -1,2 +1,3 @@
-/** Placeholder for DESIGN §4.1 provider POI ownership. */
-export {};
+export { assertPoi, assertPoiDetail, guardPois } from "./guards";
+export type { GuardedPois } from "./guards";
+export type { Poi, PoiDetail, PoiProvider, PoiProviderError } from "./types";
