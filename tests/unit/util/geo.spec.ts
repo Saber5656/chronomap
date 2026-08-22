@@ -1,10 +1,23 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  bboxIntersects,
   haversineMeters,
   metersToPixelsAtLat,
   viewportDiagonalMeters,
 } from "../../../src/util/geo";
+
+describe("bboxIntersects", () => {
+  it("detects overlap and shared edges", () => {
+    expect(bboxIntersects([0, 0, 2, 2], [1, 1, 3, 3])).toBe(true);
+    expect(bboxIntersects([0, 0, 1, 1], [1, 1, 2, 2])).toBe(true);
+  });
+
+  it("rejects boxes separated on either axis", () => {
+    expect(bboxIntersects([0, 0, 1, 1], [2, 0, 3, 1])).toBe(false);
+    expect(bboxIntersects([0, 0, 1, 1], [0, 2, 1, 3])).toBe(false);
+  });
+});
 
 describe("haversineMeters", () => {
   it("measures the Tokyo Station to Shin-Osaka distance within one percent", () => {

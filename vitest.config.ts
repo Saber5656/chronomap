@@ -10,6 +10,7 @@ export default defineConfig({
       reporter: ["text", "lcov"],
       include: [
         "src/util/**/*.ts",
+        "src/providers/layers/resolve.ts",
         "src/state/store.ts",
         "src/security/validate.ts",
         "src/state/urlState.ts",
@@ -33,6 +34,12 @@ export default defineConfig({
           lines: 95,
         },
         "src/integrations/parseSharedLocation.ts": {
+          statements: 100,
+          branches: 100,
+          functions: 100,
+          lines: 100,
+        },
+        "src/providers/layers/resolve.ts": {
           statements: 100,
           branches: 100,
           functions: 100,

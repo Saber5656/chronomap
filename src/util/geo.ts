@@ -35,6 +35,14 @@ export function viewportDiagonalMeters(bbox: BoundingBox): number {
   return haversineMeters({ lat: south, lng: west }, { lat: north, lng: east });
 }
 
+/** Returns whether two non-antimeridian bounding boxes overlap or touch. */
+export function bboxIntersects(a: BoundingBox, b: BoundingBox): boolean {
+  const [aWest, aSouth, aEast, aNorth] = a;
+  const [bWest, bSouth, bEast, bNorth] = b;
+
+  return aWest <= bEast && aEast >= bWest && aSouth <= bNorth && aNorth >= bSouth;
+}
+
 export function metersToPixelsAtLat(meters: number, latitude: number, zoom: number): number {
   const earthCircumference = 2 * Math.PI * WEB_MERCATOR_RADIUS_METERS;
   const groundResolution =
