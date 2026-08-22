@@ -41,9 +41,7 @@ test("renders the year range, ARIA state, and keyboard era navigation", async ({
   await expect(slider).toHaveAttribute("aria-valuenow", "1890");
   // Tokyo has a later spatially covered era, so the resolver reports an honest nearest-era snap
   // rather than `no-coverage`; the no-coverage branch is covered by the component unit test.
-  await expect
-    .poll(async () => (await readState(page)).timeLayer.resolution.reason)
-    .toBe("ok");
+  await expect.poll(async () => (await readState(page)).timeLayer.resolution.reason).toBe("ok");
 
   await slider.press("PageUp");
   await expect(slider).toHaveAttribute("aria-valuenow", "1928");
