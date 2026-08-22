@@ -22,10 +22,10 @@ export interface WikipediaSummaryFetchOptions {
 class WikipediaSummaryException extends Error implements PoiProviderError {
   readonly kind: PoiProviderError["kind"];
 
-  constructor() {
-    super("malformed");
+  constructor(kind: PoiProviderError["kind"]) {
+    super(kind);
     this.name = "PoiProviderError";
-    this.kind = "malformed";
+    this.kind = kind;
   }
 }
 
@@ -34,7 +34,11 @@ function isRecord(value: unknown): value is UnknownRecord {
 }
 
 function malformedError(): WikipediaSummaryException {
-  return new WikipediaSummaryException();
+  return new WikipediaSummaryException("malformed");
+}
+
+function abortedError(): WikipediaSummaryException {
+  return new WikipediaSummaryException("aborted");
 }
 
 function pageHosts(lang: WikipediaLanguage): ReadonlySet<string> {
@@ -55,6 +59,32 @@ function buildSummaryUrl(lang: WikipediaLanguage, title: string): URL {
     // instead of leaking a raw URIError from untrusted GeoSearch data.
     throw malformedError();
   }
+}
+
+async function awaitWithAbort<T>(promise: Promise<T>, signal: AbortSignal | undefined): Promise<T> {
+  if (signal === undefined) return promise;
+  if (signal.aborted) throw abortedError();
+
+  return new Promise<T>((resolve, reject) => {
+    const cleanup = (): void => signal.removeEventListener("abort", handleAbort);
+    const handleAbort = (): void => {
+      cleanup();
+      reject(abortedError());
+    };
+
+    signal.addEventListener("abort", handleAbort, { once: true });
+    void promise.then(
+      (value) => {
+        cleanup();
+        if (signal.aborted) reject(abortedError());
+        else resolve(value);
+      },
+      (error: unknown) => {
+        cleanup();
+        reject(error instanceof Error ? error : new Error("Wikipedia summary request failed."));
+      },
+    );
+  });
 }
 
 function summaryCacheKey(lang: WikipediaLanguage, title: string): string {
@@ -94,10 +124,9 @@ export async function fetchPoiDetail(
   }
 
   const lang = poi.source.lang;
-  const response = await cachedFetch(
-    summaryCacheKey(lang, poi.title),
-    buildSummaryUrl(lang, poi.title),
-    opts,
+  const response = await awaitWithAbort(
+    cachedFetch(summaryCacheKey(lang, poi.title), buildSummaryUrl(lang, poi.title), opts),
+    opts.signal,
   );
   return detailFromSummary(response, poi, lang);
 }

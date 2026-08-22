@@ -227,6 +227,37 @@ describe("fetchPoiDetail", () => {
     expect(fetchImpl).toHaveBeenCalledOnce();
   });
 
+  it("honors a caller abort when a cached response is already available", async () => {
+    const fetchImpl = stubFetch(summary);
+    await fetchPoiDetail(poi(), { fetchImpl });
+
+    const controller = new AbortController();
+    const pending = fetchPoiDetail(poi(), { fetchImpl, signal: controller.signal });
+    controller.abort();
+
+    await expect(pending).rejects.toMatchObject({ kind: "aborted" });
+    expect(fetchImpl).toHaveBeenCalledOnce();
+  });
+
+  it("honors a caller abort while joining an in-flight cached response", async () => {
+    let resolveResponse: ((value: Response) => void) | undefined;
+    const fetchImpl = vi.fn<typeof fetch>().mockImplementation(
+      () =>
+        new Promise<Response>((resolve) => {
+          resolveResponse = resolve;
+        }),
+    );
+    const first = fetchPoiDetail(poi(), { fetchImpl });
+    const controller = new AbortController();
+    const second = fetchPoiDetail(poi(), { fetchImpl, signal: controller.signal });
+    controller.abort();
+    resolveResponse?.(response(summary));
+
+    await expect(first).resolves.toBeDefined();
+    await expect(second).rejects.toMatchObject({ kind: "aborted" });
+    expect(fetchImpl).toHaveBeenCalledOnce();
+  });
+
   it("exports the detail API from the provider barrel", () => {
     expect(fetchPoiDetail).toBe(directFetchPoiDetail);
   });
