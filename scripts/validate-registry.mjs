@@ -12,7 +12,11 @@ const defaultSchemaPath = resolve(defaultRegistryDirectory, "registry.schema.jso
 const idPattern = /^[a-z0-9-]{1,64}$/;
 const regionPattern = /^(?:[A-Z]{2}|GLOBAL)$/;
 const konjakuHost = "ktgis.net";
+const konjakuProvider = "konjaku";
+const konjakuRegion = "JP";
 const konjakuFeatureFlag = "VITE_ENABLE_KONJAKU";
+const konjakuAttribution = "今昔マップ on the web";
+const konjakuLicense = "Provider terms / permission required";
 
 function error(file, index, field, reason) {
   return { file, index, field, reason };
@@ -44,6 +48,16 @@ function hostname(value) {
     return new URL(value).hostname;
   } catch {
     return null;
+  }
+}
+
+function isKonjakuTiles(value) {
+  if (!isRecord(value) || typeof value.urlTemplate !== "string") return false;
+  try {
+    const url = new URL(value.urlTemplate);
+    return url.hostname === konjakuHost && url.pathname.startsWith("/kjmapw/kjtilemap/");
+  } catch {
+    return false;
   }
 }
 
@@ -131,6 +145,7 @@ function validateEntry(entry, file, index, allowedHosts, currentYear) {
   if (!isRecord(entry)) {
     return { errors: [error(file, index, "entry", "must be an object")], id: null };
   }
+  const isKonjakuTilesEntry = isKonjakuTiles(entry.tiles);
 
   const entryKeys = new Set([
     "id",
@@ -153,7 +168,15 @@ function validateEntry(entry, file, index, allowedHosts, currentYear) {
   if (entry.type !== "raster-era" && entry.type !== "vector-dated") {
     errors.push(error(file, index, "type", "must be raster-era or vector-dated"));
   }
+  if (isKonjakuTilesEntry && entry.type !== "raster-era") {
+    errors.push(error(file, index, "type", konjakuHost + " tiles must use the raster-era type"));
+  }
   if (!isNonBlank(entry.provider)) errors.push(error(file, index, "provider", "must be non-blank"));
+  if (isKonjakuTilesEntry && entry.provider !== konjakuProvider) {
+    errors.push(
+      error(file, index, "provider", konjakuHost + " tiles must use provider " + konjakuProvider),
+    );
+  }
 
   if (!isRecord(entry.title)) {
     errors.push(error(file, index, "title", "must be an object"));
@@ -182,6 +205,11 @@ function validateEntry(entry, file, index, allowedHosts, currentYear) {
 
   if (typeof entry.region !== "string" || !regionPattern.test(entry.region)) {
     errors.push(error(file, index, "region", "must be GLOBAL or an uppercase ISO alpha-2 code"));
+  }
+  if (isKonjakuTilesEntry && entry.region !== konjakuRegion) {
+    errors.push(
+      error(file, index, "region", konjakuHost + " tiles must use region " + konjakuRegion),
+    );
   }
 
   if (!Array.isArray(entry.coverage) || entry.coverage.length === 0) {
@@ -241,6 +269,11 @@ function validateEntry(entry, file, index, allowedHosts, currentYear) {
     if (entry.tiles.scheme !== "xyz" && entry.tiles.scheme !== "tms") {
       errors.push(error(file, index, "tiles.scheme", "must be xyz or tms"));
     }
+    if (hostname(entry.tiles.urlTemplate) === konjakuHost && entry.tiles.scheme !== "tms") {
+      errors.push(
+        error(file, index, "tiles.scheme", `${konjakuHost} tiles must use the tms scheme`),
+      );
+    }
     if (
       !Number.isInteger(entry.tiles.minzoom) ||
       entry.tiles.minzoom < 0 ||
@@ -285,6 +318,16 @@ function validateEntry(entry, file, index, allowedHosts, currentYear) {
     if (!isNonBlank(entry.attribution.text)) {
       errors.push(error(file, index, "attribution.text", "must be non-blank"));
     }
+    if (isKonjakuTilesEntry && entry.attribution.text !== konjakuAttribution) {
+      errors.push(
+        error(
+          file,
+          index,
+          "attribution.text",
+          konjakuHost + " tiles must use the required attribution text",
+        ),
+      );
+    }
     if (entry.attribution.url !== undefined) {
       checkHttpsUrl(errors, file, index, "attribution.url", entry.attribution.url);
     }
@@ -309,6 +352,16 @@ function validateEntry(entry, file, index, allowedHosts, currentYear) {
       );
       if (!isNonBlank(entry.attribution.license.name)) {
         errors.push(error(file, index, "attribution.license.name", "must be non-blank"));
+      }
+      if (isKonjakuTilesEntry && entry.attribution.license.name !== konjakuLicense) {
+        errors.push(
+          error(
+            file,
+            index,
+            "attribution.license.name",
+            konjakuHost + " tiles must use the provider-terms label",
+          ),
+        );
       }
       if (entry.attribution.license.url !== undefined) {
         checkHttpsUrl(
@@ -343,6 +396,16 @@ function validateEntry(entry, file, index, allowedHosts, currentYear) {
     );
     if (typeof entry.flags.experimental !== "boolean") {
       errors.push(error(file, index, "flags.experimental", "must be a boolean"));
+    }
+    if (isKonjakuTilesEntry && entry.flags.experimental !== true) {
+      errors.push(
+        error(
+          file,
+          index,
+          "flags.experimental",
+          konjakuHost + " tiles must be marked experimental",
+        ),
+      );
     }
     if (!(
       entry.flags.requiresFeatureFlag === null || isNonBlank(entry.flags.requiresFeatureFlag)

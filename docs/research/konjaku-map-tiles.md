@@ -42,6 +42,59 @@ No explicit CC license is stated on the tile service page. Therefore:
 | CORS / hotlink policy unverified | Tiles may fail in browser | Verification step inside issue 16 before flag-ON request; raster tiles are loaded as images (no CORS needed for display, only for canvas readback which we do not do) |
 | Era identifiers not machine-readable | Manual transcription errors | Issue 16 acceptance criteria include a full manual cross-check of all selected region era identifiers and year ranges against the service page, plus sample tile probes |
 
+## 5. Issue #17 implementation cross-check (2026-08-23)
+
+The following table was manually cross-checked against the region tables on the official
+[tile map service page](https://ktgis.net/kjmapw/tilemapservice.html). A single-year label on the
+source page is represented as an inclusive {from, to} pair with the same year. Registry URLs
+use {y} plus scheme: "tms"; the source page's {-y} notation is not copied into the registry.
+
+| Region | Dataset | Printed years | Era folder | Registry ID |
+|---|---|---:|---|---|
+| Tokyo | tokyo50 | 1896–1909 | 2man | konjaku-tokyo50-1896 |
+| Tokyo | tokyo50 | 1917–1924 | 00 | konjaku-tokyo50-1917 |
+| Tokyo | tokyo50 | 1927–1939 | 01 | konjaku-tokyo50-1927 |
+| Tokyo | tokyo50 | 1944–1954 | 02 | konjaku-tokyo50-1944 |
+| Tokyo | tokyo50 | 1965–1968 | 03 | konjaku-tokyo50-1965 |
+| Tokyo | tokyo50 | 1975–1978 | 04 | konjaku-tokyo50-1975 |
+| Tokyo | tokyo50 | 1983–1987 | 05 | konjaku-tokyo50-1983 |
+| Tokyo | tokyo50 | 1992–1995 | 06 | konjaku-tokyo50-1992 |
+| Tokyo | tokyo50 | 1998–2005 | 07 | konjaku-tokyo50-1998 |
+| Chukyo | chukyo | 1888–1898 | 2man | konjaku-chukyo-1888 |
+| Chukyo | chukyo | 1920 | 00 | konjaku-chukyo-1920 |
+| Chukyo | chukyo | 1932 | 01 | konjaku-chukyo-1932 |
+| Chukyo | chukyo | 1937–1938 | 02 | konjaku-chukyo-1937 |
+| Chukyo | chukyo | 1947 | 03 | konjaku-chukyo-1947 |
+| Chukyo | chukyo | 1959–1960 | 04 | konjaku-chukyo-1959 |
+| Chukyo | chukyo | 1968–1973 | 05 | konjaku-chukyo-1968 |
+| Chukyo | chukyo | 1976–1980 | 06 | konjaku-chukyo-1976 |
+| Chukyo | chukyo | 1984–1989 | 07 | konjaku-chukyo-1984 |
+| Chukyo | chukyo | 1992–1996 | 08 | konjaku-chukyo-1992 |
+| Keihanshin | keihansin | 1892–1910 | 2man | konjaku-keihansin-1892 |
+| Keihanshin | keihansin | 1922–1923 | 00 | konjaku-keihansin-1922 |
+| Keihanshin | keihansin | 1927–1935 | 01 | konjaku-keihansin-1927 |
+| Keihanshin | keihansin | 1947–1950 | 02 | konjaku-keihansin-1947 |
+| Keihanshin | keihansin | 1954–1956 | 03 | konjaku-keihansin-1954 |
+| Keihanshin | keihansin | 1961–1964 | 03x | konjaku-keihansin-1961 |
+| Keihanshin | keihansin | 1967–1970 | 04 | konjaku-keihansin-1967 |
+| Keihanshin | keihansin | 1975–1979 | 05 | konjaku-keihansin-1975 |
+| Keihanshin | keihansin | 1983–1988 | 06 | konjaku-keihansin-1983 |
+| Keihanshin | keihansin | 1993–1997 | 07 | konjaku-keihansin-1993 |
+
+Representative z14 requests for the first 2man era in each dataset returned
+200 image/png for three neighboring tile coordinates per dataset on 2026-08-23:
+
+| Dataset | TMS rows sampled | Result |
+|---|---|---|
+| tokyo50 | (14552,9932), (14553,9932), (14552,9931) | 3/3 PNG responses |
+| chukyo | (14422,9903), (14423,9903), (14422,9902) | 3/3 PNG responses |
+| keihansin | (14358,9877), (14359,9877), (14358,9876) | 3/3 PNG responses |
+
+These HTTP probes verify that the published paths serve image tiles; they do not establish
+permission for public use or replace a browser overlay alignment check. This repository revision
+does not yet contain an overlay manager or browser test harness for the requested screenshot and
+URL-row e2e assertion, so that visual gate remains pending until that downstream integration exists.
+
 ## Sources
 
 - https://ktgis.net/kjmapw/tilemapservice.html (fetched 2026-07-07)
