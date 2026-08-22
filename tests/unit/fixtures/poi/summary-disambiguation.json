@@ -1,0 +1,10 @@
+{
+  "type": "disambiguation",
+  "title": "Mercury",
+  "extract": "Mercury may refer to several subjects, including a planet and an element.",
+  "content_urls": {
+    "desktop": {
+      "page": "https://en.wikipedia.org/wiki/Mercury"
+    }
+  }
+}

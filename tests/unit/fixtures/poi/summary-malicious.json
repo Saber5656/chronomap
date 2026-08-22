@@ -1,0 +1,14 @@
+{
+  "type": "standard",
+  "title": "Unsafe article",
+  "extract": "<script>alert('not executable')</script> This remains plain text.",
+  "extract_html": "<script>alert('must be ignored')</script>",
+  "thumbnail": {
+    "source": "https://evil.example/tracking.png"
+  },
+  "content_urls": {
+    "desktop": {
+      "page": "https://evil.example/redirect"
+    }
+  }
+}
