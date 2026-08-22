@@ -21,6 +21,11 @@ function truncateCodePoints(value: string, limit: number): string {
   return codePoints.length <= limit ? value : codePoints.slice(0, limit).join("");
 }
 
+function roundCoordinate(value: number): number {
+  const rounded = Math.round(value * 1_000_000) / 1_000_000;
+  return Object.is(rounded, -0) ? 0 : rounded;
+}
+
 export function finiteInRange(value: unknown, min: number, max: number): number | null {
   if (
     typeof value !== "number" ||
@@ -50,6 +55,41 @@ export function latLng(lat: unknown, lng: unknown): { lat: number; lng: number }
     lat: Math.round(validatedLat * 1_000_000) / 1_000_000,
     lng: Math.round(validatedLng * 1_000_000) / 1_000_000,
   };
+}
+
+/**
+ * Validate coordinates that must never be silently clamped, such as outbound URLs.
+ * Boundary parsers use `latLng` above because their contract is to clamp out-of-range values.
+ */
+export function assertLatLng(lat: number, lng: number): { lat: number; lng: number } {
+  if (
+    typeof lat !== "number" ||
+    !Number.isFinite(lat) ||
+    lat < -90 ||
+    lat > 90 ||
+    typeof lng !== "number" ||
+    !Number.isFinite(lng) ||
+    lng < -180 ||
+    lng > 180
+  ) {
+    throw new RangeError("Latitude and longitude must be finite and within their valid ranges.");
+  }
+
+  return { lat: roundCoordinate(lat), lng: roundCoordinate(lng) };
+}
+
+/** Validate a store-compatible integer zoom without clamping programmer errors. */
+export function assertIntegerZoom(value: number): number {
+  if (
+    typeof value !== "number" ||
+    !Number.isInteger(value) ||
+    value < ZOOM_MIN ||
+    value > ZOOM_MAX
+  ) {
+    throw new RangeError(`Zoom must be an integer between ${ZOOM_MIN} and ${ZOOM_MAX}.`);
+  }
+
+  return value;
 }
 
 export function zoom(value: unknown): number | null {

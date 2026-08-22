@@ -3,6 +3,7 @@ import { createMap, type MapController } from "../map/mapController";
 import { createInitialState, type AppState } from "../state/appState";
 import { createStore, type Store } from "../state/store";
 import { mountMenuButton } from "../ui/components/MenuButton";
+import { showMapHandoffMenu, type MapHandoffMenuController } from "../ui/components/MapHandoffMenu";
 import { mount as mountToast } from "../ui/components/Toast";
 import { initI18n } from "../ui/i18n";
 
@@ -45,18 +46,32 @@ export function bootstrap(
   );
   const toast = (options.mountToast ?? mountToast)(shell.getSlot("toast-host"), store);
   const mapController = createMap(shell.getSlot("map"), store);
+  let handoffMenu: MapHandoffMenuController | undefined;
+  const unsubscribeLongPress = mapController.onLongPress?.(({ lat, lng }) => {
+    handoffMenu?.destroy();
+    handoffMenu = showMapHandoffMenu(lat, lng, {
+      parent: shell.getSlot("map-region"),
+      store,
+      zoom: Math.round(mapController.getMap().getZoom()),
+      onClose: () => {
+        handoffMenu = undefined;
+      },
+    });
+  });
+  options.afterMap?.({ store, shell, mapController });
   const locateButton = options.mountLocateButton?.(
     shell.getSlot("LocateButton"),
     store,
     mapController,
   );
-  options.afterMap?.({ store, shell, mapController });
 
   return {
     store,
     shell,
     mapController,
     destroy() {
+      unsubscribeLongPress?.();
+      handoffMenu?.destroy();
       mapController.destroy();
       menuButton.destroy();
       toast.destroy();

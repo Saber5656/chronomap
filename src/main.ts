@@ -11,6 +11,7 @@ import { initUrlSync } from "./state/urlSync";
 import gsiLayers from "./providers/layers/gsi.layers.json";
 import { mountLocateButton, mountMenuButton, mountToast } from "./ui/components";
 import "./ui/styles/base.css";
+import "./ui/components/MapHandoffMenu.css";
 import "./ui/components/MenuButton.css";
 import "./ui/components/Toast.css";
 
