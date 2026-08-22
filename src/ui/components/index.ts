@@ -1,4 +1,5 @@
 export { mount as mountLocateButton } from "./LocateButton";
+export { mount as mountOpacityControl } from "./OpacityControl";
 export { mount as mountToast } from "./Toast";
 export { showMapHandoffMenu } from "./MapHandoffMenu";
 export type { MapHandoffMenuController, MapHandoffMenuOptions } from "./MapHandoffMenu";
@@ -23,3 +24,13 @@ export {
   TIME_SLIDER_SETTLE_DEBOUNCE_MS,
 } from "./TimeSlider";
 export type { TimeSliderController, TimeSliderOptions } from "./TimeSlider";
+export {
+  cycleOpacityPercent,
+  exceedsOpacityLongPressMoveThreshold,
+  hasOpacityLongPressElapsed,
+  opacityPercent,
+  OPACITY_LONG_PRESS_MOVE_THRESHOLD_PX,
+  OPACITY_LONG_PRESS_MS,
+  OPACITY_SLIDER_STEP_PERCENT,
+} from "./OpacityControl";
+export type { OpacityControlController, OpacityControlOptions } from "./OpacityControl";

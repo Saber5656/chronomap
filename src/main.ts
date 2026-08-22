@@ -12,13 +12,20 @@ import { YEAR_MIN, type AppState } from "./state/appState";
 import { initUrlSync } from "./state/urlSync";
 import gsiLayers from "./providers/layers/gsi.layers.json";
 import type { LayerEntry } from "./providers/layers/types";
-import { mountLocateButton, mountMenuButton, mountTimeSlider, mountToast } from "./ui/components";
+import {
+  mountLocateButton,
+  mountMenuButton,
+  mountOpacityControl,
+  mountTimeSlider,
+  mountToast,
+} from "./ui/components";
 import "./ui/styles/base.css";
 import "./app/pointPicker.css";
 import "./ui/components/MapHandoffMenu.css";
 import "./ui/components/MenuButton.css";
 import "./ui/components/Toast.css";
 import "./ui/components/TimeSlider.css";
+import "./ui/components/OpacityControl.css";
 
 interface ChronomapDebugHook {
   getState(): Readonly<AppState>;
@@ -70,6 +77,7 @@ const runtime = bootstrap(app, now, {
   mountToast,
   mountTimeSlider: (parent, store) =>
     mountTimeSlider(parent, store, { registry: layerRegistry, currentYear, now }),
+  mountOpacityControl: (parent, store) => mountOpacityControl(parent, store),
   afterMap: ({ mapController }) => {
     urlSync?.connectIdle((callback) => {
       const map = mapController.getMap();

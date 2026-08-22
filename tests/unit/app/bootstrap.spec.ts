@@ -98,4 +98,20 @@ describe("production bootstrap", () => {
     runtime.destroy();
     expect(locateDestroy).toHaveBeenCalledOnce();
   });
+
+  it("mounts and tears down the optional opacity controller in its shell slot", () => {
+    const parent = document.createElement("div");
+    const opacityDestroy = vi.fn();
+    const mountOpacityControl = vi.fn((slot: HTMLElement) => {
+      slot.dataset.opacityMounted = "true";
+      return { destroy: opacityDestroy };
+    });
+    const runtime = bootstrap(parent, new Date(2026, 0, 1), { mountOpacityControl });
+
+    expect(mountOpacityControl).toHaveBeenCalledOnce();
+    expect(runtime.shell.getSlot("OpacityControl").dataset.opacityMounted).toBe("true");
+
+    runtime.destroy();
+    expect(opacityDestroy).toHaveBeenCalledOnce();
+  });
 });
