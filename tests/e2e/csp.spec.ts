@@ -47,9 +47,7 @@ test("keeps MapLibre, overlay, slider, picker, and menu journeys violation-free"
   const slider = page.locator("[role='slider']");
   const initialYear = await slider.getAttribute("aria-valuenow");
   await slider.press("PageUp");
-  await expect
-    .poll(async () => slider.getAttribute("aria-valuenow"))
-    .not.toBe(initialYear);
+  await expect.poll(async () => slider.getAttribute("aria-valuenow")).not.toBe(initialYear);
   await page.locator(".menu-trigger").click();
   await expect(page.locator(".menu-popover")).toBeVisible();
   await page.keyboard.press("Escape");
@@ -65,8 +63,19 @@ test("blocks injected images and cross-origin fetches to an evil host", async ({
   const result = await page.evaluate(async () => {
     const image = document.createElement("img");
     image.alt = "CSP negative test";
-    image.src = "https://evil.example/x.png";
+    const imageBlocked = new Promise<boolean>((resolve) => {
+      const timeout = window.setTimeout(() => resolve(true), 250);
+      image.onload = () => {
+        window.clearTimeout(timeout);
+        resolve(false);
+      };
+      image.onerror = () => {
+        window.clearTimeout(timeout);
+        resolve(true);
+      };
+    });
     document.body.append(image);
+    image.src = "https://evil.example/x.png";
 
     let fetchRejected = false;
     try {
@@ -75,19 +84,25 @@ test("blocks injected images and cross-origin fetches to an evil host", async ({
       fetchRejected = true;
     }
 
-    await new Promise((resolve) => window.setTimeout(resolve, 100));
+    const blockedImage = await imageBlocked;
     return {
+      blockedImage,
       fetchRejected,
       violations: (window as CspWindow).__chronomapCspViolations ?? [],
     };
   });
 
+  expect(result.blockedImage).toBe(true);
   expect(result.fetchRejected).toBe(true);
   expect(result.violations).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
         blockedURI: expect.stringContaining("evil.example"),
-        effectiveDirective: expect.stringMatching(/^(connect-src|img-src)$/u),
+        effectiveDirective: "img-src",
+      }),
+      expect.objectContaining({
+        blockedURI: expect.stringContaining("evil.example"),
+        effectiveDirective: "connect-src",
       }),
     ]),
   );
