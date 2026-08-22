@@ -144,11 +144,19 @@ export function mountMenuButton(
   const menu = el("ul", { id: menuId, class: "menu-popover", role: "menu" });
   const shareItem = el("li", { role: "none" });
   const shareButton = el("button", { type: "button", role: "menuitem", class: "menu-item" });
+  const importItem = el("li", { role: "none" });
+  const importButton = el("button", {
+    type: "button",
+    role: "menuitem",
+    class: "menu-item",
+    "data-menu-item": "import",
+  });
   const languageItem = createLanguageToggleItem(store);
   const languageItemContainer = el("li", { role: "none" });
   shareItem.append(shareButton);
+  importItem.append(importButton);
   languageItemContainer.append(languageItem.element);
-  menu.append(shareItem, languageItemContainer);
+  menu.append(shareItem, importItem, languageItemContainer);
   menu.hidden = true;
   root.append(button, menu);
   parent.append(root);
@@ -165,6 +173,7 @@ export function mountMenuButton(
   function render(locale: Locale): void {
     button.setAttribute("aria-label", t("menu.aria", {}, locale));
     shareButton.textContent = t("menu.share", {}, locale);
+    importButton.textContent = t("menu.import", {}, locale);
   }
 
   async function handleShare(): Promise<void> {
@@ -194,6 +203,12 @@ export function mountMenuButton(
     void handleShare();
   }
 
+  function handleImportClick(): void {
+    button.focus();
+    setOpen(false);
+    actions.openImportSheet({ autofocus: true });
+  }
+
   function handleDocumentOutside(event: Event): void {
     if (open && !root.contains(event.target as Node)) setOpen(false);
   }
@@ -210,6 +225,7 @@ export function mountMenuButton(
   render(store.get().ui.lang);
   button.addEventListener("click", handleButtonClick);
   shareButton.addEventListener("click", handleShareClick);
+  importButton.addEventListener("click", handleImportClick);
   document.addEventListener("pointerdown", handleDocumentOutside);
   document.addEventListener("click", handleDocumentOutside);
   document.addEventListener("keydown", handleKeyDown);
@@ -222,6 +238,7 @@ export function mountMenuButton(
       languageItem.destroy();
       button.removeEventListener("click", handleButtonClick);
       shareButton.removeEventListener("click", handleShareClick);
+      importButton.removeEventListener("click", handleImportClick);
       document.removeEventListener("pointerdown", handleDocumentOutside);
       document.removeEventListener("click", handleDocumentOutside);
       document.removeEventListener("keydown", handleKeyDown);

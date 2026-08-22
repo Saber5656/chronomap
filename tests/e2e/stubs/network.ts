@@ -9,6 +9,8 @@ const THUMBNAIL_FIXTURE_PATH = new URL("./thumbnail.png", import.meta.url).pathn
 const TILE_HOSTS = new Set(["cyberjapandata.gsi.go.jp", "ktgis.net"]);
 const UPLOAD_HOST = "upload.wikimedia.org";
 const COMMONS_HOST = "commons.wikimedia.org";
+const ONBOARDING_STORAGE_KEY = "chronomap.onboarded";
+const ONBOARDING_COMPLETE_VALUE = "1";
 
 const CORS_HEADERS = {
   "access-control-allow-origin": "*",
@@ -24,6 +26,8 @@ export type MissingTile =
 
 export interface StubUpstreamOptions {
   readonly missing?: readonly MissingTile[];
+  /** Allow the dedicated onboarding spec to exercise the first-visit coach. */
+  readonly onboarding?: "first-visit";
 }
 
 interface RequestRecorder {
@@ -179,6 +183,12 @@ async function handleRequest(
 
 /** Register deterministic provider responses and block every other external request. */
 export async function stubUpstream(page: Page, options: StubUpstreamOptions = {}): Promise<void> {
+  if (options.onboarding !== "first-visit") {
+    await page.addInitScript(({ key, value }) => localStorage.setItem(key, value), {
+      key: ONBOARDING_STORAGE_KEY,
+      value: ONBOARDING_COMPLETE_VALUE,
+    });
+  }
   const recorder: RequestRecorder = { unstubbedRequests: [] };
   recorders.set(page, recorder);
   await page.route("**/*", (route) => handleRequest(page, route, options, recorder));

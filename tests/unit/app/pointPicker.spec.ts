@@ -181,6 +181,26 @@ describe("point picker", () => {
     expect(harness.map.layers.has(PICKED_POINT_LAYER_ID)).toBe(false);
   });
 
+  it("renders an imported marker with a sanitized text-only label callout", () => {
+    const harness = createHarness();
+    harness.picker.setPickedPoint({ lat: 35.681236, lng: 139.767125 }, "<Tokyo>");
+
+    expect(harness.picker.getPickedPoint()).toEqual({ lat: 35.681236, lng: 139.767125 });
+    expect(harness.map.sources.get(PICKED_POINT_SOURCE_ID)?.data).toMatchObject({
+      features: [
+        {
+          properties: { kind: "picked", label: "<Tokyo>" },
+        },
+      ],
+    });
+    expect(harness.parent.querySelector(".point-picker-label-callout")?.textContent).toBe(
+      "<Tokyo>",
+    );
+    expect(harness.parent.querySelector(".point-picker-label-callout script")).toBeNull();
+
+    harness.picker.destroy();
+  });
+
   it("recenters through actions while keeping the marker after programmatic movement", () => {
     const harness = createHarness();
     harness.emitLongPress({ lat: 35.681236, lng: 139.767125 });

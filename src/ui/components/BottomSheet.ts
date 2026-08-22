@@ -8,6 +8,8 @@ export type SheetKind = Exclude<AppState["ui"]["sheet"], "none">;
 
 export interface SheetContentController {
   destroy(): void;
+  /** Focus the content's primary control when the sheet was opened by user action. */
+  focus?(): void;
 }
 
 export type SheetRenderer = (parent: HTMLElement, store: Store<AppState>) => SheetContentController;
@@ -311,7 +313,10 @@ export function mount(
     nextHandle.addEventListener("pointercancel", handleDragEnd);
     nextLayer.addEventListener("pointerdown", handleBackdropPointerDown);
     renderChrome();
-    if (shouldFocus) focusFirst();
+    if (shouldFocus) {
+      if (contentController?.focus === undefined) focusFirst();
+      else contentController.focus();
+    }
   }
 
   function handleSheetChange(
@@ -330,7 +335,8 @@ export function mount(
       opener = active instanceof HTMLElement ? active : null;
     }
     openHistory(next, previous);
-    renderSheet(next, true);
+    const shouldFocus = next !== "import" || store.get().ui.importRequest?.autofocus !== false;
+    renderSheet(next, shouldFocus);
   }
 
   function handleLanguageChange(): void {

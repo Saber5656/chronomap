@@ -6,6 +6,14 @@ export const POI_MAX = 50;
 export const ZOOM_MIN = 2;
 export const ZOOM_MAX = 18;
 
+export type ImportFailureReason = "shortlink" | "no-coords" | "invalid";
+
+export interface ImportSheetRequest {
+  prefill: string;
+  reason: ImportFailureReason | null;
+  autofocus: boolean;
+}
+
 export type { Poi } from "../providers/poi/types";
 
 export interface AppState {
@@ -34,6 +42,7 @@ export interface AppState {
   };
   ui: {
     sheet: "none" | "poi" | "layers" | "about" | "import";
+    importRequest: ImportSheetRequest | null;
     toast: { id: number; kind: "info" | "error"; text: string } | null;
     lang: "ja" | "en";
   };
@@ -62,6 +71,7 @@ export function createInitialState(now: Date): AppState {
     },
     ui: {
       sheet: "none",
+      importRequest: null,
       toast: null,
       lang: "ja",
     },
