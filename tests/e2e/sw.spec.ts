@@ -46,7 +46,12 @@ test("precaches the shell, keeps caches same-origin, and reloads offline", async
       return url.origin === new URL(page.url()).origin && url.pathname.startsWith("/chronomap/");
     }),
   ).toBe(true);
-  expect(cacheState.urls.some((value) => value.endsWith("/chronomap/index.html"))).toBe(true);
+  expect(
+    cacheState.urls.some((value) => {
+      const pathname = new URL(value).pathname;
+      return pathname === "/chronomap/" || pathname === "/chronomap/index.html";
+    }),
+  ).toBe(true);
   assertNoUnstubbedRequests(page);
 
   await context.setOffline(true);

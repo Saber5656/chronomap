@@ -55,7 +55,12 @@ export function mountServiceWorkerUpdate(
     if (destroyed || offlineReadyShown) return;
     offlineReadyShown = true;
 
-    const toast = createToast({ "data-sw-offline-ready": "true" });
+    // Keep this boundary out of the shared `.toast` selector so the offline-ready
+    // notification cannot collide with the app's single store-backed toast.
+    const toast = createToast({
+      class: "sw-offline-ready-toast",
+      "data-sw-offline-ready": "true",
+    });
     toast.append(document.createTextNode(t("sw.offlineReady")));
     parent.append(toast);
     offlineReadyToast = toast;
