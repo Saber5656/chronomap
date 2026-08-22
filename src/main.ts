@@ -1,9 +1,9 @@
-import { mount } from "./app/appShell";
-import { createMap, type MapLngLat } from "./map/mapController";
+import { bootstrap } from "./app/bootstrap";
+import type { MapLngLat } from "./map/mapController";
 import { createActions } from "./state/actions";
-import { createInitialState, type AppState } from "./state/appState";
-import { createStore } from "./state/store";
+import type { AppState } from "./state/appState";
 import "./ui/styles/base.css";
+import "./ui/components/MenuButton.css";
 
 interface ChronomapDebugHook {
   getState(): Readonly<AppState>;
@@ -25,9 +25,8 @@ if (app === null) {
   throw new Error("Missing #app root element.");
 }
 
-const store = createStore(createInitialState(new Date()));
-const shell = mount(app, store);
-const mapController = createMap(shell.getSlot("map"), store);
+const runtime = bootstrap(app);
+const { store, mapController } = runtime;
 
 const isDebugContext =
   import.meta.env.DEV ||
