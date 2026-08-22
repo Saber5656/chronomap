@@ -1,2 +1,2 @@
-/** Placeholder for DESIGN §4.1 integration ownership. */
-export {};
+export { parseSharedLocation } from "./parseSharedLocation";
+export type { ParseResult, RecognizerId } from "./parseSharedLocation";
