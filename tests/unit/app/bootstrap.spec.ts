@@ -82,4 +82,20 @@ describe("production bootstrap", () => {
     expect(secondButton?.textContent).toBe("日本語");
     second.destroy();
   });
+
+  it("mounts and tears down an optional locate controller", () => {
+    const parent = document.createElement("div");
+    const locateDestroy = vi.fn();
+    const mountLocateButton = vi.fn((slot: HTMLElement) => {
+      slot.dataset.locateMounted = "true";
+      return { destroy: locateDestroy };
+    });
+    const runtime = bootstrap(parent, new Date(2026, 0, 1), { mountLocateButton });
+
+    expect(mountLocateButton).toHaveBeenCalledOnce();
+    expect(runtime.shell.getSlot("LocateButton").dataset.locateMounted).toBe("true");
+
+    runtime.destroy();
+    expect(locateDestroy).toHaveBeenCalledOnce();
+  });
 });

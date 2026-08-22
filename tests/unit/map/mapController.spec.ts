@@ -14,6 +14,9 @@ const mocks = vi.hoisted(() => {
     readonly options: Record<string, unknown>;
     readonly controls: unknown[] = [];
     readonly listeners = new globalThis.Map<string, Set<Listener>>();
+    readonly sources = new globalThis.Map<string, Record<string, unknown>>();
+    readonly layers = new globalThis.Map<string, Record<string, unknown>>();
+    styleLoaded = true;
     readonly state = {
       center: { lat: 36.5, lng: 138.5 },
       zoom: 5,
@@ -38,6 +41,14 @@ const mocks = vi.hoisted(() => {
     });
     readonly setMinPitch = vi.fn();
     readonly setMaxPitch = vi.fn();
+    readonly setPaintProperty = vi.fn((layerId: string, property: string, value: unknown) => {
+      const layer = this.layers.get(layerId);
+      if (layer !== undefined) {
+        const paint = layer.paint as Record<string, unknown>;
+        paint[property] = value;
+      }
+      return this;
+    });
     readonly flyTo = vi.fn((options: { center: [number, number]; zoom: number }) => {
       this.flyTos.push({
         id: this.flyTos.length + 1,
@@ -63,6 +74,33 @@ const mocks = vi.hoisted(() => {
     addControl(control: unknown): this {
       this.controls.push(control);
       return this;
+    }
+
+    isStyleLoaded(): boolean {
+      return this.styleLoaded;
+    }
+
+    addSource(id: string, source: Record<string, unknown>): this {
+      const entry: Record<string, unknown> = { ...source };
+      entry.setData = vi.fn((data: unknown) => {
+        entry.data = data;
+        return Promise.resolve();
+      });
+      this.sources.set(id, entry);
+      return this;
+    }
+
+    getSource(id: string): Record<string, unknown> | undefined {
+      return this.sources.get(id);
+    }
+
+    addLayer(layer: Record<string, unknown>): this {
+      this.layers.set(layer.id as string, layer);
+      return this;
+    }
+
+    getLayer(id: string): Record<string, unknown> | undefined {
+      return this.layers.get(id);
     }
 
     on(type: string, listener: Listener): this {
@@ -293,7 +331,7 @@ describe("createMap", () => {
     expect(store.get().view).toEqual({ lat: 36.5, lng: 138.5, zoom: 5 });
 
     await map.resolveFlyTo(map.flyTos[1]!.id);
-    expect(store.get().view).toEqual({ lat: 34.56789, lng: 135.45679, zoom: 15 });
+    expect(store.get().view).toEqual({ lat: 36.5, lng: 138.5, zoom: 5 });
 
     const convergedView = store.get().view;
     map.emitStaleMoveEnd();
@@ -392,7 +430,7 @@ describe("createMap", () => {
     controller.destroy();
   });
 
-  it("uses jumpTo for reduced motion and flyTo otherwise, updating the store at the target", () => {
+  it("uses jumpTo for reduced motion and keeps geolocation camera state transient", () => {
     const { controller, map, store } = setup();
     const matchMedia = vi.fn().mockReturnValue({ matches: true });
     vi.stubGlobal("matchMedia", matchMedia);
@@ -401,7 +439,7 @@ describe("createMap", () => {
     expect(map.flyTo).not.toHaveBeenCalled();
     expect(map.state.center).toEqual({ lat: 35.681236, lng: 139.767125 });
     expect(map.state.zoom).toBe(15);
-    expect(store.get().view).toEqual({ lat: 35.681236, lng: 139.767125, zoom: 15 });
+    expect(store.get().view).toEqual({ lat: 36.5, lng: 138.5, zoom: 5 });
 
     matchMedia.mockReturnValue({ matches: false });
     map.flyTo.mockImplementation((options: { center: [number, number]; zoom: number }) => {
@@ -419,7 +457,148 @@ describe("createMap", () => {
       roll: 0,
       duration: 1500,
     });
-    expect(store.get().view).toEqual({ lat: 34.6937, lng: 135.5023, zoom: 15 });
+    expect(store.get().view).toEqual({ lat: 36.5, lng: 138.5, zoom: 5 });
+
+    controller.destroy();
+  });
+
+  it("keeps a geolocation camera fix out of the persistent view state", () => {
+    const { controller, map, store } = setup();
+    vi.stubGlobal("matchMedia", vi.fn().mockReturnValue({ matches: true }));
+
+    controller.flyToUser({ lat: 35.681236, lng: 139.767125 });
+
+    expect(map.state.center).toEqual({ lat: 35.681236, lng: 139.767125 });
+    expect(map.state.zoom).toBe(15);
+    expect(store.get().view).toEqual({ lat: 36.5, lng: 138.5, zoom: 5 });
+
+    map.userMove({ lat: 35, lng: 139 }, 12);
+    expect(store.get().view).toEqual({ lat: 35, lng: 139, zoom: 12 });
+    controller.destroy();
+  });
+
+  it("renders a persistent GeoJSON user fix with accuracy and dot layers", () => {
+    const { controller, map } = setup();
+    const fix = { lat: 35.681236, lng: 139.767125, accuracyM: 100, at: 123 };
+
+    controller.setUserFix(fix);
+
+    const source = map.sources.get("chronomap-user");
+    expect(source?.type).toBe("geojson");
+    expect(source?.data).toMatchObject({
+      type: "FeatureCollection",
+      features: [
+        expect.objectContaining({
+          properties: { kind: "accuracy" },
+          geometry: { type: "Point", coordinates: [fix.lng, fix.lat] },
+        }),
+        expect.objectContaining({
+          properties: { kind: "dot" },
+          geometry: { type: "Point", coordinates: [fix.lng, fix.lat] },
+        }),
+      ],
+    });
+    expect(map.layers.has("chronomap-user-accuracy")).toBe(true);
+    expect(map.layers.has("chronomap-user-dot")).toBe(true);
+
+    const sourceEntry = source;
+    const accuracyLayer = map.layers.get("chronomap-user-accuracy");
+    const accuracyPaint = accuracyLayer?.paint;
+    if (typeof accuracyPaint !== "object" || accuracyPaint === null) {
+      throw new Error("Expected an accuracy layer paint object.");
+    }
+    expect(typeof (accuracyPaint as Record<string, unknown>)["circle-radius"]).toBe("number");
+
+    map.state.zoom = 15;
+    map.emit("zoom");
+    expect(map.setPaintProperty).toHaveBeenCalledWith(
+      "chronomap-user-accuracy",
+      "circle-radius",
+      expect.any(Number),
+    );
+
+    controller.setUserFix({ ...fix, lat: 34.6937, lng: 135.5023 });
+    expect(sourceEntry?.data).toEqual({
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          properties: { kind: "accuracy" },
+          geometry: { type: "Point", coordinates: [135.5023, 34.6937] },
+        },
+        {
+          type: "Feature",
+          properties: { kind: "dot" },
+          geometry: { type: "Point", coordinates: [135.5023, 34.6937] },
+        },
+      ],
+    });
+    expect(map.layers.size).toBe(2);
+
+    controller.destroy();
+  });
+
+  it("retries the latest user fix after a source update finishes", () => {
+    const { controller, map } = setup();
+    const firstFix = { lat: 35.681236, lng: 139.767125, accuracyM: 100, at: 123 };
+    const latestFix = { lat: 34.6937, lng: 135.5023, accuracyM: 80, at: 456 };
+
+    controller.setUserFix(firstFix);
+    const source = map.sources.get("chronomap-user");
+    if (source === undefined) throw new Error("Expected the user location source.");
+
+    map.styleLoaded = false;
+    controller.setUserFix(latestFix);
+    const firstSourceData = source.data as {
+      features: Array<{ geometry: { coordinates: [number, number] } }>;
+    };
+    expect(firstSourceData.features.map((feature) => feature.geometry.coordinates)).toContainEqual([
+      firstFix.lng,
+      firstFix.lat,
+    ]);
+
+    map.styleLoaded = true;
+    map.emit("sourcedata", { sourceId: "chronomap-user" });
+    const latestSourceData = source.data as {
+      features: Array<{ geometry: { coordinates: [number, number] } }>;
+    };
+    expect(latestSourceData.features.map((feature) => feature.geometry.coordinates)).toContainEqual(
+      [latestFix.lng, latestFix.lat],
+    );
+
+    controller.destroy();
+  });
+
+  it("retries a pending user fix when an unrelated source finishes", () => {
+    const { controller, map } = setup();
+    const firstFix = { lat: 35.681236, lng: 139.767125, accuracyM: 100, at: 123 };
+    const latestFix = { lat: 34.6937, lng: 135.5023, accuracyM: 80, at: 456 };
+
+    controller.setUserFix(firstFix);
+    const source = map.sources.get("chronomap-user");
+    if (source === undefined) throw new Error("Expected the user location source.");
+
+    map.styleLoaded = false;
+    controller.setUserFix(latestFix);
+    map.styleLoaded = true;
+    map.emit("sourcedata", { sourceId: "gsi-pale" });
+
+    const beforeIdle = source.data as {
+      features: Array<{ geometry: { coordinates: [number, number] } }>;
+    };
+    expect(beforeIdle.features.map((feature) => feature.geometry.coordinates)).not.toContainEqual([
+      latestFix.lng,
+      latestFix.lat,
+    ]);
+
+    map.emit("idle");
+    const afterIdle = source.data as {
+      features: Array<{ geometry: { coordinates: [number, number] } }>;
+    };
+    expect(afterIdle.features.map((feature) => feature.geometry.coordinates)).toContainEqual([
+      latestFix.lng,
+      latestFix.lat,
+    ]);
 
     controller.destroy();
   });

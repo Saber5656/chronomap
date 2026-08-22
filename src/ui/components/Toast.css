@@ -1,0 +1,19 @@
+.toast {
+  width: min(100%, 32rem);
+  padding: 0.75rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--color-text) 20%, transparent);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  box-shadow: var(--shadow);
+  color: var(--color-text);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.toast[data-kind="error"] {
+  border-color: color-mix(in srgb, #b42318 60%, transparent);
+}
+
+.toast[hidden] {
+  display: none;
+}

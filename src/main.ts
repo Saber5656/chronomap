@@ -1,9 +1,16 @@
 import { bootstrap } from "./app/bootstrap";
-import type { MapLngLat } from "./map/mapController";
+import {
+  USER_LOCATION_ACCURACY_LAYER_ID,
+  USER_LOCATION_DOT_LAYER_ID,
+  USER_LOCATION_SOURCE_ID,
+  type MapLngLat,
+} from "./map/mapController";
 import { createActions } from "./state/actions";
 import type { AppState } from "./state/appState";
+import { mountLocateButton } from "./ui/components";
 import "./ui/styles/base.css";
 import "./ui/components/MenuButton.css";
+import "./ui/components/Toast.css";
 
 interface ChronomapDebugHook {
   getState(): Readonly<AppState>;
@@ -11,6 +18,7 @@ interface ChronomapDebugHook {
   setView(view: AppState["view"]): void;
   getLastLongPress(): MapLngLat | null;
   isMapLoaded(): boolean;
+  hasUserLocationLayers(): boolean;
 }
 
 declare global {
@@ -25,13 +33,13 @@ if (app === null) {
   throw new Error("Missing #app root element.");
 }
 
-const runtime = bootstrap(app);
+const runtime = bootstrap(app, new Date(), {
+  mountLocateButton: (parent, store, mapController) =>
+    mountLocateButton(parent, store, { mapController }),
+});
 const { store, mapController } = runtime;
 
-const isDebugContext =
-  import.meta.env.DEV ||
-  (!import.meta.env.PROD &&
-    (import.meta.env.MODE === "e2e" || import.meta.env.VITE_E2E === "true"));
+const isDebugContext = import.meta.env.DEV || import.meta.env.VITE_E2E === "true";
 
 if (isDebugContext) {
   const actions = createActions(store);
@@ -50,5 +58,13 @@ if (isDebugContext) {
     setView: (view) => actions.setView(view),
     getLastLongPress: () => lastLongPress,
     isMapLoaded: () => mapController.getMap().loaded(),
+    hasUserLocationLayers: () => {
+      const map = mapController.getMap();
+      return (
+        map.getSource(USER_LOCATION_SOURCE_ID) !== undefined &&
+        map.getLayer(USER_LOCATION_ACCURACY_LAYER_ID) !== undefined &&
+        map.getLayer(USER_LOCATION_DOT_LAYER_ID) !== undefined
+      );
+    },
   };
 }

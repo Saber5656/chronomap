@@ -1,4 +1,4 @@
-import { latLng, opacity, year, zoom } from "../security/validate";
+import { latLng, MAX_ACCURACY_METERS, opacity, year, zoom } from "../security/validate";
 import type { AppState, Poi } from "./appState";
 import { POI_MAX } from "./appState";
 import type { Store } from "./store";
@@ -93,6 +93,7 @@ export function createActions(store: Store<AppState>): AppActions {
         coordinates === null ||
         !Number.isFinite(fix.accuracyM) ||
         fix.accuracyM < 0 ||
+        fix.accuracyM > MAX_ACCURACY_METERS ||
         !Number.isFinite(fix.at)
       ) {
         return;

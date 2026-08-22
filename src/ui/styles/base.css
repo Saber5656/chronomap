@@ -164,6 +164,101 @@ body {
   pointer-events: auto;
 }
 
+.locate-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.locate-control[hidden] {
+  display: none;
+}
+
+.locate-button {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid rgb(23 32 42 / 24%);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  box-shadow: var(--shadow);
+  color: var(--color-text);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.locate-button:hover {
+  border-color: var(--color-accent);
+}
+
+.locate-button:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.locate-button:disabled {
+  cursor: wait;
+  opacity: 0.78;
+}
+
+.locate-button__icon {
+  display: block;
+}
+
+.locate-button[data-state="requesting"] .locate-button__icon circle[data-icon="spinner"] {
+  animation: locate-spinner 900ms linear infinite;
+  stroke-dasharray: 30 20;
+  transform-origin: center;
+}
+
+.locate-button[data-state="granted"] .locate-button__icon circle[data-icon="dot"] {
+  fill: currentColor;
+}
+
+.locate-popover {
+  position: absolute;
+  inset-block-start: calc(100% + 0.5rem);
+  inset-inline-end: 0;
+  width: min(18rem, calc(100vw - 1.5rem));
+  padding: 0.75rem 0.875rem;
+  border: 1px solid rgb(23 32 42 / 18%);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  box-shadow: var(--shadow);
+  color: var(--color-text);
+  text-align: start;
+}
+
+.locate-popover[hidden] {
+  display: none;
+}
+
+.locate-popover__title {
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.locate-popover__body {
+  margin-block-start: 0.35rem;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+@keyframes locate-spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .locate-button[data-state="requesting"] .locate-button__icon circle[data-icon="spinner"] {
+    animation: none;
+  }
+}
+
 .coverage-banner-slot {
   inset-block-start: calc(
     var(--top-controls-block-start) + var(--top-controls-stack-block-size) + var(--top-chrome-gap)
