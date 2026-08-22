@@ -47,6 +47,24 @@ jobs:
       - name: Build application
         run: npm run build
 
+      - name: Validate PWA build
+        run: npm run validate:pwa
+
+      - name: Preview PWA smoke check
+        run: |
+          preview_log="$(mktemp)"
+          npm run preview -- --host 127.0.0.1 --port 4173 >"$preview_log" 2>&1 &
+          preview_pid=$!
+          cleanup() {
+            kill "$preview_pid" 2>/dev/null || true
+            rm -f "$preview_log"
+          }
+          trap cleanup EXIT
+          if ! npm run validate:pwa:preview -- http://127.0.0.1:4173/chronomap/; then
+            cat "$preview_log"
+            exit 1
+          fi
+
       - name: Add SPA fallback
         run: cp dist/index.html dist/404.html
 

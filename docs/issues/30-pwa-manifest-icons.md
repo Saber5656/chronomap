@@ -48,7 +48,57 @@ the home-screen "walk-and-explore" use case.
 
 ## Validation
 
-`npm run build` + preview inspection; Lighthouse run recorded in PR.
+`npm run build` + `npm run validate:pwa` + the reproducible preview HTTP smoke check below.
+Lighthouse/CDP evidence must be recorded separately; the build validator and HTTP smoke check do
+not claim a Lighthouse pass.
+
+## Implementation and evidence
+
+The regular checked-in PNGs are exported from `public/icons/icon.svg`; the maskable PNG is
+exported from `public/icons/maskable.svg`, whose full-canvas opaque background avoids transparent
+corner wedges when a launcher applies an adaptive mask. The validator checks both the opaque
+background and that the visible glyph remains inside the inner 80% safe zone.
+
+```sh
+for size in 180 192 512; do
+  sips -s format png -z "$size" "$size" public/icons/icon.svg \
+    --out "public/icons/pwa-$size.png"
+done
+sips -s format png -z 512 512 public/icons/maskable.svg \
+  --out public/icons/pwa-maskable-512.png
+```
+
+The build intentionally keeps `vite-plugin-pwa`'s generated `dist/sw.js`/Workbox artifact while
+leaving it inert at runtime: `injectRegister: false` means this issue does not add
+`virtual:pwa-register`, `navigator.serviceWorker.register`, or an update UI. Service-worker
+registration and the prompt/update flow belong to follow-up #32; this boundary is asserted by
+`npm run validate:pwa` and is not a license to implement that flow here.
+
+The preview smoke check uses only Node's built-in `fetch` and can be reproduced with:
+
+```sh
+npm run build
+npm run validate:pwa
+npm run preview -- --host 127.0.0.1 --port 4173
+npm run validate:pwa:preview -- http://127.0.0.1:4173/chronomap/
+```
+
+It fetches the base HTML, manifest, and every manifest PNG over HTTP and verifies status,
+content type, manifest identity, and PNG signatures. No Lighthouse/CDP run is claimed by this
+task unless separately recorded in the PR.
+
+Chrome DevTools visual QA also opened the served `pwa-maskable-512.png` and overlaid the inner
+80% circular safe-zone guide. The blue clock/pin glyph remained within the guide; this screenshot
+was captured as review evidence and is summarized in the PR body. The source PNG and deterministic
+`validate:pwa` safe-zone bounding-box check remain the reproducible repository evidence.
+
+After the MapLibre bootstrap prerequisite (#11) was integrated, Chrome DevTools Lighthouse
+navigation completed against the `/chronomap/` preview for both mobile and desktop. Scores were
+Accessibility 100, Best Practices 96, SEO 90, and Agentic Browsing 100. The only reported audits
+were the existing missing meta description and console-errors audit; direct console inspection was
+empty and no PWA/installability failure was reported. A performance trace recorded LCP 106 ms and
+CLS 0.00. The a11y snapshot exposed the Map region, GSI attribution link, Japanese document
+language, and manifest URL.
 
 ## Dependencies
 

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <title>chronomap app icon</title>
+  <rect width="512" height="512" rx="96" fill="#fff"/>
+  <path
+    d="M256 432c-14-22-112-119-112-208a112 112 0 1 1 224 0c0 89-98 186-112 208Z"
+    fill="#fff"
+    stroke="#2d6cdf"
+    stroke-linejoin="round"
+    stroke-width="28"
+  />
+  <circle cx="256" cy="220" r="84" fill="#fff" stroke="#2d6cdf" stroke-width="24"/>
+  <path
+    d="M256 170v54l42 28"
+    fill="none"
+    stroke="#2d6cdf"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="20"
+  />
+  <circle cx="256" cy="220" r="10" fill="#2d6cdf"/>
+</svg>
