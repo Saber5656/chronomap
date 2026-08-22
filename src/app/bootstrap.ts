@@ -14,11 +14,19 @@ export interface AppRuntime {
 }
 
 export interface BootstrapOptions {
+  readonly beforeShell?: (store: Store<AppState>) => void;
+  readonly mountMenuButton?: (parent: HTMLElement, store: Store<AppState>) => { destroy(): void };
+  readonly mountToast?: (parent: HTMLElement, store: Store<AppState>) => { destroy(): void };
   readonly mountLocateButton?: (
     parent: HTMLElement,
     store: Store<AppState>,
     mapController: MapController,
   ) => { destroy(): void };
+  readonly afterMap?: (runtime: {
+    store: Store<AppState>;
+    shell: AppShell;
+    mapController: MapController;
+  }) => void;
 }
 
 /** Create the production runtime, initializing locale state before any UI renders. */
@@ -29,15 +37,20 @@ export function bootstrap(
 ): AppRuntime {
   const store = createStore(createInitialState(now));
   const i18n = initI18n(store);
+  options.beforeShell?.(store);
   const shell = mount(parent, store);
-  const menuButton = mountMenuButton(shell.getSlot("MenuButton"), store);
+  const menuButton = (options.mountMenuButton ?? mountMenuButton)(
+    shell.getSlot("MenuButton"),
+    store,
+  );
+  const toast = (options.mountToast ?? mountToast)(shell.getSlot("toast-host"), store);
   const mapController = createMap(shell.getSlot("map"), store);
-  const toast = mountToast(shell.getSlot("toast-host"), store);
   const locateButton = options.mountLocateButton?.(
     shell.getSlot("LocateButton"),
     store,
     mapController,
   );
+  options.afterMap?.({ store, shell, mapController });
 
   return {
     store,

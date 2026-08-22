@@ -7,3 +7,4 @@ export type {
   LocateMapController,
 } from "./LocateButton";
 export type { ToastController } from "./Toast";
+export { buildShareUrl, mountMenuButton, shareCurrentView } from "./MenuButton";

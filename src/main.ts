@@ -7,7 +7,9 @@ import {
 } from "./map/mapController";
 import { createActions } from "./state/actions";
 import type { AppState } from "./state/appState";
-import { mountLocateButton } from "./ui/components";
+import { initUrlSync } from "./state/urlSync";
+import gsiLayers from "./providers/layers/gsi.layers.json";
+import { mountLocateButton, mountMenuButton, mountToast } from "./ui/components";
 import "./ui/styles/base.css";
 import "./ui/components/MenuButton.css";
 import "./ui/components/Toast.css";
@@ -33,7 +35,34 @@ if (app === null) {
   throw new Error("Missing #app root element.");
 }
 
-const runtime = bootstrap(app, new Date(), {
+const now = new Date();
+const registryIds = new Set(gsiLayers.map((entry) => entry.id));
+let urlSync: ReturnType<typeof initUrlSync> | undefined;
+const runtime = bootstrap(app, now, {
+  beforeShell: (store) => {
+    urlSync = initUrlSync(store, registryIds, { now });
+  },
+  mountMenuButton: (parent, store) =>
+    mountMenuButton(parent, store, {
+      registryIds,
+      getSerialized: () => urlSync?.getSerialized() ?? "",
+    }),
+  mountToast,
+  afterMap: ({ mapController }) => {
+    urlSync?.connectIdle((callback) => {
+      const map = mapController.getMap();
+      const unsubscribe = mapController.onIdle(callback);
+      const markReady = (): void => callback();
+      map.once("load", markReady);
+      // A stubbed/offline tile source can keep MapLibre.loaded() false after the style is ready;
+      // the load event or style readiness is the safe bootstrap boundary for URL writes.
+      if (map.loaded() || map.isStyleLoaded()) markReady();
+      return () => {
+        unsubscribe();
+        map.off("load", markReady);
+      };
+    });
+  },
   mountLocateButton: (parent, store, mapController) =>
     mountLocateButton(parent, store, { mapController }),
 });

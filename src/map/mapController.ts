@@ -241,6 +241,7 @@ export function createMap(container: HTMLElement, store: Store<AppState>): MapCo
   let longPressTimer: ReturnType<typeof setTimeout> | null = null;
   let lastContextMenuAt = Number.NEGATIVE_INFINITY;
   let suppressContextMenuUntil = Number.NEGATIVE_INFINITY;
+  let userCameraGesture = false;
   let userFix: UserLocationFix | null = null;
   let userFixRenderPending = false;
 
@@ -351,7 +352,12 @@ export function createMap(container: HTMLElement, store: Store<AppState>): MapCo
     }
 
     const isPrimaryButton = event.isPrimary !== false && event.button === 0;
-    if (!isPrimaryButton || event.pointerType === "mouse") return;
+    if (!isPrimaryButton) return;
+
+    // MapLibre versions/browsers do not consistently populate moveend.originalEvent for
+    // drag-pan. Keep the pointer boundary so URL sync still receives the settled user view.
+    userCameraGesture = true;
+    if (event.pointerType === "mouse") return;
 
     const point = getContainerPoint(event);
     longPressState = {
@@ -417,7 +423,9 @@ export function createMap(container: HTMLElement, store: Store<AppState>): MapCo
     if (destroyed) return;
 
     const cameraView = readCameraView();
-    if (isProgrammaticMove(event)) {
+    const isUserGesture = userCameraGesture || !isProgrammaticMove(event);
+    userCameraGesture = false;
+    if (!isUserGesture) {
       const operation = activeProgrammaticOperation;
       if (operation === null) return;
 
@@ -427,6 +435,10 @@ export function createMap(container: HTMLElement, store: Store<AppState>): MapCo
 
     activeProgrammaticOperation = null;
     actions.setView(cameraView);
+  }
+
+  function handleUserDragStart(): void {
+    userCameraGesture = true;
   }
 
   function consumeProgrammaticOperation(
@@ -489,6 +501,7 @@ export function createMap(container: HTMLElement, store: Store<AppState>): MapCo
 
   const unsubscribeStore = store.on((state) => state.view, syncMapToStoreView);
   map.on("moveend", handleMoveEnd);
+  map.on("dragstart", handleUserDragStart);
   map.on("idle", handleIdle);
   map.on("styledata", handleStyleData);
   map.on("load", handleStyleData);
@@ -573,6 +586,7 @@ export function createMap(container: HTMLElement, store: Store<AppState>): MapCo
       container.removeEventListener("pointercancel", handlePointerEnd);
       container.removeEventListener("lostpointercapture", handlePointerEnd);
       map.off("moveend", handleMoveEnd);
+      map.off("dragstart", handleUserDragStart);
       map.off("idle", handleIdle);
       map.off("styledata", handleStyleData);
       map.off("load", handleStyleData);

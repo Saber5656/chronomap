@@ -194,7 +194,26 @@ body {
   border-color: var(--color-accent);
 }
 
-.locate-button:focus-visible {
+.menu-button {
+  position: relative;
+  z-index: var(--z-chrome);
+}
+
+.menu-trigger,
+.menu-item {
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid color-mix(in srgb, var(--color-text) 20%, transparent);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  color: var(--color-text);
+  box-shadow: var(--shadow);
+  font: inherit;
+  cursor: pointer;
+}
+
+.menu-trigger:focus-visible,
+.menu-item:focus-visible {
   outline: 3px solid var(--color-accent);
   outline-offset: 2px;
 }
@@ -257,6 +276,25 @@ body {
   .locate-button[data-state="requesting"] .locate-button__icon circle[data-icon="spinner"] {
     animation: none;
   }
+}
+
+.menu-popover {
+  position: absolute;
+  inset-block-start: calc(100% + 0.5rem);
+  inset-inline-end: 0;
+  z-index: var(--z-chrome);
+  min-width: 12rem;
+  padding: 0.25rem;
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  box-shadow: var(--shadow);
+  list-style: none;
+}
+
+.menu-item {
+  width: 100%;
+  padding-inline: 0.75rem;
+  text-align: start;
 }
 
 .coverage-banner-slot {
