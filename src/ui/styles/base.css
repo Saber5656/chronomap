@@ -171,6 +171,10 @@ body {
   justify-content: flex-end;
 }
 
+.locate-control[hidden] {
+  display: none;
+}
+
 .locate-button {
   display: grid;
   width: 44px;
