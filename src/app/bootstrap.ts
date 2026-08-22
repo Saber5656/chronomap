@@ -4,6 +4,20 @@ import type { LayerEntry } from "../providers/layers/types";
 import { mountPointPicker, type PointPickerController } from "./pointPicker";
 import { createInitialState, type AppState } from "../state/appState";
 import { createStore, type Store } from "../state/store";
+import {
+  createSheetStub,
+  mount as mountBottomSheet,
+  type BottomSheetController,
+} from "../ui/components/BottomSheet";
+import {
+  mount as mountLayerInfoBadge,
+  type LayerInfoBadgeController,
+} from "../ui/components/LayerInfoBadge";
+import {
+  mount as mountLayersSheet,
+  type BasemapInfo,
+  type PoiSourceInfo,
+} from "../ui/components/LayersSheet";
 import { mountMenuButton } from "../ui/components/MenuButton";
 import { mount as mountToast } from "../ui/components/Toast";
 import {
@@ -26,6 +40,8 @@ export interface AppRuntime {
 
 export interface BootstrapOptions {
   readonly layerRegistry?: readonly LayerEntry[];
+  readonly basemap?: BasemapInfo;
+  readonly poiSource?: PoiSourceInfo | null;
   readonly currentYear?: number;
   readonly beforeShell?: (store: Store<AppState>) => void;
   readonly mountMenuButton?: (parent: HTMLElement, store: Store<AppState>) => { destroy(): void };
@@ -94,6 +110,25 @@ export function bootstrap(
   const timeSlider = options.mountTimeSlider?.(shell.getSlot("TimeSlider"), store);
   const opacityControl = options.mountOpacityControl?.(shell.getSlot("OpacityControl"), store);
   const pointPicker = mountPointPicker(shell.getSlot("map-region"), store, mapController);
+  let bottomSheet: BottomSheetController | undefined;
+  let layerInfoBadge: LayerInfoBadgeController | undefined;
+  if (options.layerRegistry !== undefined && options.basemap !== undefined) {
+    const registry = options.layerRegistry;
+    const basemap = options.basemap;
+    bottomSheet = mountBottomSheet(shell.getSlot("sheet-host"), store, {
+      renderers: {
+        layers: (parent, sheetStore) =>
+          mountLayersSheet(parent, sheetStore, {
+            registry,
+            basemap,
+            poiSource: options.poiSource ?? null,
+          }),
+        poi: createSheetStub("poi"),
+        about: createSheetStub("about"),
+      },
+    });
+    layerInfoBadge = mountLayerInfoBadge(shell.getSlot("LayerInfoBadge"), store, { registry });
+  }
   options.afterMap?.({ store, shell, mapController });
   const locateButton = options.mountLocateButton?.(
     shell.getSlot("LocateButton"),
@@ -114,6 +149,8 @@ export function bootstrap(
       timeSlider?.destroy();
       opacityControl?.destroy();
       coverageBanner?.destroy();
+      bottomSheet?.destroy();
+      layerInfoBadge?.destroy();
       timeWiring?.destroy();
       overlayManager?.destroy();
       mapController.destroy();
