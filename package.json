@@ -10,6 +10,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "check:pins": "node scripts/check-action-pinning.mjs",
+    "validate:pwa": "node scripts/validate-pwa-build.mjs",
+    "validate:pwa:preview": "node scripts/validate-pwa-preview.mjs",
     "validate:registry": "node scripts/validate-registry.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -28,6 +30,7 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.67.0",
     "vite": "^8.2.1",
+    "vite-plugin-pwa": "^1.3.0",
     "vitest": "^4.1.10",
     "yaml": "^2.9.0"
   }
