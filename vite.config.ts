@@ -18,7 +18,7 @@ function cspMetaPlugin(enableKonjaku: boolean): Plugin {
           throw new Error("index.html must contain the Content-Security-Policy meta tag");
         }
 
-        const contentPattern = /(\bcontent=["'])[^"']*(["'])/iu;
+        const contentPattern = /(\bcontent=(['"]))[^>]*?\2/iu;
         if (!contentPattern.test(meta)) {
           throw new Error("Content-Security-Policy meta tag must have a content attribute");
         }
