@@ -31,8 +31,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command:
-      "VITE_E2E=true npm run build && npm run preview -- --host 127.0.0.1 --port 4174",
+    command: "VITE_E2E=true npm run build && npm run preview -- --host 127.0.0.1 --port 4174",
     url: "http://127.0.0.1:4174/chronomap/",
     reuseExistingServer: true,
     timeout: 120_000,
