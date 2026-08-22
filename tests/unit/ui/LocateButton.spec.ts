@@ -108,6 +108,7 @@ describe("LocateButton", () => {
 
     button.click();
     const popover = parent.querySelector<HTMLElement>(".locate-popover");
+    const retryButton = parent.querySelector<HTMLButtonElement>(".locate-popover__retry");
     expect(popover?.hidden).toBe(false);
     expect(popover?.textContent).toContain("位置情報");
     expect(requestFix).toHaveBeenCalledOnce();
@@ -116,6 +117,10 @@ describe("LocateButton", () => {
     expect(popover?.hidden).toBe(true);
 
     button.click();
+    expect(popover?.hidden).toBe(false);
+    expect(requestFix).toHaveBeenCalledOnce();
+
+    retryButton?.click();
     await flushPromises();
     await flushPromises();
     expect(requestFix).toHaveBeenCalledTimes(2);

@@ -19,6 +19,7 @@ export const GEO_I18N_KEYS = {
   deniedAria: "geo.denied.aria",
   deniedTitle: "geo.denied.title",
   deniedBody: "geo.denied.body",
+  retry: "common.retry",
   timeout: "geo.timeout",
 } as const satisfies Record<string, I18nKey>;
 
@@ -134,6 +135,7 @@ export function mount(
   });
   const title = el("h2", { id: deniedTitleId, class: "locate-popover__title" });
   const body = el("p", { id: deniedBodyId, class: "locate-popover__body" });
+  const retryButton = el("button", { class: "locate-popover__retry", type: "button" });
   const popover = el(
     "aside",
     {
@@ -143,14 +145,13 @@ export function mount(
       "aria-labelledby": deniedTitleId,
       "aria-describedby": deniedBodyId,
     },
-    [title, body],
+    [title, body, retryButton],
   );
   const root = el("div", { class: "locate-control" }, [button, popover]);
   parent.append(root);
 
   let destroyed = false;
   let popoverOpen = false;
-  let deniedExplainerShown = false;
   let requestSequence = 0;
 
   function render(): void {
@@ -175,6 +176,7 @@ export function mount(
 
     title.textContent = translate(GEO_I18N_KEYS.deniedTitle, lang);
     body.textContent = translate(GEO_I18N_KEYS.deniedBody, lang);
+    retryButton.textContent = translate(GEO_I18N_KEYS.retry, lang);
     const showPopover = status === "denied" && popoverOpen;
     popover.hidden = !showPopover;
     popover.setAttribute("aria-hidden", String(!showPopover));
@@ -218,14 +220,14 @@ export function mount(
     const status = store.get().geo.status;
     if (status === "requesting" || status === "unavailable") return;
     if (status === "denied") {
-      if (!deniedExplainerShown) {
-        deniedExplainerShown = true;
-        setPopoverOpen(true);
-      } else {
-        void acquireFix();
-      }
+      setPopoverOpen(true);
       return;
     }
+    void acquireFix();
+  }
+
+  function handleRetryClick(): void {
+    if (store.get().geo.status !== "denied") return;
     void acquireFix();
   }
 
@@ -244,6 +246,7 @@ export function mount(
   button.addEventListener("click", handleButtonClick);
   document.addEventListener("pointerdown", handleDocumentPointerDown);
   document.addEventListener("keydown", handleDocumentKeyDown);
+  retryButton.addEventListener("click", handleRetryClick);
 
   if (normalized.requestFix === undefined && !isGeolocationAvailable()) {
     actions.setGeoStatus("unavailable");
@@ -261,6 +264,7 @@ export function mount(
       button.removeEventListener("click", handleButtonClick);
       document.removeEventListener("pointerdown", handleDocumentPointerDown);
       document.removeEventListener("keydown", handleDocumentKeyDown);
+      retryButton.removeEventListener("click", handleRetryClick);
       root.remove();
     },
   };
