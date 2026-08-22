@@ -6,6 +6,10 @@ import { createInitialState, type AppState } from "../state/appState";
 import { createStore, type Store } from "../state/store";
 import { mountMenuButton } from "../ui/components/MenuButton";
 import { mount as mountToast } from "../ui/components/Toast";
+import {
+  mount as mountCoverageBanner,
+  type CoverageBannerController,
+} from "../ui/components/CoverageBanner";
 import { initI18n } from "../ui/i18n";
 import { createTimeWiring, type TimeWiringController } from "./timeWiring";
 
@@ -16,6 +20,7 @@ export interface AppRuntime {
   readonly overlayManager: OverlayManager | undefined;
   readonly timeWiring: TimeWiringController | null;
   readonly pointPicker: PointPickerController;
+  readonly coverageBanner: CoverageBannerController | undefined;
   destroy(): void;
 }
 
@@ -25,6 +30,12 @@ export interface BootstrapOptions {
   readonly beforeShell?: (store: Store<AppState>) => void;
   readonly mountMenuButton?: (parent: HTMLElement, store: Store<AppState>) => { destroy(): void };
   readonly mountToast?: (parent: HTMLElement, store: Store<AppState>) => { destroy(): void };
+  readonly mountCoverageBanner?: (
+    parent: HTMLElement,
+    store: Store<AppState>,
+    mapController: MapController,
+    registry: readonly LayerEntry[],
+  ) => CoverageBannerController;
   readonly mountTimeSlider?: (parent: HTMLElement, store: Store<AppState>) => { destroy(): void };
   readonly mountOpacityControl?: (
     parent: HTMLElement,
@@ -68,6 +79,18 @@ export function bootstrap(
       : createTimeWiring(store, mapController, options.layerRegistry, {
           ...(options.currentYear === undefined ? {} : { currentYear: options.currentYear }),
         });
+  const mountCoverage =
+    options.mountCoverageBanner ??
+    ((
+      parent: HTMLElement,
+      stateStore: Store<AppState>,
+      controller: MapController,
+      registry: readonly LayerEntry[],
+    ) => mountCoverageBanner(parent, stateStore, { mapController: controller, registry }));
+  const coverageBanner =
+    options.layerRegistry === undefined
+      ? undefined
+      : mountCoverage(shell.getSlot("CoverageBanner"), store, mapController, options.layerRegistry);
   const timeSlider = options.mountTimeSlider?.(shell.getSlot("TimeSlider"), store);
   const opacityControl = options.mountOpacityControl?.(shell.getSlot("OpacityControl"), store);
   const pointPicker = mountPointPicker(shell.getSlot("map-region"), store, mapController);
@@ -85,10 +108,12 @@ export function bootstrap(
     overlayManager,
     timeWiring,
     pointPicker,
+    coverageBanner,
     destroy() {
       pointPicker.destroy();
       timeSlider?.destroy();
       opacityControl?.destroy();
+      coverageBanner?.destroy();
       timeWiring?.destroy();
       overlayManager?.destroy();
       mapController.destroy();

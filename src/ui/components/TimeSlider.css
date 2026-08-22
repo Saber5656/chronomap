@@ -17,6 +17,11 @@
   outline-offset: 2px;
 }
 
+.time-slider[data-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .time-slider__track {
   position: absolute;
   inset-inline: 0;

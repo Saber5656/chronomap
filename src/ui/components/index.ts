@@ -1,6 +1,8 @@
 export { mount as mountLocateButton } from "./LocateButton";
 export { mount as mountOpacityControl } from "./OpacityControl";
 export { mount as mountToast } from "./Toast";
+export { mount as mountCoverageBanner } from "./CoverageBanner";
+export type { CoverageBannerController, CoverageBannerOptions, NearbyEra } from "./CoverageBanner";
 export { showMapHandoffMenu } from "./MapHandoffMenu";
 export type { MapHandoffMenuController, MapHandoffMenuOptions } from "./MapHandoffMenu";
 export type {

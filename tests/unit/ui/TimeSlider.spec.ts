@@ -105,7 +105,8 @@ describe("TimeSlider", () => {
     initial.timeLayer = {
       activeLayerId: "era-mid",
       opacity: 1,
-      resolution: { candidates: ["era-mid"], reason: "ok" },
+      disabled: false,
+      resolution: { candidates: ["era-mid"], reason: "ok", snapped: false },
     };
     const store = createStore(initial);
     const parent = document.createElement("div");
@@ -183,8 +184,37 @@ describe("TimeSlider", () => {
 
   it("uses the no-data ARIA value when resolution has no coverage", () => {
     const { controller, root, store } = setup();
-    createActions(store).setActiveLayer(null, { candidates: [], reason: "no-coverage" });
+    createActions(store).setActiveLayer(null, {
+      candidates: [],
+      reason: "no-coverage",
+      snapped: false,
+    });
     expect(root.getAttribute("aria-valuetext")).toBe("データなし");
+    controller.destroy();
+  });
+
+  it("honors the registry disabled flag for pointer and keyboard input", () => {
+    const { controller, root, store } = setup();
+    const actions = createActions(store);
+
+    actions.setActiveLayer(null, {
+      candidates: [],
+      reason: "registry-empty",
+      snapped: false,
+    });
+    expect(root.getAttribute("aria-disabled")).toBe("true");
+    expect(root.getAttribute("tabindex")).toBe("-1");
+
+    root.dispatchEvent(pointerEvent("pointerdown", { clientX: 300 }));
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true }));
+    expect(store.get().year).toBe(1950);
+
+    actions.setActiveLayer("era-mid", {
+      candidates: ["era-mid"],
+      reason: "ok",
+      snapped: false,
+    });
+    expect(root.getAttribute("aria-disabled")).toBe("false");
     controller.destroy();
   });
 });

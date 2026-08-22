@@ -2,10 +2,24 @@ import { describe, expect, it } from "vitest";
 
 import {
   bboxIntersects,
+  expandBbox,
   haversineMeters,
   metersToPixelsAtLat,
   viewportDiagonalMeters,
 } from "../../../src/util/geo";
+
+describe("expandBbox", () => {
+  it("expands both dimensions around the same center", () => {
+    expect(expandBbox([10, 20, 14, 24], 4)).toEqual([4, 14, 20, 30]);
+    expect(expandBbox([10, 20, 14, 24], 1)).toEqual([10, 20, 14, 24]);
+  });
+
+  it("leaves an invalid factor unchanged", () => {
+    const bbox = [10, 20, 14, 24] as const;
+    expect(expandBbox(bbox, Number.NaN)).toBe(bbox);
+    expect(expandBbox(bbox, -1)).toBe(bbox);
+  });
+});
 
 describe("bboxIntersects", () => {
   it("detects overlap and shared edges", () => {

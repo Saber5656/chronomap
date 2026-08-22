@@ -26,6 +26,7 @@ const TOUCH_CONTEXT_MENU_SUPPRESSION_MS = 1_000;
 const CONTEXT_MENU_DEDUPE_MS = 100;
 const USER_FLY_TO_ZOOM = 15;
 const USER_FLY_TO_DURATION_MS = 1_500;
+const COVERAGE_FLY_TO_DURATION_MS = 800;
 
 export const USER_LOCATION_SOURCE_ID = "chronomap-user";
 export const USER_LOCATION_ACCURACY_LAYER_ID = "chronomap-user-accuracy";
@@ -73,6 +74,7 @@ export interface MapController {
   getViewportBbox(): BoundingBox;
   onIdle(callback: () => void): () => void;
   onLongPress(callback: (lngLat: MapLngLat) => void): () => void;
+  flyTo(view: Pick<AppState["view"], "lat" | "lng" | "zoom">): void;
   flyToUser(fix: UserFix): void;
   setUserFix(fix: UserLocationFix): void;
   destroy(): void;
@@ -535,6 +537,26 @@ export function createMap(container: HTMLElement, store: Store<AppState>): MapCo
       if (destroyed) return () => undefined;
       longPressListeners.add(callback);
       return () => longPressListeners.delete(callback);
+    },
+    flyTo(view) {
+      if (destroyed) return;
+
+      const coordinates = latLng(view.lat, view.lng);
+      if (coordinates === null || !Number.isFinite(view.zoom)) return;
+
+      const targetView = normalizeView({
+        lat: coordinates.lat,
+        lng: coordinates.lng,
+        zoom: view.zoom,
+      });
+      beginProgrammaticOperation(targetView, true);
+      map.stop();
+
+      if (prefersReducedMotion(container)) {
+        map.jumpTo(toMapCamera(targetView));
+      } else {
+        map.flyTo({ ...toMapCamera(targetView), duration: COVERAGE_FLY_TO_DURATION_MS });
+      }
     },
     flyToUser(fix) {
       if (destroyed) return;

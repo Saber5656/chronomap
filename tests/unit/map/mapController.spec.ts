@@ -480,6 +480,33 @@ describe("createMap", () => {
     controller.destroy();
   });
 
+  it("flies coverage targets with reduced-motion fallback and persists the matched view", async () => {
+    const { controller, map, store } = setup();
+    const matchMedia = vi.fn().mockReturnValue({ matches: true });
+    vi.stubGlobal("matchMedia", matchMedia);
+
+    controller.flyTo({ lat: 35.675, lng: 139.75, zoom: 14 });
+    expect(map.flyTo).not.toHaveBeenCalled();
+    expect(map.state.center).toEqual({ lat: 35.675, lng: 139.75 });
+    expect(map.state.zoom).toBe(14);
+    expect(store.get().view).toEqual({ lat: 35.675, lng: 139.75, zoom: 14 });
+
+    matchMedia.mockReturnValue({ matches: false });
+    controller.flyTo({ lat: 34.6937, lng: 135.5023, zoom: 13 });
+    expect(map.flyTo).toHaveBeenCalledWith({
+      center: [135.5023, 34.6937],
+      zoom: 13,
+      bearing: 0,
+      pitch: 0,
+      roll: 0,
+      duration: 800,
+    });
+
+    await map.resolveFlyTo(map.flyTos.at(-1)!.id);
+    expect(store.get().view).toEqual({ lat: 34.6937, lng: 135.5023, zoom: 13 });
+    controller.destroy();
+  });
+
   it("keeps a geolocation camera fix out of the persistent view state", () => {
     const { controller, map, store } = setup();
     vi.stubGlobal("matchMedia", vi.fn().mockReturnValue({ matches: true }));

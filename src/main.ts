@@ -24,6 +24,7 @@ import "./app/pointPicker.css";
 import "./ui/components/MapHandoffMenu.css";
 import "./ui/components/MenuButton.css";
 import "./ui/components/Toast.css";
+import "./ui/components/CoverageBanner.css";
 import "./ui/components/TimeSlider.css";
 import "./ui/components/OpacityControl.css";
 

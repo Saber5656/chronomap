@@ -18,7 +18,8 @@ describe("createInitialState", () => {
       timeLayer: {
         activeLayerId: null,
         opacity: 1,
-        resolution: { candidates: [], reason: "registry-empty" },
+        disabled: true,
+        resolution: { candidates: [], reason: "registry-empty", snapped: false },
       },
       poi: {
         enabled: true,

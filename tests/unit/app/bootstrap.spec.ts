@@ -1,7 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-  createMap: vi.fn(() => ({ destroy: vi.fn() })),
+  createMap: vi.fn(() => ({
+    destroy: vi.fn(),
+    getMap: vi.fn(() => ({
+      isStyleLoaded: () => true,
+      on: vi.fn(),
+      off: vi.fn(),
+    })),
+    getViewportBbox: vi.fn(() => [0, 0, 1, 1]),
+    onLongPress: vi.fn(() => vi.fn()),
+  })),
 }));
 
 vi.mock("../../../src/map/mapController", () => ({
@@ -113,5 +122,24 @@ describe("production bootstrap", () => {
 
     runtime.destroy();
     expect(opacityDestroy).toHaveBeenCalledOnce();
+  });
+
+  it("mounts and tears down CoverageBanner with a registry", () => {
+    const parent = document.createElement("div");
+    const coverageDestroy = vi.fn();
+    const mountCoverageBanner = vi.fn((slot: HTMLElement) => {
+      slot.dataset.coverageMounted = "true";
+      return { destroy: coverageDestroy };
+    });
+    const runtime = bootstrap(parent, new Date(2026, 0, 1), {
+      layerRegistry: [],
+      mountCoverageBanner,
+    });
+
+    expect(mountCoverageBanner).toHaveBeenCalledOnce();
+    expect(runtime.shell.getSlot("CoverageBanner").dataset.coverageMounted).toBe("true");
+
+    runtime.destroy();
+    expect(coverageDestroy).toHaveBeenCalledOnce();
   });
 });
