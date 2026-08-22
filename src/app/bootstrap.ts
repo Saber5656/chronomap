@@ -114,7 +114,12 @@ export function bootstrap(
   const opacityControl = options.mountOpacityControl?.(shell.getSlot("OpacityControl"), store);
   const pointPicker = mountPointPicker(shell.getSlot("map-region"), store, mapController);
   const sheetRenderers: Partial<Record<SheetKind, SheetRenderer>> = {
-    import: (parent, sheetStore) => mountImportSheet(parent, sheetStore),
+    import: (parent, sheetStore) =>
+      mountImportSheet(parent, sheetStore, {
+        onLocationOpened: (result) => {
+          pointPicker.setPickedPoint({ lat: result.lat, lng: result.lng }, result.label);
+        },
+      }),
   };
   let layerInfoBadge: LayerInfoBadgeController | undefined;
   if (options.layerRegistry !== undefined && options.basemap !== undefined) {
