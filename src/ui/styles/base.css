@@ -177,6 +177,21 @@ body {
   inset-inline-start: max(0.75rem, env(safe-area-inset-left, 0px));
 }
 
+.maplibregl-ctrl-bottom-left {
+  inset-block-end: calc(var(--slider-dock-block-size) + 0.75rem);
+  inset-inline-start: max(0.75rem, env(safe-area-inset-left, 0px));
+  max-width: calc(
+    100% - max(0.75rem, env(safe-area-inset-left, 0px)) -
+      max(0.75rem, env(safe-area-inset-right, 0px))
+  );
+  z-index: var(--z-chrome);
+}
+
+.maplibregl-ctrl-bottom-left > .maplibregl-ctrl {
+  max-width: 100%;
+  pointer-events: auto;
+}
+
 .slider-dock {
   inset-inline: 0;
   inset-block-end: 0;
