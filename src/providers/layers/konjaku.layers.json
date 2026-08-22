@@ -1,0 +1,783 @@
+[
+  {
+    "id": "konjaku-tokyo50-1896",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": {
+      "ja": "首都圏 1896–1909年",
+      "en": "Tokyo metropolitan area 1896–1909"
+    },
+    "era": { "from": 1896, "to": 1909 },
+    "region": "JP",
+    "coverage": [[139.246797187739, 35.2532768423511, 140.249621242259, 36.0032127899679]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/tokyo50/2man/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  },
+  {
+    "id": "konjaku-tokyo50-1917",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": {
+      "ja": "首都圏 1917–1924年",
+      "en": "Tokyo metropolitan area 1917–1924"
+    },
+    "era": { "from": 1917, "to": 1924 },
+    "region": "JP",
+    "coverage": [[139.246797187739, 35.2532768423511, 140.249621242259, 36.0032127899679]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/tokyo50/00/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  },
+  {
+    "id": "konjaku-tokyo50-1927",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": {
+      "ja": "首都圏 1927–1939年",
+      "en": "Tokyo metropolitan area 1927–1939"
+    },
+    "era": { "from": 1927, "to": 1939 },
+    "region": "JP",
+    "coverage": [[139.246797187739, 35.2532768423511, 140.249621242259, 36.0032127899679]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/tokyo50/01/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  },
+  {
+    "id": "konjaku-tokyo50-1944",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": {
+      "ja": "首都圏 1944–1954年",
+      "en": "Tokyo metropolitan area 1944–1954"
+    },
+    "era": { "from": 1944, "to": 1954 },
+    "region": "JP",
+    "coverage": [[139.246797187739, 35.2532768423511, 140.249621242259, 36.0032127899679]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/tokyo50/02/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  },
+  {
+    "id": "konjaku-tokyo50-1965",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": {
+      "ja": "首都圏 1965–1968年",
+      "en": "Tokyo metropolitan area 1965–1968"
+    },
+    "era": { "from": 1965, "to": 1968 },
+    "region": "JP",
+    "coverage": [[139.246797187739, 35.2532768423511, 140.249621242259, 36.0032127899679]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/tokyo50/03/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  },
+  {
+    "id": "konjaku-tokyo50-1975",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": {
+      "ja": "首都圏 1975–1978年",
+      "en": "Tokyo metropolitan area 1975–1978"
+    },
+    "era": { "from": 1975, "to": 1978 },
+    "region": "JP",
+    "coverage": [[139.246797187739, 35.2532768423511, 140.249621242259, 36.0032127899679]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/tokyo50/04/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  },
+  {
+    "id": "konjaku-tokyo50-1983",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": {
+      "ja": "首都圏 1983–1987年",
+      "en": "Tokyo metropolitan area 1983–1987"
+    },
+    "era": { "from": 1983, "to": 1987 },
+    "region": "JP",
+    "coverage": [[139.246797187739, 35.2532768423511, 140.249621242259, 36.0032127899679]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/tokyo50/05/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  },
+  {
+    "id": "konjaku-tokyo50-1992",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": {
+      "ja": "首都圏 1992–1995年",
+      "en": "Tokyo metropolitan area 1992–1995"
+    },
+    "era": { "from": 1992, "to": 1995 },
+    "region": "JP",
+    "coverage": [[139.246797187739, 35.2532768423511, 140.249621242259, 36.0032127899679]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/tokyo50/06/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  },
+  {
+    "id": "konjaku-tokyo50-1998",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": {
+      "ja": "首都圏 1998–2005年",
+      "en": "Tokyo metropolitan area 1998–2005"
+    },
+    "era": { "from": 1998, "to": 2005 },
+    "region": "JP",
+    "coverage": [[139.246797187739, 35.2532768423511, 140.249621242259, 36.0032127899679]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/tokyo50/07/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  },
+  {
+    "id": "konjaku-chukyo-1888",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": { "ja": "中京圏 1888–1898年", "en": "Chukyo area 1888–1898" },
+    "era": { "from": 1888, "to": 1898 },
+    "region": "JP",
+    "coverage": [[136.497054614878, 34.8032576674011, 137.249902267604, 35.503191041181]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/chukyo/2man/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  },
+  {
+    "id": "konjaku-chukyo-1920",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": { "ja": "中京圏 1920年", "en": "Chukyo area 1920" },
+    "era": { "from": 1920, "to": 1920 },
+    "region": "JP",
+    "coverage": [[136.497054614878, 34.8032576674011, 137.249902267604, 35.503191041181]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/chukyo/00/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  },
+  {
+    "id": "konjaku-chukyo-1932",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": { "ja": "中京圏 1932年", "en": "Chukyo area 1932" },
+    "era": { "from": 1932, "to": 1932 },
+    "region": "JP",
+    "coverage": [[136.497054614878, 34.8032576674011, 137.249902267604, 35.503191041181]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/chukyo/01/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  },
+  {
+    "id": "konjaku-chukyo-1937",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": { "ja": "中京圏 1937–1938年", "en": "Chukyo area 1937–1938" },
+    "era": { "from": 1937, "to": 1938 },
+    "region": "JP",
+    "coverage": [[136.497054614878, 34.8032576674011, 137.249902267604, 35.503191041181]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/chukyo/02/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  },
+  {
+    "id": "konjaku-chukyo-1947",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": { "ja": "中京圏 1947年", "en": "Chukyo area 1947" },
+    "era": { "from": 1947, "to": 1947 },
+    "region": "JP",
+    "coverage": [[136.497054614878, 34.8032576674011, 137.249902267604, 35.503191041181]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/chukyo/03/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  },
+  {
+    "id": "konjaku-chukyo-1959",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": { "ja": "中京圏 1959–1960年", "en": "Chukyo area 1959–1960" },
+    "era": { "from": 1959, "to": 1960 },
+    "region": "JP",
+    "coverage": [[136.497054614878, 34.8032576674011, 137.249902267604, 35.503191041181]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/chukyo/04/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  },
+  {
+    "id": "konjaku-chukyo-1968",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": { "ja": "中京圏 1968–1973年", "en": "Chukyo area 1968–1973" },
+    "era": { "from": 1968, "to": 1973 },
+    "region": "JP",
+    "coverage": [[136.497054614878, 34.8032576674011, 137.249902267604, 35.503191041181]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/chukyo/05/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  },
+  {
+    "id": "konjaku-chukyo-1976",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": { "ja": "中京圏 1976–1980年", "en": "Chukyo area 1976–1980" },
+    "era": { "from": 1976, "to": 1980 },
+    "region": "JP",
+    "coverage": [[136.497054614878, 34.8032576674011, 137.249902267604, 35.503191041181]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/chukyo/06/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  },
+  {
+    "id": "konjaku-chukyo-1984",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": { "ja": "中京圏 1984–1989年", "en": "Chukyo area 1984–1989" },
+    "era": { "from": 1984, "to": 1989 },
+    "region": "JP",
+    "coverage": [[136.497054614878, 34.8032576674011, 137.249902267604, 35.503191041181]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/chukyo/07/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  },
+  {
+    "id": "konjaku-chukyo-1992",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": { "ja": "中京圏 1992–1996年", "en": "Chukyo area 1992–1996" },
+    "era": { "from": 1992, "to": 1996 },
+    "region": "JP",
+    "coverage": [[136.497054614878, 34.8032576674011, 137.249902267604, 35.503191041181]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/chukyo/08/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  },
+  {
+    "id": "konjaku-keihansin-1892",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": { "ja": "京阪神圏 1892–1910年", "en": "Keihanshin area 1892–1910" },
+    "era": { "from": 1892, "to": 1910 },
+    "region": "JP",
+    "coverage": [[134.997212700346, 34.3365802891868, 136.000007847578, 35.0865097371461]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/keihansin/2man/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  },
+  {
+    "id": "konjaku-keihansin-1922",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": { "ja": "京阪神圏 1922–1923年", "en": "Keihanshin area 1922–1923" },
+    "era": { "from": 1922, "to": 1923 },
+    "region": "JP",
+    "coverage": [[134.997212700346, 34.3365802891868, 136.000007847578, 35.0865097371461]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/keihansin/00/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  },
+  {
+    "id": "konjaku-keihansin-1927",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": { "ja": "京阪神圏 1927–1935年", "en": "Keihanshin area 1927–1935" },
+    "era": { "from": 1927, "to": 1935 },
+    "region": "JP",
+    "coverage": [[134.997212700346, 34.3365802891868, 136.000007847578, 35.0865097371461]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/keihansin/01/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  },
+  {
+    "id": "konjaku-keihansin-1947",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": { "ja": "京阪神圏 1947–1950年", "en": "Keihanshin area 1947–1950" },
+    "era": { "from": 1947, "to": 1950 },
+    "region": "JP",
+    "coverage": [[134.997212700346, 34.3365802891868, 136.000007847578, 35.0865097371461]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/keihansin/02/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  },
+  {
+    "id": "konjaku-keihansin-1954",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": { "ja": "京阪神圏 1954–1956年", "en": "Keihanshin area 1954–1956" },
+    "era": { "from": 1954, "to": 1956 },
+    "region": "JP",
+    "coverage": [[134.997212700346, 34.3365802891868, 136.000007847578, 35.0865097371461]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/keihansin/03/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  },
+  {
+    "id": "konjaku-keihansin-1961",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": { "ja": "京阪神圏 1961–1964年", "en": "Keihanshin area 1961–1964" },
+    "era": { "from": 1961, "to": 1964 },
+    "region": "JP",
+    "coverage": [[134.997212700346, 34.3365802891868, 136.000007847578, 35.0865097371461]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/keihansin/03x/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  },
+  {
+    "id": "konjaku-keihansin-1967",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": { "ja": "京阪神圏 1967–1970年", "en": "Keihanshin area 1967–1970" },
+    "era": { "from": 1967, "to": 1970 },
+    "region": "JP",
+    "coverage": [[134.997212700346, 34.3365802891868, 136.000007847578, 35.0865097371461]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/keihansin/04/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  },
+  {
+    "id": "konjaku-keihansin-1975",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": { "ja": "京阪神圏 1975–1979年", "en": "Keihanshin area 1975–1979" },
+    "era": { "from": 1975, "to": 1979 },
+    "region": "JP",
+    "coverage": [[134.997212700346, 34.3365802891868, 136.000007847578, 35.0865097371461]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/keihansin/05/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  },
+  {
+    "id": "konjaku-keihansin-1983",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": { "ja": "京阪神圏 1983–1988年", "en": "Keihanshin area 1983–1988" },
+    "era": { "from": 1983, "to": 1988 },
+    "region": "JP",
+    "coverage": [[134.997212700346, 34.3365802891868, 136.000007847578, 35.0865097371461]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/keihansin/06/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  },
+  {
+    "id": "konjaku-keihansin-1993",
+    "type": "raster-era",
+    "provider": "konjaku",
+    "title": { "ja": "京阪神圏 1993–1997年", "en": "Keihanshin area 1993–1997" },
+    "era": { "from": 1993, "to": 1997 },
+    "region": "JP",
+    "coverage": [[134.997212700346, 34.3365802891868, 136.000007847578, 35.0865097371461]],
+    "tiles": {
+      "urlTemplate": "https://ktgis.net/kjmapw/kjtilemap/keihansin/07/{z}/{x}/{y}.png",
+      "scheme": "tms",
+      "minzoom": 8,
+      "maxzoom": 16,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "今昔マップ on the web",
+      "url": "https://ktgis.net/kjmapw/tilemapservice.html",
+      "license": {
+        "name": "Provider terms / permission required",
+        "url": "https://ktgis.net/kjmapw/tilemapservice.html"
+      }
+    },
+    "flags": { "experimental": true, "requiresFeatureFlag": "VITE_ENABLE_KONJAKU" },
+    "priority": 15
+  }
+]

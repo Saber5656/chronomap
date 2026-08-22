@@ -17,10 +17,23 @@ const fixture = (name) => resolve("tests/unit/fixtures/registry", name);
 const script = resolve("scripts/validate-registry.mjs");
 const allowedHosts = new Set(["cyberjapandata.gsi.go.jp", "ktgis.net"]);
 const temporaryDirectories = [];
+const konjakuRegistry = resolve("src/providers/layers/konjaku.layers.json");
 
 async function validDocument() {
   const document = JSON.parse(await readFile(fixture("valid.layers.json"), "utf8"));
   return [document[0]];
+}
+
+async function validKonjakuDocument() {
+  const document = await validDocument();
+  document[0].provider = "konjaku";
+  document[0].attribution.text = "今昔マップ on the web";
+  document[0].attribution.license.name = "Provider terms / permission required";
+  document[0].flags.experimental = true;
+  document[0].tiles.urlTemplate = "https://ktgis.net/kjmapw/kjtilemap/tokyo50/2man/{z}/{x}/{y}.png";
+  document[0].tiles.scheme = "tms";
+  document[0].flags.requiresFeatureFlag = "VITE_ENABLE_KONJAKU";
+  return document;
 }
 
 async function temporaryDirectory() {
@@ -49,6 +62,41 @@ async function run(args) {
 }
 
 describe("validate-registry CLI", () => {
+  it("accepts all real Konjaku entries with TMS URLs and the permission flag", async () => {
+    const document = JSON.parse(await readFile(konjakuRegistry, "utf8"));
+
+    expect(document).toHaveLength(29);
+    expect(document.every((entry) => entry.tiles.scheme === "tms")).toBe(true);
+    expect(document.every((entry) => !entry.tiles.urlTemplate.includes("{-y}"))).toBe(true);
+    expect(
+      document.every((entry) => entry.flags.requiresFeatureFlag === "VITE_ENABLE_KONJAKU"),
+    ).toBe(true);
+
+    expect(validateRegistryDocument(document, allowedHosts, "konjaku.layers.json")).toEqual([]);
+  });
+
+  it("rejects a Konjaku entry that bypasses the TMS y-flip contract", async () => {
+    const document = JSON.parse(await readFile(konjakuRegistry, "utf8"));
+    document[0].tiles.scheme = "xyz";
+
+    const errors = validateRegistryDocument(document, allowedHosts, "konjaku.layers.json");
+
+    expect(errors).toEqual([
+      expect.objectContaining({
+        index: 0,
+        field: "tiles.scheme",
+        reason: "ktgis.net tiles must use the tms scheme",
+      }),
+    ]);
+  });
+
+  it("discovers and validates both committed registry files", async () => {
+    const result = await run([]);
+
+    expect(result).toEqual(expect.objectContaining({ code: 0 }));
+    expect(result.stdout).toContain("Validated 2 layer registry file(s).");
+  });
+
   it("accepts the committed valid table including rolling and vector entries", async () => {
     const result = await run([fixture("valid.layers.json")]);
 
@@ -258,8 +306,8 @@ describe("validate-registry CLI", () => {
   );
 
   it("requires the Konjaku feature flag for every ktgis.net entry", async () => {
-    const document = await validDocument();
-    document[0].tiles.urlTemplate = "https://ktgis.net/kjmapw/{z}/{x}/{y}.png";
+    const document = await validKonjakuDocument();
+    document[0].flags.requiresFeatureFlag = null;
 
     const ungatedErrors = validateRegistryDocument(document, allowedHosts, "konjaku.layers.json");
     document[0].flags.requiresFeatureFlag = "VITE_ENABLE_OTHER";
@@ -277,6 +325,39 @@ describe("validate-registry CLI", () => {
     ]);
     expect(wronglyGatedErrors).toEqual([
       expect.objectContaining({ field: "flags.requiresFeatureFlag" }),
+    ]);
+  });
+
+  it.each([
+    ["provider", (entry) => (entry.provider = "gsi"), "provider"],
+    ["experimental flag", (entry) => (entry.flags.experimental = false), "flags.experimental"],
+    ["attribution", (entry) => (entry.attribution.text = "wrong credit"), "attribution.text"],
+    [
+      "license label",
+      (entry) => (entry.attribution.license.name = "CC BY"),
+      "attribution.license.name",
+    ],
+  ])("rejects a ktgis.net entry with an invalid Konjaku %s", async (_name, mutate, field) => {
+    const document = await validKonjakuDocument();
+    mutate(document[0]);
+
+    const errors = validateRegistryDocument(document, allowedHosts, "konjaku.layers.json");
+
+    expect(errors).toEqual([expect.objectContaining({ index: 0, field })]);
+  });
+
+  it("requires TMS for ktgis.net entries", async () => {
+    const document = await validKonjakuDocument();
+    document[0].tiles.scheme = "xyz";
+
+    const errors = validateRegistryDocument(document, allowedHosts, "konjaku.layers.json");
+
+    expect(errors).toEqual([
+      expect.objectContaining({
+        index: 0,
+        field: "tiles.scheme",
+        reason: "ktgis.net tiles must use the tms scheme",
+      }),
     ]);
   });
 

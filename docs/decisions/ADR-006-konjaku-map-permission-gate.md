@@ -25,3 +25,19 @@ action outside agent scope.
   registry-driven design, issue 17/19 — disabled providers simply contribute no layers).
 - If permission is denied, the code is removed or kept dormant at the owner's decision; no other
   component depends on the provider's existence.
+
+## Gate checklist
+
+The following human permission gate is intentionally incomplete. All items must be checked and
+the permission scope must be recorded here before `VITE_ENABLE_KONJAKU` is set to `true` in any
+public deployment.
+
+- [ ] Owner contacted Saitama University (date/contact/source recorded).
+- [ ] Permission scope recorded: app name/deployment URL, allowed use, required on-screen attribution
+      wording (`今昔マップ on the web`), OSS fork/redistribution expectations, and caching/proxy
+      constraints.
+- [ ] `VITE_ENABLE_KONJAKU` enablement reviewed and recorded in the deploy workflow after the
+      preceding permission items are complete.
+
+Current status: external permission is not checked or verified; the flag remains default-off and
+no public deployment is authorized by this ADR update.

@@ -13,7 +13,11 @@ const REGION_PATTERN = /^(?:[A-Z]{2}|GLOBAL)$/;
 const TILE_TYPES = new Set<LayerType>(["raster-era", "vector-dated"]);
 const TILE_SCHEMES = new Set<TileScheme>(["xyz", "tms"]);
 const KONJAKU_HOST = "ktgis.net";
+const KONJAKU_PROVIDER = "konjaku";
+const KONJAKU_REGION = "JP";
 const KONJAKU_FEATURE_FLAG = "VITE_ENABLE_KONJAKU";
+const KONJAKU_ATTRIBUTION = "今昔マップ on the web";
+const KONJAKU_LICENSE = "Provider terms / permission required";
 const allowedHosts = new Set<string>(allowedHostsJson);
 
 interface ParseSuccess {
@@ -190,8 +194,25 @@ function parseEntry(value: unknown, currentYear: number): ParseResult {
   if (!isRecord(tiles)) return fail("tiles", "must be an object");
   const urlTemplate = parseTileUrl(tiles.urlTemplate);
   if (typeof urlTemplate !== "string") return urlTemplate;
+  const tileHost = new URL(urlTemplate).hostname;
+  const isKonjakuTiles =
+    tileHost === KONJAKU_HOST && new URL(urlTemplate).pathname.startsWith("/kjmapw/kjtilemap/");
+  if (isKonjakuTiles) {
+    if (value.type !== "raster-era") {
+      return fail("type", KONJAKU_HOST + " tiles must use the raster-era type");
+    }
+    if (value.provider !== KONJAKU_PROVIDER) {
+      return fail("provider", KONJAKU_HOST + " tiles must use provider " + KONJAKU_PROVIDER);
+    }
+    if (value.region !== KONJAKU_REGION) {
+      return fail("region", KONJAKU_HOST + " tiles must use region " + KONJAKU_REGION);
+    }
+  }
   if (typeof tiles.scheme !== "string" || !TILE_SCHEMES.has(tiles.scheme as TileScheme)) {
     return fail("tiles.scheme", "must be xyz or tms");
+  }
+  if (tileHost === KONJAKU_HOST && tiles.scheme !== "tms") {
+    return fail("tiles.scheme", `${KONJAKU_HOST} tiles must use the tms scheme`);
   }
   if (
     !Number.isInteger(tiles.minzoom) ||
@@ -218,8 +239,20 @@ function parseEntry(value: unknown, currentYear: number): ParseResult {
   }
   const licenseUrl = optionalHttpsUrl(license.url, "attribution.license.url");
   if (isFailure(licenseUrl)) return licenseUrl;
+  if (isKonjakuTiles && attribution.text !== KONJAKU_ATTRIBUTION) {
+    return fail("attribution.text", KONJAKU_HOST + " tiles must use the required attribution text");
+  }
+  if (isKonjakuTiles && license.name !== KONJAKU_LICENSE) {
+    return fail(
+      "attribution.license.name",
+      KONJAKU_HOST + " tiles must use the provider-terms label",
+    );
+  }
 
   const flags = value.flags;
+  if (isKonjakuTiles && isRecord(flags) && flags.experimental !== true) {
+    return fail("flags.experimental", KONJAKU_HOST + " tiles must be marked experimental");
+  }
   if (
     !isRecord(flags) ||
     typeof flags.experimental !== "boolean" ||
@@ -227,10 +260,7 @@ function parseEntry(value: unknown, currentYear: number): ParseResult {
   ) {
     return fail("flags", "must contain experimental boolean and non-blank feature flag or null");
   }
-  if (
-    new URL(urlTemplate).hostname === KONJAKU_HOST &&
-    flags.requiresFeatureFlag !== KONJAKU_FEATURE_FLAG
-  ) {
+  if (tileHost === KONJAKU_HOST && flags.requiresFeatureFlag !== KONJAKU_FEATURE_FLAG) {
     return fail(
       "flags.requiresFeatureFlag",
       `${KONJAKU_HOST} tiles must require ${KONJAKU_FEATURE_FLAG}`,
