@@ -1,6 +1,6 @@
 import { readdir, readFile } from "node:fs/promises";
 import { inflateSync } from "node:zlib";
-import { relative, resolve } from "node:path";
+import { resolve } from "node:path";
 
 const distRoot = resolve("dist");
 const manifestUrl = new URL("https://chronomap.example/chronomap/manifest.webmanifest");
@@ -234,13 +234,16 @@ assert(
 
 const javascriptAssets = await listJavaScriptAssets(resolve(distRoot, "assets"));
 assert(javascriptAssets.length > 0, "built JavaScript assets are missing");
+let hasRuntimeRegistration = false;
 for (const assetPath of javascriptAssets) {
   const asset = await readFile(assetPath, "utf8");
-  assert(
-    !/(?:registerSW|navigator\.serviceWorker\.register|virtual:pwa-register)/.test(asset),
-    `runtime SW registration was emitted in ${relative(distRoot, assetPath)}`,
-  );
+  hasRuntimeRegistration ||=
+    /virtual_pwa-register[^`"']+\.js/.test(asset) && asset.includes("registerSW");
 }
+assert(
+  hasRuntimeRegistration,
+  "runtime SW registration import was not emitted in the JavaScript bundle",
+);
 
 const svg = await readText("icons/icon.svg");
 assert(/<svg\b[^>]*\bviewBox="0 0 512 512"/.test(svg), "SVG viewBox metadata mismatch");
@@ -266,10 +269,26 @@ assertOpaque(maskablePixels, "icons/pwa-maskable-512.png");
 const safeZone = assertMaskableSafeZone(maskable, maskablePixels, "icons/pwa-maskable-512.png");
 
 const serviceWorker = await readText("sw.js");
+const normalizedServiceWorker = serviceWorker.replace(/\s+/g, "");
 assert(serviceWorker.includes("precacheAndRoute"), "generated service worker is missing precache");
 assert(
   serviceWorker.includes("self.skipWaiting"),
   "generated service worker is missing update hook",
+);
+assert(
+  normalizedServiceWorker.includes("NavigationRoute") &&
+    normalizedServiceWorker.includes("index.html"),
+  "generated service worker is missing the app-shell navigation fallback",
+);
+assert(
+  (normalizedServiceWorker.match(/registerRoute\(/g) ?? []).length === 2,
+  "generated service worker must contain only the navigation and cross-origin routes",
+);
+assert(
+  /registerRoute\(\(\{url(?::[^}]*)?\}\)=>[^,]*origin!==self\.location\.origin,new(?:[\w$]+\.)?NetworkOnly(?:\(\))?,["']GET["']\)/.test(
+    normalizedServiceWorker,
+  ),
+  "generated service worker is missing the explicit cross-origin NetworkOnly route",
 );
 
 console.log(

@@ -1,4 +1,5 @@
 import { bootstrap } from "./app/bootstrap";
+import { registerServiceWorker } from "./app/swUpdate";
 import {
   USER_LOCATION_ACCURACY_LAYER_ID,
   USER_LOCATION_DOT_LAYER_ID,
@@ -68,6 +69,10 @@ const runtime = bootstrap(app, now, {
     mountLocateButton(parent, store, { mapController }),
 });
 const { store, mapController } = runtime;
+
+if (import.meta.env.PROD) {
+  void registerServiceWorker(runtime.shell.getSlot("toast-host"));
+}
 
 const isDebugContext = import.meta.env.DEV || import.meta.env.VITE_E2E === "true";
 

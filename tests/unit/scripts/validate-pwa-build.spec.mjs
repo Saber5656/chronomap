@@ -45,8 +45,19 @@ async function createFixture() {
       "</head><body></body></html>",
     ].join(""),
   );
-  await writeFile(join(dist, "assets/main.js"), "console.log('chronomap');");
-  await writeFile(join(dist, "sw.js"), "precacheAndRoute([]); self.skipWaiting();");
+  await writeFile(
+    join(dist, "assets/main.js"),
+    "import('./virtual_pwa-register-hash.js').then(({registerSW}) => registerSW({}));",
+  );
+  await writeFile(
+    join(dist, "sw.js"),
+    [
+      "precacheAndRoute([{url: 'index.html'}]);",
+      "registerRoute(new NavigationRoute(createHandlerBoundToURL('index.html')));",
+      "registerRoute(({url}) => url.origin !== self.location.origin, new NetworkOnly(), 'GET');",
+      "self.skipWaiting();",
+    ].join("\n"),
+  );
   return { root, dist };
 }
 
@@ -100,15 +111,14 @@ describe("validate-pwa-build", () => {
     expect(`${result.stdout}${result.stderr}`).toContain("manifest.name mismatch");
   });
 
-  it("rejects service-worker registration in nested JavaScript assets", async () => {
+  it("rejects a build without runtime service-worker registration", async () => {
     const { root, dist } = await createFixture();
-    await writeFile(
-      join(dist, "assets/nested/register.js"),
-      "navigator.serviceWorker.register('/chronomap/sw.js');",
-    );
+    await writeFile(join(dist, "assets/main.js"), "console.log('chronomap');");
     const result = await runValidator(root);
 
     expect(result.code).not.toBe(0);
-    expect(`${result.stdout}${result.stderr}`).toContain("runtime SW registration was emitted");
+    expect(`${result.stdout}${result.stderr}`).toContain(
+      "runtime SW registration import was not emitted",
+    );
   });
 });

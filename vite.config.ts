@@ -1,6 +1,8 @@
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
+const APP_SHELL_GLOB_PATTERNS = ["**/*.{js,css,html,svg,png,webmanifest}"];
+
 export default defineConfig({
   base: "/chronomap/",
   plugins: [
@@ -10,6 +12,16 @@ export default defineConfig({
       injectRegister: false,
       devOptions: {
         enabled: false,
+      },
+      workbox: {
+        globPatterns: APP_SHELL_GLOB_PATTERNS,
+        navigateFallback: "index.html",
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.origin !== self.location.origin,
+            handler: "NetworkOnly",
+          },
+        ],
       },
       manifest: {
         name: "chronomap — 時間旅行地図",
