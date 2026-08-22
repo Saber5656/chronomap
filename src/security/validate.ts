@@ -2,6 +2,9 @@ import { YEAR_MIN, ZOOM_MAX, ZOOM_MIN } from "../state/appState";
 
 const CONTROL_CHARACTERS = /[\u0000-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069]/gu;
 
+/** Reject implausible browser accuracy values before they reach map paint properties. */
+export const MAX_ACCURACY_METERS = 1_000_000;
+
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }

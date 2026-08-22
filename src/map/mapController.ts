@@ -3,14 +3,15 @@ import {
   Map as MapLibreMap,
   type MapOptions,
   type MapMovementEvent,
+  type Source,
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 import { createActions } from "../state/actions";
 import { ZOOM_MAX, ZOOM_MIN, type AppState } from "../state/appState";
 import type { Store } from "../state/store";
-import { latLng } from "../security/validate";
-import type { BoundingBox } from "../util/geo";
+import { latLng, MAX_ACCURACY_METERS } from "../security/validate";
+import { metersToPixelsAtLat, type BoundingBox } from "../util/geo";
 
 export const GSI_PALE_TILE_URL = "https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png";
 export const GSI_STANDARD_TILE_URL = "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png";
@@ -25,6 +26,10 @@ const TOUCH_CONTEXT_MENU_SUPPRESSION_MS = 1_000;
 const CONTEXT_MENU_DEDUPE_MS = 100;
 const USER_FLY_TO_ZOOM = 15;
 const USER_FLY_TO_DURATION_MS = 1_500;
+
+export const USER_LOCATION_SOURCE_ID = "chronomap-user";
+export const USER_LOCATION_ACCURACY_LAYER_ID = "chronomap-user-accuracy";
+export const USER_LOCATION_DOT_LAYER_ID = "chronomap-user-dot";
 
 /** The fixed inline style keeps the first map request limited to the GSI basemap. */
 export const GSI_BASEMAP_STYLE = {
@@ -61,6 +66,7 @@ export type MapLngLat = Readonly<{
 }>;
 
 export type UserFix = Pick<NonNullable<AppState["geo"]["fix"]>, "lat" | "lng">;
+export type UserLocationFix = NonNullable<AppState["geo"]["fix"]>;
 
 export interface MapController {
   getMap(): MapLibreMap;
@@ -68,6 +74,7 @@ export interface MapController {
   onIdle(callback: () => void): () => void;
   onLongPress(callback: (lngLat: MapLngLat) => void): () => void;
   flyToUser(fix: UserFix): void;
+  setUserFix(fix: UserLocationFix): void;
   destroy(): void;
 }
 
@@ -147,6 +154,48 @@ function toMapLngLat(lngLat: { lng: number; lat: number }): MapLngLat {
   return { lng: lngLat.lng, lat: lngLat.lat };
 }
 
+type UserLocationFeatureKind = "accuracy" | "dot";
+type UserLocationGeoJson = GeoJSON.FeatureCollection<
+  GeoJSON.Point,
+  { kind: UserLocationFeatureKind }
+>;
+
+type GeoJsonSourceWithData = Source & {
+  type: "geojson";
+  setData(data: UserLocationGeoJson): Promise<void>;
+};
+
+function isGeoJsonSource(source: Source | undefined): source is GeoJsonSourceWithData {
+  return source?.type === "geojson" && "setData" in source && typeof source.setData === "function";
+}
+
+function createUserLocationGeoJson(fix: UserLocationFix): UserLocationGeoJson {
+  const point = [fix.lng, fix.lat] as [number, number];
+  return {
+    type: "FeatureCollection",
+    features: [
+      {
+        type: "Feature",
+        properties: { kind: "accuracy" },
+        geometry: { type: "Point", coordinates: point },
+      },
+      {
+        type: "Feature",
+        properties: { kind: "dot" },
+        geometry: { type: "Point", coordinates: point },
+      },
+    ],
+  };
+}
+
+function userAccuracyRadiusPixels(fix: UserLocationFix, zoom: number): number {
+  // Web Mercator is undefined at the poles. The location itself remains the validated
+  // coordinate; only the display approximation is clamped to the projection's usable edge.
+  const displayLatitude = Math.max(-85.05112878, Math.min(85.05112878, fix.lat));
+  const radius = metersToPixelsAtLat(fix.accuracyM, displayLatitude, zoom);
+  return Number.isFinite(radius) && radius >= 0 ? radius : 0;
+}
+
 /** Owns the MapLibre instance and the camera boundary for AppState.view. */
 export function createMap(container: HTMLElement, store: Store<AppState>): MapController {
   const actions = createActions(store);
@@ -192,6 +241,80 @@ export function createMap(container: HTMLElement, store: Store<AppState>): MapCo
   let longPressTimer: ReturnType<typeof setTimeout> | null = null;
   let lastContextMenuAt = Number.NEGATIVE_INFINITY;
   let suppressContextMenuUntil = Number.NEGATIVE_INFINITY;
+  let userFix: UserLocationFix | null = null;
+  let userFixRenderPending = false;
+
+  function updateUserAccuracyRadius(): void {
+    if (userFix === null || map.getLayer(USER_LOCATION_ACCURACY_LAYER_ID) === undefined) return;
+
+    map.setPaintProperty(
+      USER_LOCATION_ACCURACY_LAYER_ID,
+      "circle-radius",
+      userAccuracyRadiusPixels(userFix, map.getZoom()),
+    );
+  }
+
+  function renderUserFix(): void {
+    if (destroyed || userFix === null) return;
+    if (!map.isStyleLoaded()) {
+      userFixRenderPending = true;
+      return;
+    }
+    userFixRenderPending = false;
+
+    const data = createUserLocationGeoJson(userFix);
+    const source = map.getSource(USER_LOCATION_SOURCE_ID);
+    if (source === undefined) {
+      map.addSource(USER_LOCATION_SOURCE_ID, { type: "geojson", data });
+    } else if (isGeoJsonSource(source)) {
+      void source.setData(data);
+    } else {
+      return;
+    }
+
+    if (map.getLayer(USER_LOCATION_ACCURACY_LAYER_ID) === undefined) {
+      map.addLayer({
+        id: USER_LOCATION_ACCURACY_LAYER_ID,
+        type: "circle",
+        source: USER_LOCATION_SOURCE_ID,
+        filter: ["==", ["get", "kind"], "accuracy"],
+        paint: {
+          "circle-color": "#2d6cdf",
+          "circle-opacity": 0.16,
+          "circle-radius": userAccuracyRadiusPixels(userFix, map.getZoom()),
+          "circle-stroke-color": "#2d6cdf",
+          "circle-stroke-opacity": 0.72,
+          "circle-stroke-width": 1,
+        },
+      });
+    } else {
+      updateUserAccuracyRadius();
+    }
+
+    if (map.getLayer(USER_LOCATION_DOT_LAYER_ID) === undefined) {
+      map.addLayer({
+        id: USER_LOCATION_DOT_LAYER_ID,
+        type: "circle",
+        source: USER_LOCATION_SOURCE_ID,
+        filter: ["==", ["get", "kind"], "dot"],
+        paint: {
+          "circle-color": "#2d6cdf",
+          "circle-radius": 6,
+          "circle-stroke-color": "#ffffff",
+          "circle-stroke-width": 2,
+        },
+      });
+    }
+  }
+
+  const handleStyleData = (): void => {
+    renderUserFix();
+  };
+  const handleSourceData = (event: { sourceId?: string }): void => {
+    if (event.sourceId === USER_LOCATION_SOURCE_ID && userFixRenderPending) {
+      renderUserFix();
+    }
+  };
 
   function readCameraView(): CameraView {
     const center = map.getCenter();
@@ -328,6 +451,7 @@ export function createMap(container: HTMLElement, store: Store<AppState>): MapCo
 
   function handleIdle(): void {
     if (destroyed) return;
+    if (userFixRenderPending) renderUserFix();
     for (const callback of [...idleListeners]) callback();
   }
 
@@ -366,6 +490,10 @@ export function createMap(container: HTMLElement, store: Store<AppState>): MapCo
   const unsubscribeStore = store.on((state) => state.view, syncMapToStoreView);
   map.on("moveend", handleMoveEnd);
   map.on("idle", handleIdle);
+  map.on("styledata", handleStyleData);
+  map.on("load", handleStyleData);
+  map.on("sourcedata", handleSourceData);
+  map.on("zoom", updateUserAccuracyRadius);
   map.on("move", cancelLongPress);
   map.on("zoomstart", cancelLongPress);
   map.on("rotatestart", cancelLongPress);
@@ -404,7 +532,10 @@ export function createMap(container: HTMLElement, store: Store<AppState>): MapCo
       const targetView: CameraView = {
         ...normalizeView({ lat: coordinates.lat, lng: coordinates.lng, zoom: USER_FLY_TO_ZOOM }),
       };
-      beginProgrammaticOperation(targetView, true);
+      // Geolocation camera movement is transient. Keeping it out of AppState.view prevents
+      // URL/share synchronizers from persisting the private fix; the first user camera gesture
+      // converges the persistent view through handleMoveEnd.
+      beginProgrammaticOperation(targetView, false);
       map.stop();
 
       if (prefersReducedMotion(container)) {
@@ -412,6 +543,23 @@ export function createMap(container: HTMLElement, store: Store<AppState>): MapCo
       } else {
         map.flyTo({ ...toMapCamera(targetView), duration: USER_FLY_TO_DURATION_MS });
       }
+    },
+    setUserFix(fix) {
+      if (destroyed) return;
+
+      const coordinates = latLng(fix.lat, fix.lng);
+      if (
+        coordinates === null ||
+        !Number.isFinite(fix.accuracyM) ||
+        fix.accuracyM < 0 ||
+        fix.accuracyM > MAX_ACCURACY_METERS ||
+        !Number.isFinite(fix.at)
+      ) {
+        return;
+      }
+
+      userFix = { ...coordinates, accuracyM: fix.accuracyM, at: fix.at };
+      renderUserFix();
     },
     destroy() {
       if (destroyed) return;
@@ -426,6 +574,10 @@ export function createMap(container: HTMLElement, store: Store<AppState>): MapCo
       container.removeEventListener("lostpointercapture", handlePointerEnd);
       map.off("moveend", handleMoveEnd);
       map.off("idle", handleIdle);
+      map.off("styledata", handleStyleData);
+      map.off("load", handleStyleData);
+      map.off("sourcedata", handleSourceData);
+      map.off("zoom", updateUserAccuracyRadius);
       map.off("move", cancelLongPress);
       map.off("zoomstart", cancelLongPress);
       map.off("rotatestart", cancelLongPress);
@@ -435,6 +587,8 @@ export function createMap(container: HTMLElement, store: Store<AppState>): MapCo
       idleListeners.clear();
       longPressListeners.clear();
       activeProgrammaticOperation = null;
+      userFix = null;
+      userFixRenderPending = false;
       map.removeControl(attributionControl);
       map.remove();
     },

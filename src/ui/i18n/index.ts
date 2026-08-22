@@ -43,8 +43,8 @@ function interpolate(value: string, vars?: InterpolationVars): string {
     return String(vars[name]);
   });
 }
-export function t(key: I18nKey, vars?: InterpolationVars): string {
-  const value = strings[currentLocale][key];
+export function t(key: I18nKey, vars?: InterpolationVars, locale: Locale = currentLocale): string {
+  const value = strings[locale][key];
   if (value === undefined) {
     if (import.meta.env.DEV) console.warn(`Missing i18n key: ${String(key)}`);
     return String(key);

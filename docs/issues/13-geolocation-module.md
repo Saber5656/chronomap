@@ -42,15 +42,16 @@ only). "現在地から過去を遡る" is the product's opening move — this m
 
 ## Acceptance Criteria
 
-- [ ] e2e (fix stubbed 35.681,139.767): tap → camera lands z15 at fix; dot + accuracy circle
+- [x] e2e (fix stubbed 35.681,139.767): tap → camera lands z15 at fix; dot + accuracy circle
       rendered; `geo.status='granted'`.
-- [ ] e2e denial path: permission denied → slashed icon + explainer popover opens on tap.
-- [ ] e2e: network log contains no request with the fix coordinates (POI disabled in this spec).
-- [ ] Unit: error mapping (`PERMISSION_DENIED`→denied etc.), `metersToPixelsAtLat`.
+- [x] e2e denial path: permission denied → slashed icon + explainer popover opens on tap.
+- [x] e2e: network log contains no request with the fix coordinates (POI disabled in this spec).
+- [x] Unit: error mapping (`PERMISSION_DENIED`→denied etc.), `metersToPixelsAtLat`.
 
 ## Validation
 
-`tests/e2e/geolocation.spec.ts` with Playwright geolocation fixtures (07); unit specs.
+`tests/e2e/geolocation.spec.ts` with Playwright geolocation fixtures (07); unit specs. The current
+integrated run passes boot, granted, and denied scenarios on mobile Chromium.
 
 ## Dependencies
 
@@ -63,3 +64,12 @@ Continuous tracking, heading/compass, background location, IP-based fallback loc
 ## Design References
 
 DESIGN §3.1, §8 #5, §13; ADR-005 rules 1–2.
+
+## Privacy and runtime hardening
+
+- Browser fixes are rejected when the callback payload is malformed or `accuracyM` is outside
+  `0..1,000,000` metres. The UI receives only the sanitized `GeoError` status.
+- The geolocation camera move is transient: `MapController.flyToUser` deliberately does not update
+  the persistent `AppState.view`. This prevents URL/share synchronization from persisting the fix;
+  the next user camera gesture is the boundary that updates the persistent view.
+- Accuracy paint radius is checked for finite non-negative output before it reaches MapLibre.
