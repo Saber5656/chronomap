@@ -295,6 +295,24 @@ describe("createMap", () => {
     controller.destroy();
   });
 
+  it("treats a pointer drag as a user move when moveend omits originalEvent", () => {
+    const { container, controller, map, store } = setup();
+
+    emitPointer(container, "pointerdown", {
+      pointerId: 1,
+      clientX: 20,
+      clientY: 30,
+      pointerType: "mouse",
+    });
+    map.emit("dragstart");
+    map.state.center = { lat: 43.123456789, lng: 141.987654321 };
+    map.state.zoom = 9.876;
+    map.emit("moveend", { originalEvent: undefined });
+
+    expect(store.get().view).toEqual({ lat: 43.123457, lng: 141.987654, zoom: 9.88 });
+    controller.destroy();
+  });
+
   it("ignores stale programmatic moveend events after rapid store updates", () => {
     const { controller, map, store } = setup();
     const views = [
