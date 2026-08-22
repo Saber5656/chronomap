@@ -69,6 +69,7 @@ const namedKeys = [
   "share.copied",
   "share.fail.shortlink",
   "slider.aria",
+  "slider.noData",
   "slider.valuetext",
   "sw.offlineReady",
   "sw.reload",
