@@ -69,6 +69,20 @@ describe("production bootstrap", () => {
     runtime.destroy();
   });
 
+  it("mounts the import sheet even when layer options are absent", () => {
+    const parent = document.createElement("div");
+    const runtime = bootstrap(parent, new Date(2026, 0, 1));
+    const menuTrigger = parent.querySelector<HTMLButtonElement>(".menu-trigger");
+    const importButton = parent.querySelector<HTMLButtonElement>("[data-menu-item='import']");
+
+    menuTrigger?.click();
+    importButton?.click();
+
+    expect(parent.querySelector(".bottom-sheet[role='dialog']")).not.toBeNull();
+    expect(parent.querySelector("#chronomap-import-input")).not.toBeNull();
+    runtime.destroy();
+  });
+
   it("toggles the language through the DOM and restores it on the next bootstrap", () => {
     setNavigatorLanguage("ja-JP");
     const parent = document.createElement("div");

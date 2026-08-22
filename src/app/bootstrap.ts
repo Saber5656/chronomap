@@ -8,6 +8,8 @@ import {
   createSheetStub,
   mount as mountBottomSheet,
   type BottomSheetController,
+  type SheetKind,
+  type SheetRenderer,
 } from "../ui/components/BottomSheet";
 import {
   mount as mountLayerInfoBadge,
@@ -111,26 +113,26 @@ export function bootstrap(
   const timeSlider = options.mountTimeSlider?.(shell.getSlot("TimeSlider"), store);
   const opacityControl = options.mountOpacityControl?.(shell.getSlot("OpacityControl"), store);
   const pointPicker = mountPointPicker(shell.getSlot("map-region"), store, mapController);
-  let bottomSheet: BottomSheetController | undefined;
+  const sheetRenderers: Partial<Record<SheetKind, SheetRenderer>> = {
+    import: (parent, sheetStore) => mountImportSheet(parent, sheetStore),
+  };
   let layerInfoBadge: LayerInfoBadgeController | undefined;
   if (options.layerRegistry !== undefined && options.basemap !== undefined) {
     const registry = options.layerRegistry;
     const basemap = options.basemap;
-    bottomSheet = mountBottomSheet(shell.getSlot("sheet-host"), store, {
-      renderers: {
-        layers: (parent, sheetStore) =>
-          mountLayersSheet(parent, sheetStore, {
-            registry,
-            basemap,
-            poiSource: options.poiSource ?? null,
-          }),
-        poi: createSheetStub("poi"),
-        about: createSheetStub("about"),
-        import: (parent, sheetStore) => mountImportSheet(parent, sheetStore),
-      },
-    });
+    sheetRenderers.layers = (parent, sheetStore) =>
+      mountLayersSheet(parent, sheetStore, {
+        registry,
+        basemap,
+        poiSource: options.poiSource ?? null,
+      });
+    sheetRenderers.poi = createSheetStub("poi");
+    sheetRenderers.about = createSheetStub("about");
     layerInfoBadge = mountLayerInfoBadge(shell.getSlot("LayerInfoBadge"), store, { registry });
   }
+  const bottomSheet: BottomSheetController = mountBottomSheet(shell.getSlot("sheet-host"), store, {
+    renderers: sheetRenderers,
+  });
   options.afterMap?.({ store, shell, mapController });
   const locateButton = options.mountLocateButton?.(
     shell.getSlot("LocateButton"),
