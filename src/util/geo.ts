@@ -43,6 +43,24 @@ export function bboxIntersects(a: BoundingBox, b: BoundingBox): boolean {
   return aWest <= bEast && aEast >= bWest && aSouth <= bNorth && aNorth >= bSouth;
 }
 
+/** Expand a non-antimeridian bounding box around its center by a dimension factor. */
+export function expandBbox(bbox: BoundingBox, factor: number): BoundingBox {
+  if (!Number.isFinite(factor) || factor < 0) return bbox;
+
+  const [west, south, east, north] = bbox;
+  const centerLng = (west + east) / 2;
+  const centerLat = (south + north) / 2;
+  const halfWidth = ((east - west) * factor) / 2;
+  const halfHeight = ((north - south) * factor) / 2;
+
+  return [
+    centerLng - halfWidth,
+    centerLat - halfHeight,
+    centerLng + halfWidth,
+    centerLat + halfHeight,
+  ];
+}
+
 export function metersToPixelsAtLat(meters: number, latitude: number, zoom: number): number {
   const earthCircumference = 2 * Math.PI * WEB_MERCATOR_RADIUS_METERS;
   const groundResolution =

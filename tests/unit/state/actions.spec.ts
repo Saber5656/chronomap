@@ -44,6 +44,7 @@ describe("createActions", () => {
     actions.setActiveLayer("gsi-1960", {
       candidates: ["gsi-1960"],
       reason: "ok",
+      snapped: false,
     });
     expect(store.get().timeLayer).toMatchObject({
       activeLayerId: "gsi-1960",

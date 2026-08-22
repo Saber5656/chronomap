@@ -1,0 +1,85 @@
+.coverage-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(100%, 30rem);
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--color-text) 20%, transparent);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--color-bg) 94%, transparent);
+  box-shadow: var(--shadow);
+  color: var(--color-text);
+  font-size: 0.88rem;
+  line-height: 1.35;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* AppShell's generic shell-slot rule is intentionally interactive for other controls. */
+.map-region > .coverage-banner-slot > .coverage-banner {
+  pointer-events: none;
+}
+
+.coverage-banner[hidden] {
+  display: none;
+}
+
+.coverage-banner__message {
+  min-width: 0;
+}
+
+.coverage-banner__action {
+  min-height: 44px;
+  margin-inline-start: 0.5rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 65%, transparent);
+  border-radius: 0.625rem;
+  background: var(--color-accent);
+  color: var(--color-bg);
+  font: inherit;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+.coverage-banner__action:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.coverage-banner[data-state="registry-error"] {
+  border-color: color-mix(in srgb, #b42318 60%, transparent);
+}
+
+.coverage-banner[data-state="snapped"] {
+  width: max-content;
+  max-width: min(100%, 30rem);
+  margin-inline: auto;
+  font-size: 0.8rem;
+}
+
+.map-region > .coverage-banner-slot[data-coverage-state="snapped"] {
+  inset-block-start: auto;
+  inset-block-end: calc(var(--slider-dock-block-size) + 0.75rem);
+  inset-inline-start: max(0.75rem, env(safe-area-inset-left, 0px));
+  inset-inline-end: max(0.75rem, env(safe-area-inset-right, 0px));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coverage-banner__action {
+    transition: none;
+  }
+}
+
+@media (max-width: 24rem) {
+  .coverage-banner {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .coverage-banner__action {
+    margin-block-start: 0.35rem;
+    margin-inline-start: 0;
+  }
+}

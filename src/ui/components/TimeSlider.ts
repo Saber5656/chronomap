@@ -157,6 +157,7 @@ export function mount(
     "aria-valuemin": YEAR_MIN,
     "aria-valuemax": maxYear,
     "aria-label": translate("slider.aria", {}, store.get().ui.lang),
+    "aria-disabled": String(store.get().timeLayer.disabled),
     "data-current-year": maxYear,
   });
   const track = el("div", { class: "time-slider__track", "aria-hidden": "true" });
@@ -170,6 +171,7 @@ export function mount(
 
   let displayedYear = clampYear(store.get().year, YEAR_MIN, maxYear);
   let resolution = store.get().timeLayer.resolution;
+  let disabled = store.get().timeLayer.disabled;
   let geometry: TrackGeometry = { left: 0, width: 0 };
   let activePointerId: number | null = null;
   let settleTimer: ReturnType<typeof setTimeout> | null = null;
@@ -228,7 +230,29 @@ export function mount(
     valueLabel.textContent = yearLabel(displayedYear, locale);
   }
 
+  function renderDisabled(): void {
+    root.setAttribute("aria-disabled", String(disabled));
+    root.dataset.disabled = String(disabled);
+    root.tabIndex = disabled ? -1 : 0;
+  }
+
+  function cancelDragging(): void {
+    clearSettleTimer();
+    if (!dragging) return;
+    dragging = false;
+    const pointerId = activePointerId;
+    activePointerId = null;
+    delete root.dataset.dragging;
+    if (pointerId === null) return;
+    try {
+      root.releasePointerCapture(pointerId);
+    } catch {
+      // The pointer may already have been released by the browser.
+    }
+  }
+
   function render(): void {
+    renderDisabled();
     renderPosition();
     renderTicks();
     renderAria();
@@ -276,7 +300,7 @@ export function mount(
   }
 
   function handlePointerDown(event: PointerEvent): void {
-    if (destroyed || !isPrimaryPointer(event)) return;
+    if (destroyed || disabled || !isPrimaryPointer(event)) return;
     event.preventDefault();
     dragging = true;
     activePointerId = event.pointerId;
@@ -313,6 +337,7 @@ export function mount(
   }
 
   function handleKeyDown(event: KeyboardEvent): void {
+    if (disabled) return;
     const next = keyboardYear(displayedYear, event.key, ticks, YEAR_MIN, maxYear, event.shiftKey);
     if (next === null) return;
     event.preventDefault();
@@ -335,6 +360,14 @@ export function mount(
       resolution = next;
       renderTicks();
       renderAria();
+    },
+  );
+  const unsubscribeDisabled = store.on(
+    (state) => state.timeLayer.disabled,
+    (next) => {
+      disabled = next;
+      if (disabled) cancelDragging();
+      renderDisabled();
     },
   );
   const unsubscribeActiveLayer = store.on(
@@ -370,6 +403,7 @@ export function mount(
       view?.removeEventListener("resize", handleResize);
       unsubscribeYear();
       unsubscribeResolution();
+      unsubscribeDisabled();
       unsubscribeActiveLayer();
       unsubscribeLanguage();
       root.removeEventListener("pointerdown", handlePointerDown);

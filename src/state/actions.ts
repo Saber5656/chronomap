@@ -50,6 +50,7 @@ export function createActions(store: Store<AppState>): AppActions {
           ...state.timeLayer,
           activeLayerId,
           resolution: resolution ?? state.timeLayer.resolution,
+          disabled: (resolution ?? state.timeLayer.resolution).reason === "registry-empty",
         },
       }));
     },

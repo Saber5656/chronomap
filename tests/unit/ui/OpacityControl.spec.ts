@@ -60,7 +60,12 @@ describe("OpacityControl", () => {
     initial.timeLayer = {
       activeLayerId,
       opacity: 1,
-      resolution: { candidates: activeLayerId === null ? [] : [activeLayerId], reason: "ok" },
+      disabled: activeLayerId === null,
+      resolution: {
+        candidates: activeLayerId === null ? [] : [activeLayerId],
+        reason: "ok",
+        snapped: false,
+      },
     };
     const store = createStore(initial);
     const parent = document.createElement("div");

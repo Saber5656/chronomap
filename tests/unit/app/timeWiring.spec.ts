@@ -50,6 +50,7 @@ describe("createTimeWiring", () => {
 
     expect(store.get().timeLayer).toMatchObject({
       activeLayerId: "old",
+      disabled: false,
       resolution: { candidates: ["old", "recent"], reason: "ok" },
     });
 
@@ -62,6 +63,7 @@ describe("createTimeWiring", () => {
     await Promise.resolve();
     expect(store.get().timeLayer).toMatchObject({
       activeLayerId: null,
+      disabled: false,
       resolution: { candidates: [], reason: "no-coverage" },
     });
 
@@ -82,6 +84,7 @@ describe("createTimeWiring", () => {
       candidates: [],
     });
     expect(store.get().timeLayer.resolution.reason).toBe("registry-empty");
+    expect(store.get().timeLayer.disabled).toBe(true);
     wiring.destroy();
   });
 });

@@ -53,6 +53,7 @@ export function createTimeWiring(
     actions.setActiveLayer(lastResolution.activeLayerId, {
       candidates: lastResolution.candidates,
       reason: lastResolution.reason,
+      snapped: lastResolution.snapped,
     });
     return lastResolution;
   }

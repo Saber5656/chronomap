@@ -15,9 +15,11 @@ export interface AppState {
   timeLayer: {
     activeLayerId: string | null;
     opacity: number;
+    disabled: boolean;
     resolution: {
       candidates: string[];
       reason: "ok" | "no-coverage" | "registry-empty";
+      snapped: boolean;
     };
   };
   poi: {
@@ -45,7 +47,8 @@ export function createInitialState(now: Date): AppState {
     timeLayer: {
       activeLayerId: null,
       opacity: 1,
-      resolution: { candidates: [], reason: "registry-empty" },
+      disabled: true,
+      resolution: { candidates: [], reason: "registry-empty", snapped: false },
     },
     poi: {
       enabled: true,
