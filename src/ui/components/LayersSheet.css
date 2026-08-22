@@ -1,0 +1,86 @@
+.layers-sheet {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.layers-sheet__description {
+  color: color-mix(in srgb, var(--color-text) 72%, transparent);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.layers-sheet__row {
+  display: grid;
+  gap: 0.35rem;
+  padding-block: 0.15rem 0.8rem;
+  border-block-end: 1px solid color-mix(in srgb, var(--color-text) 14%, transparent);
+}
+
+.layers-sheet__row-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.98rem;
+  line-height: 1.35;
+}
+
+.layers-sheet__section-label {
+  color: color-mix(in srgb, var(--color-text) 58%, transparent);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.layers-sheet__title {
+  font-weight: 650;
+}
+
+.layers-sheet__chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.4rem;
+  padding-inline: 0.45rem;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 55%, transparent);
+  border-radius: 999px;
+  color: var(--color-accent);
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.layers-sheet__value {
+  min-width: 0;
+  color: color-mix(in srgb, var(--color-text) 82%, transparent);
+  font-size: 0.84rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.layers-sheet__label {
+  color: color-mix(in srgb, var(--color-text) 60%, transparent);
+}
+
+.layers-sheet a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.layers-sheet__footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-block-start: 0.1rem;
+}
+
+.layers-sheet__about-stub {
+  min-height: 44px;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--color-text) 18%, transparent);
+  border-radius: 0.625rem;
+  background: transparent;
+  color: color-mix(in srgb, var(--color-text) 66%, transparent);
+  font: inherit;
+  cursor: not-allowed;
+}

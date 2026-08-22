@@ -4,6 +4,9 @@ import {
   USER_LOCATION_ACCURACY_LAYER_ID,
   USER_LOCATION_DOT_LAYER_ID,
   USER_LOCATION_SOURCE_ID,
+  GSI_ATTRIBUTION_TEXT,
+  GSI_ATTRIBUTION_URL,
+  GSI_BASEMAP_SOURCE_ID,
   type MapLngLat,
 } from "./map";
 import { loadRegistry } from "./providers/layers";
@@ -19,6 +22,7 @@ import {
   mountTimeSlider,
   mountToast,
 } from "./ui/components";
+import type { BasemapInfo, PoiSourceInfo } from "./ui/components/LayersSheet";
 import "./ui/styles/base.css";
 import "./app/pointPicker.css";
 import "./ui/components/MapHandoffMenu.css";
@@ -27,6 +31,9 @@ import "./ui/components/Toast.css";
 import "./ui/components/CoverageBanner.css";
 import "./ui/components/TimeSlider.css";
 import "./ui/components/OpacityControl.css";
+import "./ui/components/BottomSheet.css";
+import "./ui/components/LayerInfoBadge.css";
+import "./ui/components/LayersSheet.css";
 
 interface ChronomapDebugHook {
   getState(): Readonly<AppState>;
@@ -63,9 +70,26 @@ const layerRegistry: LayerEntry[] = loadRegistry(gsiLayers, {
   featureFlags: { VITE_ENABLE_KONJAKU: import.meta.env.VITE_ENABLE_KONJAKU },
 });
 const registryIds = new Set(layerRegistry.map((entry) => entry.id));
+const basemap: BasemapInfo = {
+  id: GSI_BASEMAP_SOURCE_ID,
+  title: { ja: "GSI 淡色地図", en: "GSI pale" },
+  attribution: { text: GSI_ATTRIBUTION_TEXT, url: GSI_ATTRIBUTION_URL },
+};
+// Keep the POI credit visible while the provider registry grows in later waves. The row is
+// supplied as data to the sheet, so replacing this source with the registry is future-safe.
+const poiSource: PoiSourceInfo = {
+  id: "wikipedia",
+  title: { ja: "Wikipedia", en: "Wikipedia" },
+  attribution: {
+    text: "Wikipedia (CC BY-SA)",
+    url: "https://creativecommons.org/licenses/by-sa/4.0/",
+  },
+};
 let urlSync: ReturnType<typeof initUrlSync> | undefined;
 const runtime = bootstrap(app, now, {
   layerRegistry,
+  basemap,
+  poiSource,
   currentYear,
   beforeShell: (store) => {
     urlSync = initUrlSync(store, registryIds, { now });

@@ -5,6 +5,24 @@ export { mount as mountCoverageBanner } from "./CoverageBanner";
 export type { CoverageBannerController, CoverageBannerOptions, NearbyEra } from "./CoverageBanner";
 export { showMapHandoffMenu } from "./MapHandoffMenu";
 export type { MapHandoffMenuController, MapHandoffMenuOptions } from "./MapHandoffMenu";
+export { createSheetStub, mount as mountBottomSheet } from "./BottomSheet";
+export type {
+  BottomSheetController,
+  BottomSheetOptions,
+  SheetContentController,
+  SheetKind,
+  SheetRenderer,
+} from "./BottomSheet";
+export { mount as mountLayerInfoBadge } from "./LayerInfoBadge";
+export type { LayerInfoBadgeController, LayerInfoBadgeOptions } from "./LayerInfoBadge";
+export { mount as mountLayersSheet } from "./LayersSheet";
+export type {
+  BasemapInfo,
+  LayersSheetController,
+  LayersSheetOptions,
+  LocalizedLabel,
+  PoiSourceInfo,
+} from "./LayersSheet";
 export type {
   GeoI18nKey,
   LocateButton,

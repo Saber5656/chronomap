@@ -306,7 +306,7 @@ body {
 }
 
 .layer-info-badge-slot {
-  inset-block-end: calc(var(--slider-dock-block-size) + 0.75rem);
+  inset-block-end: calc(var(--slider-dock-block-size) + 3rem);
   inset-inline-start: max(0.75rem, env(safe-area-inset-left, 0px));
 }
 
