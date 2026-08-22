@@ -3,12 +3,18 @@ import { expect, test, type Page } from "@playwright/test";
 import { assertNoUnstubbedRequests, stubUpstream } from "./stubs/network";
 
 const ONBOARDING_KEY = "chronomap.onboarded";
+const ONBOARDING_RESET_MARKER = "chronomap.e2e.onboarding-reset";
 
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript((key) => {
-    localStorage.removeItem(key);
-  }, ONBOARDING_KEY);
-  await stubUpstream(page);
+  await page.addInitScript(
+    ({ key, marker }) => {
+      if (sessionStorage.getItem(marker) === "1") return;
+      localStorage.removeItem(key);
+      sessionStorage.setItem(marker, "1");
+    },
+    { key: ONBOARDING_KEY, marker: ONBOARDING_RESET_MARKER },
+  );
+  await stubUpstream(page, { onboarding: "first-visit" });
 });
 
 async function readOnboardingFlag(page: Page): Promise<string | null> {
