@@ -1,0 +1,36 @@
+[
+  null,
+  {},
+  {
+    "id": "missing-title",
+    "lat": 35,
+    "lng": 139,
+    "source": {
+      "provider": "wikipedia",
+      "lang": "ja",
+      "url": "https://ja.wikipedia.org/"
+    }
+  },
+  {
+    "id": "wrong-coordinate-type",
+    "title": "A place",
+    "lat": "35",
+    "lng": 139,
+    "source": {
+      "provider": "wikipedia",
+      "lang": "ja",
+      "url": "https://ja.wikipedia.org/"
+    }
+  },
+  {
+    "id": "wrong-provider",
+    "title": "A place",
+    "lat": 35,
+    "lng": 139,
+    "source": {
+      "provider": "unknown",
+      "lang": "ja",
+      "url": "https://ja.wikipedia.org/"
+    }
+  }
+]

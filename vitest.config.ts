@@ -15,6 +15,7 @@ export default defineConfig({
         "src/security/validate.ts",
         "src/state/urlState.ts",
         "src/integrations/parseSharedLocation.ts",
+        "src/providers/poi/**/*.ts",
       ],
       thresholds: {
         statements: 80,
@@ -39,11 +40,18 @@ export default defineConfig({
           functions: 100,
           lines: 100,
         },
+<<<<<<< HEAD
         "src/providers/layers/resolve.ts": {
           statements: 100,
           branches: 100,
           functions: 100,
           lines: 100,
+        },
+        "src/providers/poi/guards.ts": {
+          statements: 95,
+          branches: 95,
+          functions: 95,
+          lines: 95,
         },
       },
     },

@@ -1,22 +1,12 @@
+import type { Poi } from "../providers/poi/types";
+
 export const YEAR_MIN = 1890;
 export const POI_MIN_ZOOM = 13;
 export const POI_MAX = 50;
 export const ZOOM_MIN = 2;
 export const ZOOM_MAX = 18;
 
-/** Temporary shared shape; Issue 23 moves the provider-facing model to providers/poi/types.ts. */
-export interface Poi {
-  id: string;
-  title: string;
-  lat: number;
-  lng: number;
-  distanceM?: number;
-  source: {
-    provider: "wikipedia" | "commons";
-    lang: string;
-    url: string;
-  };
-}
+export type { Poi } from "../providers/poi/types";
 
 export interface AppState {
   view: { lat: number; lng: number; zoom: number };
