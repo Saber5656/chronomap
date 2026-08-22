@@ -26,6 +26,8 @@ export type MissingTile =
 
 export interface StubUpstreamOptions {
   readonly missing?: readonly MissingTile[];
+  /** Let browser-level security tests observe the request before the harness blocks it. */
+  readonly passthroughHosts?: readonly string[];
   /** Allow the dedicated onboarding spec to exercise the first-visit coach. */
   readonly onboarding?: "first-visit";
 }
@@ -126,6 +128,11 @@ async function handleRequest(
   }
 
   if (isSameOriginOrLocalRequest(page, url)) {
+    await route.continue();
+    return;
+  }
+
+  if (options.passthroughHosts?.includes(url.hostname) === true) {
     await route.continue();
     return;
   }

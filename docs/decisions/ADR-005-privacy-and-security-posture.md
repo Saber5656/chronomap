@@ -37,3 +37,33 @@ Secure defaults, in priority order:
 - No telemetry means bug reports are user-initiated only — acceptable for v1 OSS.
 - CSP via `<meta>` (Pages limitation) cannot express `frame-ancestors`; residual clickjacking risk
   documented and revisited if hosting changes (issue 43 acceptance criteria).
+
+## Amendment: Issue #44 document policy decision
+
+Date: 2026-08-23 / Status: Accepted
+
+The GitHub Pages document uses the following meta-CSP, built by
+`src/security/csp.ts` from `src/security/hosts.ts`:
+
+```text
+default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://cyberjapandata.gsi.go.jp https://upload.wikimedia.org; connect-src 'self' https://cyberjapandata.gsi.go.jp https://ja.wikipedia.org https://en.wikipedia.org https://commons.wikimedia.org; worker-src 'self' blob:; child-src blob:; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'
+```
+
+The document also sets `<meta name="referrer" content="no-referrer">`. The Vite HTML transform
+rebuilds the CSP for each build: `https://ktgis.net` is appended to `img-src` only when
+`VITE_ENABLE_KONJAKU` is exactly `"true"`, matching the layer registry gate. The default v1 build
+therefore does not authorize the permission-gated provider.
+
+Compatibility decisions and evidence required for this policy are:
+
+| Area | Decision | Evidence |
+|---|---|---|
+| MapLibre GL worker | Keep `worker-src 'self' blob:` and legacy `child-src blob:`. | CSP E2E built-preview journey |
+| MapLibre style injection | Keep `style-src 'self'`; no inline-style relaxation is authorized. | CSP E2E built-preview journey |
+| GL/image decode | Keep `img-src data: blob:` because MapLibre and browser image decode paths use them; provider origins remain explicit. | CSP E2E built-preview journey |
+| PWA registration | Keep `injectRegister: false`; registration is imported through the external application bundle. | Built `index.html`/PWA validation and CSP E2E |
+
+The policy intentionally does not claim `frame-ancestors` or `report-uri` protection: neither is
+enforceable through a meta-CSP. A hosting migration must move these controls to response headers.
+There is no `unsafe-inline` or `unsafe-eval` allowance. Adding a provider requires updating
+`hosts.ts`; the policy drift unit test must fail until the checked-in meta/build path is updated.
