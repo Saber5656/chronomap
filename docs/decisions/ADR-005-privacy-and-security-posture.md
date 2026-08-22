@@ -46,7 +46,7 @@ The GitHub Pages document uses the following meta-CSP, built by
 `src/security/csp.ts` from `src/security/hosts.ts`:
 
 ```text
-default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://cyberjapandata.gsi.go.jp https://upload.wikimedia.org; connect-src 'self' https://ja.wikipedia.org https://en.wikipedia.org https://commons.wikimedia.org; worker-src 'self' blob:; child-src blob:; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'
+default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://cyberjapandata.gsi.go.jp https://upload.wikimedia.org; connect-src 'self' https://cyberjapandata.gsi.go.jp https://ja.wikipedia.org https://en.wikipedia.org https://commons.wikimedia.org; worker-src 'self' blob:; child-src blob:; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'
 ```
 
 The document also sets `<meta name="referrer" content="no-referrer">`. The Vite HTML transform
