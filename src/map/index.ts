@@ -12,6 +12,27 @@ export {
 } from "./mapController";
 export type { MapController, MapLngLat, UserFix, UserLocationFix } from "./mapController";
 export {
+  createOverlayManager,
+  firstLayerIdWithPrefix,
+  pastLayerId,
+  pastSourceId,
+  PAST_LAYER_PREFIX,
+  PAST_SOURCE_PREFIX,
+  POI_LAYER_PREFIX,
+  USER_LAYER_PREFIX,
+  type OverlayManager,
+  type OverlayManagerOptions,
+} from "./overlayManager";
+export {
+  overlayTransitionFrame,
+  runOverlayTransition,
+  RASTER_CROSSFADE_DURATION_MS,
+  type OverlayTransitionFrame,
+  type OverlayTransitionHandle,
+  type OverlayTransitionScheduler,
+  type OverlayTransitionState,
+} from "./overlayTransition";
+export {
   GEOLOCATION_OPTIONS,
   GeoError,
   isGeolocationAvailable,

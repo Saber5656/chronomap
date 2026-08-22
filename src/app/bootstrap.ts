@@ -1,5 +1,6 @@
 import { mount, type AppShell } from "./appShell";
-import { createMap, type MapController } from "../map/mapController";
+import { createOverlayManager, createMap, type MapController, type OverlayManager } from "../map";
+import type { LayerEntry } from "../providers/layers/types";
 import { createInitialState, type AppState } from "../state/appState";
 import { createStore, type Store } from "../state/store";
 import { mountMenuButton } from "../ui/components/MenuButton";
@@ -11,6 +12,7 @@ export interface AppRuntime {
   readonly store: Store<AppState>;
   readonly shell: AppShell;
   readonly mapController: MapController;
+  readonly overlayManager: OverlayManager | undefined;
   destroy(): void;
 }
 
@@ -18,6 +20,7 @@ export interface BootstrapOptions {
   readonly beforeShell?: (store: Store<AppState>) => void;
   readonly mountMenuButton?: (parent: HTMLElement, store: Store<AppState>) => { destroy(): void };
   readonly mountToast?: (parent: HTMLElement, store: Store<AppState>) => { destroy(): void };
+  readonly layerRegistry?: readonly LayerEntry[];
   readonly mountLocateButton?: (
     parent: HTMLElement,
     store: Store<AppState>,
@@ -46,6 +49,10 @@ export function bootstrap(
   );
   const toast = (options.mountToast ?? mountToast)(shell.getSlot("toast-host"), store);
   const mapController = createMap(shell.getSlot("map"), store);
+  const overlayManager =
+    options.layerRegistry === undefined
+      ? undefined
+      : createOverlayManager(mapController, store, options.layerRegistry);
   let handoffMenu: MapHandoffMenuController | undefined;
   const unsubscribeLongPress = mapController.onLongPress?.(({ lat, lng }) => {
     handoffMenu?.destroy();
@@ -69,9 +76,11 @@ export function bootstrap(
     store,
     shell,
     mapController,
+    overlayManager,
     destroy() {
       unsubscribeLongPress?.();
       handoffMenu?.destroy();
+      overlayManager?.destroy();
       mapController.destroy();
       menuButton.destroy();
       toast.destroy();

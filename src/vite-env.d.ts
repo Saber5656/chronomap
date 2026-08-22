@@ -3,6 +3,7 @@
 
 interface ImportMetaEnv {
   readonly VITE_E2E?: string;
+  readonly VITE_ENABLE_KONJAKU?: string;
 }
 
 interface ImportMeta {
