@@ -7,20 +7,24 @@ import { mountMenuButton } from "../ui/components/MenuButton";
 import { showMapHandoffMenu, type MapHandoffMenuController } from "../ui/components/MapHandoffMenu";
 import { mount as mountToast } from "../ui/components/Toast";
 import { initI18n } from "../ui/i18n";
+import { createTimeWiring, type TimeWiringController } from "./timeWiring";
 
 export interface AppRuntime {
   readonly store: Store<AppState>;
   readonly shell: AppShell;
   readonly mapController: MapController;
   readonly overlayManager: OverlayManager | undefined;
+  readonly timeWiring: TimeWiringController | null;
   destroy(): void;
 }
 
 export interface BootstrapOptions {
+  readonly layerRegistry?: readonly LayerEntry[];
+  readonly currentYear?: number;
   readonly beforeShell?: (store: Store<AppState>) => void;
   readonly mountMenuButton?: (parent: HTMLElement, store: Store<AppState>) => { destroy(): void };
   readonly mountToast?: (parent: HTMLElement, store: Store<AppState>) => { destroy(): void };
-  readonly layerRegistry?: readonly LayerEntry[];
+  readonly mountTimeSlider?: (parent: HTMLElement, store: Store<AppState>) => { destroy(): void };
   readonly mountLocateButton?: (
     parent: HTMLElement,
     store: Store<AppState>,
@@ -53,6 +57,13 @@ export function bootstrap(
     options.layerRegistry === undefined
       ? undefined
       : createOverlayManager(mapController, store, options.layerRegistry);
+  const timeWiring =
+    options.layerRegistry === undefined
+      ? null
+      : createTimeWiring(store, mapController, options.layerRegistry, {
+          ...(options.currentYear === undefined ? {} : { currentYear: options.currentYear }),
+        });
+  const timeSlider = options.mountTimeSlider?.(shell.getSlot("TimeSlider"), store);
   let handoffMenu: MapHandoffMenuController | undefined;
   const unsubscribeLongPress = mapController.onLongPress?.(({ lat, lng }) => {
     handoffMenu?.destroy();
@@ -77,9 +88,12 @@ export function bootstrap(
     shell,
     mapController,
     overlayManager,
+    timeWiring,
     destroy() {
       unsubscribeLongPress?.();
       handoffMenu?.destroy();
+      timeSlider?.destroy();
+      timeWiring?.destroy();
       overlayManager?.destroy();
       mapController.destroy();
       menuButton.destroy();

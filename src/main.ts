@@ -8,15 +8,16 @@ import {
 } from "./map";
 import { loadRegistry } from "./providers/layers";
 import { createActions } from "./state/actions";
-import type { AppState } from "./state/appState";
+import { YEAR_MIN, type AppState } from "./state/appState";
 import { initUrlSync } from "./state/urlSync";
 import gsiLayers from "./providers/layers/gsi.layers.json";
 import type { LayerEntry } from "./providers/layers/types";
-import { mountLocateButton, mountMenuButton, mountToast } from "./ui/components";
+import { mountLocateButton, mountMenuButton, mountTimeSlider, mountToast } from "./ui/components";
 import "./ui/styles/base.css";
 import "./ui/components/MapHandoffMenu.css";
 import "./ui/components/MenuButton.css";
 import "./ui/components/Toast.css";
+import "./ui/components/TimeSlider.css";
 
 interface ChronomapDebugHook {
   getState(): Readonly<AppState>;
@@ -43,14 +44,19 @@ if (app === null) {
 }
 
 const now = new Date();
+const currentYear = Math.max(
+  YEAR_MIN,
+  Number.isFinite(now.getFullYear()) ? now.getFullYear() : YEAR_MIN,
+);
 const layerRegistry: LayerEntry[] = loadRegistry(gsiLayers, {
-  currentYear: now.getFullYear(),
+  currentYear,
   featureFlags: { VITE_ENABLE_KONJAKU: import.meta.env.VITE_ENABLE_KONJAKU },
 });
 const registryIds = new Set(layerRegistry.map((entry) => entry.id));
 let urlSync: ReturnType<typeof initUrlSync> | undefined;
 const runtime = bootstrap(app, now, {
   layerRegistry,
+  currentYear,
   beforeShell: (store) => {
     urlSync = initUrlSync(store, registryIds, { now });
   },
@@ -60,6 +66,8 @@ const runtime = bootstrap(app, now, {
       getSerialized: () => urlSync?.getSerialized() ?? "",
     }),
   mountToast,
+  mountTimeSlider: (parent, store) =>
+    mountTimeSlider(parent, store, { registry: layerRegistry, currentYear, now }),
   afterMap: ({ mapController }) => {
     urlSync?.connectIdle((callback) => {
       const map = mapController.getMap();

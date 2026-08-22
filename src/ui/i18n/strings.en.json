@@ -69,6 +69,7 @@
   "share.copied": "Link copied",
   "share.fail.shortlink": "Open the short link, then copy the full URL or coordinates.",
   "slider.aria": "Year slider",
+  "slider.noData": "No data",
   "slider.valuetext": "{year} — {layerTitle}",
   "sw.offlineReady": "Available offline",
   "sw.reload": "Update",
