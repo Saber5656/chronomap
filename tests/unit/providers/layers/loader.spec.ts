@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
+import gsiLayers from "../../../../src/providers/layers/gsi.layers.json";
 import { loadRegistry } from "../../../../src/providers/layers/loader";
 import type {
   LayerEntry,
@@ -66,6 +67,27 @@ describe("loadRegistry", () => {
     expect(entries[0]?.era).toEqual({ from: 2020, to: 2026 });
     expect(raster).toEqual(before);
     expect(entries[1]?.type).toBe("vector-dated");
+  });
+
+  it("loads every S15 GSI entry without warnings or drops", () => {
+    const { entries, warnings } = load(gsiLayers);
+
+    expect(warnings).toEqual([]);
+    expect(entries.map((entry) => entry.id)).toEqual([
+      "gsi-ort-1928",
+      "gsi-ort-riku10",
+      "gsi-ort-usa10",
+      "gsi-ort-old10",
+      "gsi-gazo1",
+      "gsi-gazo2",
+      "gsi-gazo3",
+      "gsi-gazo4",
+      "gsi-seamlessphoto",
+    ]);
+    expect(entries.at(-1)?.era.to).toBe(2026);
+    expect(entries.find((entry) => entry.id === "gsi-seamlessphoto")?.attribution.text).toBe(
+      "全国最新写真（シームレス） / GRUS画像（© Axelspace）",
+    );
   });
 
   it.each([

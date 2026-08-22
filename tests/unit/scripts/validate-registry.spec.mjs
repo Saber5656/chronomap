@@ -210,7 +210,7 @@ describe("validate-registry CLI", () => {
     const result = await run([path, path]);
 
     expect(result.code).toBe(1);
-    expect(result.stderr).toContain("duplicate id valid-raster");
+    expect(result.stderr).toContain("duplicate id gsi-ort-1928");
     expect(result.stderr).toContain("first declared at");
   });
 
