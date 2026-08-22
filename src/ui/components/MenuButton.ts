@@ -204,6 +204,7 @@ export function mountMenuButton(
   }
 
   function handleImportClick(): void {
+    button.focus();
     setOpen(false);
     actions.openImportSheet({ autofocus: true });
   }

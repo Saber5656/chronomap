@@ -102,6 +102,20 @@ describe("MenuButton", () => {
     expect(parent.querySelector(".menu-button")).toBeNull();
   });
 
+  it("keeps the trigger as the sheet opener when importing from the menu", () => {
+    const store = createTestStore();
+    const menu = mountMenuButton(parent, store, { pageLocation: LOCATION, pageNavigator: {} });
+    const trigger = parent.querySelector<HTMLButtonElement>(".menu-trigger");
+    const importButton = parent.querySelector<HTMLButtonElement>("[data-menu-item='import']");
+    if (trigger === null || importButton === null) throw new Error("Expected import controls.");
+
+    trigger.click();
+    importButton.click();
+
+    expect(document.activeElement).toBe(trigger);
+    menu.destroy();
+  });
+
   it("copies the view and renders the translated toast", async () => {
     const store = createTestStore();
     const writeText = vi.fn().mockResolvedValue(undefined);
