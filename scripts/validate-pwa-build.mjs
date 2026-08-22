@@ -111,6 +111,15 @@ function decodeRgba(png, relativePath) {
   return pixels;
 }
 
+function assertOpaque(pixels, relativePath) {
+  for (let pixelOffset = 3; pixelOffset < pixels.length; pixelOffset += 4) {
+    assert(
+      pixels[pixelOffset] === 255,
+      `${relativePath} must have an opaque full-canvas background`,
+    );
+  }
+}
+
 function assertMaskableSafeZone(png, pixels, relativePath) {
   const minSafeCoordinate = Math.ceil(png.width * 0.1);
   const maxSafeCoordinate = Math.floor(png.width * 0.9);
@@ -228,11 +237,9 @@ for (const [relativePath, size] of [
 }
 
 const maskable = pngs.get("icons/pwa-maskable-512.png");
-const safeZone = assertMaskableSafeZone(
-  maskable,
-  decodeRgba(maskable, "icons/pwa-maskable-512.png"),
-  "icons/pwa-maskable-512.png",
-);
+const maskablePixels = decodeRgba(maskable, "icons/pwa-maskable-512.png");
+assertOpaque(maskablePixels, "icons/pwa-maskable-512.png");
+const safeZone = assertMaskableSafeZone(maskable, maskablePixels, "icons/pwa-maskable-512.png");
 
 const serviceWorker = await readText("sw.js");
 assert(serviceWorker.includes("precacheAndRoute"), "generated service worker is missing precache");

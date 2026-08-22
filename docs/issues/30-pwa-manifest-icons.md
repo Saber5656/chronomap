@@ -54,16 +54,18 @@ not claim a Lighthouse pass.
 
 ## Implementation and evidence
 
-The checked-in PNGs were exported from `public/icons/icon.svg` with the macOS built-in `sips`
-command below. `pwa-maskable-512.png` intentionally uses the same 512px export; the validator
-checks that its visible glyph remains inside the inner 80% safe zone.
+The regular checked-in PNGs are exported from `public/icons/icon.svg`; the maskable PNG is
+exported from `public/icons/maskable.svg`, whose full-canvas opaque background avoids transparent
+corner wedges when a launcher applies an adaptive mask. The validator checks both the opaque
+background and that the visible glyph remains inside the inner 80% safe zone.
 
 ```sh
 for size in 180 192 512; do
   sips -s format png -z "$size" "$size" public/icons/icon.svg \
     --out "public/icons/pwa-$size.png"
 done
-cp public/icons/pwa-512.png public/icons/pwa-maskable-512.png
+sips -s format png -z 512 512 public/icons/maskable.svg \
+  --out public/icons/pwa-maskable-512.png
 ```
 
 The build intentionally keeps `vite-plugin-pwa`'s generated `dist/sw.js`/Workbox artifact while
