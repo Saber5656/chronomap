@@ -26,6 +26,10 @@ export interface BootstrapOptions {
   readonly mountMenuButton?: (parent: HTMLElement, store: Store<AppState>) => { destroy(): void };
   readonly mountToast?: (parent: HTMLElement, store: Store<AppState>) => { destroy(): void };
   readonly mountTimeSlider?: (parent: HTMLElement, store: Store<AppState>) => { destroy(): void };
+  readonly mountOpacityControl?: (
+    parent: HTMLElement,
+    store: Store<AppState>,
+  ) => { destroy(): void };
   readonly mountLocateButton?: (
     parent: HTMLElement,
     store: Store<AppState>,
@@ -65,6 +69,7 @@ export function bootstrap(
           ...(options.currentYear === undefined ? {} : { currentYear: options.currentYear }),
         });
   const timeSlider = options.mountTimeSlider?.(shell.getSlot("TimeSlider"), store);
+  const opacityControl = options.mountOpacityControl?.(shell.getSlot("OpacityControl"), store);
   const pointPicker = mountPointPicker(shell.getSlot("map-region"), store, mapController);
   options.afterMap?.({ store, shell, mapController });
   const locateButton = options.mountLocateButton?.(
@@ -83,6 +88,7 @@ export function bootstrap(
     destroy() {
       pointPicker.destroy();
       timeSlider?.destroy();
+      opacityControl?.destroy();
       timeWiring?.destroy();
       overlayManager?.destroy();
       mapController.destroy();
