@@ -1,7 +1,11 @@
 import { defineConfig } from "vitest/config";
 import { resolve } from "node:path";
+import packageJson from "./package.json" with { type: "json" };
 
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(packageJson.version),
+  },
   resolve: {
     alias: {
       "virtual:pwa-register": resolve(import.meta.dirname, "tests/unit/mocks/pwa-register.ts"),
