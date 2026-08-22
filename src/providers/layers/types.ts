@@ -35,6 +35,30 @@ export type LayerRegistryEntry = LayerEntryShape<number | null>;
 /** Validated runtime shape. Rolling eras always have an explicit injected year. */
 export type LayerEntry = LayerEntryShape<number>;
 
+export type LayerResolutionReason = "ok" | "no-coverage" | "registry-empty";
+
+export interface LayerResolutionInput {
+  readonly year: number;
+  readonly viewBbox: Bbox;
+  readonly zoom: number;
+  readonly currentYear: number;
+  readonly registry: readonly LayerEntry[];
+  readonly overrideId?: string | undefined;
+}
+
+export interface LayerResolution {
+  readonly activeLayerId: string | null;
+  readonly reason: LayerResolutionReason;
+  readonly candidates: string[];
+  readonly snapped: boolean;
+}
+
+export interface EraTick {
+  readonly layerId: string;
+  readonly from: number;
+  readonly to: number;
+}
+
 export interface RegistryEnv {
   readonly currentYear: number;
   readonly featureFlags: Readonly<Record<string, unknown>>;
