@@ -1,10 +1,10 @@
 import { mount, type AppShell } from "./appShell";
 import { createOverlayManager, createMap, type MapController, type OverlayManager } from "../map";
 import type { LayerEntry } from "../providers/layers/types";
+import { mountPointPicker, type PointPickerController } from "./pointPicker";
 import { createInitialState, type AppState } from "../state/appState";
 import { createStore, type Store } from "../state/store";
 import { mountMenuButton } from "../ui/components/MenuButton";
-import { showMapHandoffMenu, type MapHandoffMenuController } from "../ui/components/MapHandoffMenu";
 import { mount as mountToast } from "../ui/components/Toast";
 import { initI18n } from "../ui/i18n";
 import { createTimeWiring, type TimeWiringController } from "./timeWiring";
@@ -15,6 +15,7 @@ export interface AppRuntime {
   readonly mapController: MapController;
   readonly overlayManager: OverlayManager | undefined;
   readonly timeWiring: TimeWiringController | null;
+  readonly pointPicker: PointPickerController;
   destroy(): void;
 }
 
@@ -64,18 +65,7 @@ export function bootstrap(
           ...(options.currentYear === undefined ? {} : { currentYear: options.currentYear }),
         });
   const timeSlider = options.mountTimeSlider?.(shell.getSlot("TimeSlider"), store);
-  let handoffMenu: MapHandoffMenuController | undefined;
-  const unsubscribeLongPress = mapController.onLongPress?.(({ lat, lng }) => {
-    handoffMenu?.destroy();
-    handoffMenu = showMapHandoffMenu(lat, lng, {
-      parent: shell.getSlot("map-region"),
-      store,
-      zoom: Math.round(mapController.getMap().getZoom()),
-      onClose: () => {
-        handoffMenu = undefined;
-      },
-    });
-  });
+  const pointPicker = mountPointPicker(shell.getSlot("map-region"), store, mapController);
   options.afterMap?.({ store, shell, mapController });
   const locateButton = options.mountLocateButton?.(
     shell.getSlot("LocateButton"),
@@ -89,9 +79,9 @@ export function bootstrap(
     mapController,
     overlayManager,
     timeWiring,
+    pointPicker,
     destroy() {
-      unsubscribeLongPress?.();
-      handoffMenu?.destroy();
+      pointPicker.destroy();
       timeSlider?.destroy();
       timeWiring?.destroy();
       overlayManager?.destroy();

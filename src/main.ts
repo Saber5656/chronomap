@@ -14,6 +14,7 @@ import gsiLayers from "./providers/layers/gsi.layers.json";
 import type { LayerEntry } from "./providers/layers/types";
 import { mountLocateButton, mountMenuButton, mountTimeSlider, mountToast } from "./ui/components";
 import "./ui/styles/base.css";
+import "./app/pointPicker.css";
 import "./ui/components/MapHandoffMenu.css";
 import "./ui/components/MenuButton.css";
 import "./ui/components/Toast.css";
@@ -24,6 +25,7 @@ interface ChronomapDebugHook {
   getMapView(): { lat: number; lng: number; zoom: number };
   setView(view: AppState["view"]): void;
   getLastLongPress(): MapLngLat | null;
+  getPickedPoint(): { lat: number; lng: number } | null;
   isMapLoaded(): boolean;
   hasUserLocationLayers(): boolean;
   setOpacity(percent: number): void;
@@ -86,7 +88,7 @@ const runtime = bootstrap(app, now, {
   mountLocateButton: (parent, store, mapController) =>
     mountLocateButton(parent, store, { mapController }),
 });
-const { store, mapController, overlayManager } = runtime;
+const { store, mapController, overlayManager, pointPicker } = runtime;
 
 if (import.meta.env.PROD) {
   void registerServiceWorker(runtime.shell.getSlot("toast-host"));
@@ -110,6 +112,7 @@ if (isDebugContext) {
     },
     setView: (view) => actions.setView(view),
     getLastLongPress: () => lastLongPress,
+    getPickedPoint: () => pointPicker.getPickedPoint(),
     isMapLoaded: () => mapController.getMap().loaded(),
     hasUserLocationLayers: () => {
       const map = mapController.getMap();
