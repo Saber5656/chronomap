@@ -1,6 +1,6 @@
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import { inflateSync } from "node:zlib";
-import { resolve } from "node:path";
+import { relative, resolve } from "node:path";
 
 const distRoot = resolve("dist");
 const manifestUrl = new URL("https://chronomap.example/chronomap/manifest.webmanifest");
@@ -16,6 +16,20 @@ async function readBuffer(relativePath) {
 
 async function readText(relativePath) {
   return readBuffer(relativePath).then((contents) => contents.toString("utf8"));
+}
+
+async function listJavaScriptAssets(directory) {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const files = [];
+  for (const entry of entries) {
+    const path = resolve(directory, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...(await listJavaScriptAssets(path)));
+    } else if (entry.isFile() && entry.name.endsWith(".js")) {
+      files.push(path);
+    }
+  }
+  return files;
 }
 
 function parsePng(contents, relativePath) {
@@ -217,6 +231,16 @@ assert(
   !/(?:registerSW|navigator\.serviceWorker\.register|virtual:pwa-register)/.test(index),
   "runtime SW registration was injected",
 );
+
+const javascriptAssets = await listJavaScriptAssets(resolve(distRoot, "assets"));
+assert(javascriptAssets.length > 0, "built JavaScript assets are missing");
+for (const assetPath of javascriptAssets) {
+  const asset = await readFile(assetPath, "utf8");
+  assert(
+    !/(?:registerSW|navigator\.serviceWorker\.register|virtual:pwa-register)/.test(asset),
+    `runtime SW registration was emitted in ${relative(distRoot, assetPath)}`,
+  );
+}
 
 const svg = await readText("icons/icon.svg");
 assert(/<svg\b[^>]*\bviewBox="0 0 512 512"/.test(svg), "SVG viewBox metadata mismatch");
