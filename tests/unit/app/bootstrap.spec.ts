@@ -5,6 +5,10 @@ const mocks = vi.hoisted(() => ({
     destroy: vi.fn(),
     getMap: vi.fn(() => ({
       isStyleLoaded: () => true,
+      getLayer: vi.fn(() => undefined),
+      getSource: vi.fn(() => undefined),
+      removeLayer: vi.fn(),
+      removeSource: vi.fn(),
       on: vi.fn(),
       off: vi.fn(),
     })),
