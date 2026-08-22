@@ -71,6 +71,17 @@ describe("fetchPoiDetail", () => {
     );
   });
 
+  it("maps an unpaired title surrogate to a typed malformed provider error", async () => {
+    const fetchImpl = vi.fn<typeof fetch>();
+
+    await expect(
+      fetchPoiDetail(poi({ title: "Invalid\ud800" }), { fetchImpl }),
+    ).rejects.toMatchObject({
+      kind: "malformed",
+    });
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
   it("maps the plain extract and allowlisted thumbnail/page URLs through the detail guard", async () => {
     const fetchImpl = stubFetch(summary);
 

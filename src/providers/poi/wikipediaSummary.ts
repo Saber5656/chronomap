@@ -46,9 +46,15 @@ function safeUrl(value: unknown, allowedHosts: ReadonlySet<string>): string | un
 }
 
 function buildSummaryUrl(lang: WikipediaLanguage, title: string): URL {
-  const normalizedTitle = title.replaceAll(" ", "_");
-  const encodedTitle = encodeURIComponent(normalizedTitle);
-  return new URL(`https://${WIKIPEDIA_HOSTS[lang]}/api/rest_v1/page/summary/${encodedTitle}`);
+  try {
+    const normalizedTitle = title.replaceAll(" ", "_");
+    const encodedTitle = encodeURIComponent(normalizedTitle);
+    return new URL(`https://${WIKIPEDIA_HOSTS[lang]}/api/rest_v1/page/summary/${encodedTitle}`);
+  } catch {
+    // encodeURIComponent rejects unpaired UTF-16 surrogates. Keep the provider contract typed
+    // instead of leaking a raw URIError from untrusted GeoSearch data.
+    throw malformedError();
+  }
 }
 
 function summaryCacheKey(lang: WikipediaLanguage, title: string): string {
