@@ -1,1 +1,275 @@
-[]
+[
+  {
+    "id": "gsi-ort-1928",
+    "type": "raster-era",
+    "provider": "gsi",
+    "title": {
+      "ja": "大阪 空中写真 1928年頃",
+      "en": "Osaka aerial photos around 1928"
+    },
+    "era": { "from": 1928, "to": 1928 },
+    "region": "JP",
+    "coverage": [[135.3, 34.55, 135.65, 34.8]],
+    "tiles": {
+      "urlTemplate": "https://cyberjapandata.gsi.go.jp/xyz/ort_1928/{z}/{x}/{y}.png",
+      "scheme": "xyz",
+      "minzoom": 13,
+      "maxzoom": 18,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "空中写真（1928年頃）",
+      "url": "https://maps.gsi.go.jp/development/ichiran.html",
+      "license": {
+        "name": "GSI content terms (attribution required)",
+        "url": "https://maps.gsi.go.jp/development/ichiran.html"
+      }
+    },
+    "flags": { "experimental": false, "requiresFeatureFlag": null },
+    "priority": 10
+  },
+  {
+    "id": "gsi-ort-riku10",
+    "type": "raster-era",
+    "provider": "gsi",
+    "title": {
+      "ja": "空中写真 1936–1942年（東京・大阪）",
+      "en": "Aerial photos 1936–1942 (Tokyo & Osaka)"
+    },
+    "era": { "from": 1936, "to": 1942 },
+    "region": "JP",
+    "coverage": [
+      [139.55, 35.5, 139.95, 35.85],
+      [135.3, 34.55, 135.65, 34.8]
+    ],
+    "tiles": {
+      "urlTemplate": "https://cyberjapandata.gsi.go.jp/xyz/ort_riku10/{z}/{x}/{y}.png",
+      "scheme": "xyz",
+      "minzoom": 13,
+      "maxzoom": 18,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "空中写真（1936年～1942年頃）",
+      "url": "https://maps.gsi.go.jp/development/ichiran.html",
+      "license": {
+        "name": "GSI content terms (attribution required)",
+        "url": "https://maps.gsi.go.jp/development/ichiran.html"
+      }
+    },
+    "flags": { "experimental": false, "requiresFeatureFlag": null },
+    "priority": 10
+  },
+  {
+    "id": "gsi-ort-usa10",
+    "type": "raster-era",
+    "provider": "gsi",
+    "title": {
+      "ja": "空中写真 1945–1950年",
+      "en": "Aerial photos 1945–1950"
+    },
+    "era": { "from": 1945, "to": 1950 },
+    "region": "JP",
+    "coverage": [
+      [139.55, 35.5, 139.95, 35.85],
+      [135.3, 34.55, 135.65, 34.8],
+      [136.75, 34.95, 137.1, 35.3],
+      [130.2, 33.45, 130.65, 33.75],
+      [141.15, 42.95, 141.55, 43.25]
+    ],
+    "tiles": {
+      "urlTemplate": "https://cyberjapandata.gsi.go.jp/xyz/ort_USA10/{z}/{x}/{y}.png",
+      "scheme": "xyz",
+      "minzoom": 10,
+      "maxzoom": 17,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "空中写真（1945年～1950年）",
+      "url": "https://maps.gsi.go.jp/development/ichiran.html",
+      "license": {
+        "name": "GSI content terms (attribution required)",
+        "url": "https://maps.gsi.go.jp/development/ichiran.html"
+      }
+    },
+    "flags": { "experimental": false, "requiresFeatureFlag": null },
+    "priority": 10
+  },
+  {
+    "id": "gsi-ort-old10",
+    "type": "raster-era",
+    "provider": "gsi",
+    "title": {
+      "ja": "空中写真 1961–1969年",
+      "en": "Aerial photos 1961–1969"
+    },
+    "era": { "from": 1961, "to": 1969 },
+    "region": "JP",
+    "coverage": [
+      [139.55, 35.5, 139.95, 35.85],
+      [135.3, 34.55, 135.65, 34.8],
+      [136.75, 34.95, 137.1, 35.3],
+      [130.2, 33.45, 130.65, 33.75],
+      [141.15, 42.95, 141.55, 43.25]
+    ],
+    "tiles": {
+      "urlTemplate": "https://cyberjapandata.gsi.go.jp/xyz/ort_old10/{z}/{x}/{y}.png",
+      "scheme": "xyz",
+      "minzoom": 10,
+      "maxzoom": 17,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "空中写真（1961年～1969年）",
+      "url": "https://maps.gsi.go.jp/development/ichiran.html",
+      "license": {
+        "name": "GSI content terms (attribution required)",
+        "url": "https://maps.gsi.go.jp/development/ichiran.html"
+      }
+    },
+    "flags": { "experimental": false, "requiresFeatureFlag": null },
+    "priority": 10
+  },
+  {
+    "id": "gsi-gazo1",
+    "type": "raster-era",
+    "provider": "gsi",
+    "title": {
+      "ja": "空中写真 1974–1978年",
+      "en": "Aerial photos 1974–1978"
+    },
+    "era": { "from": 1974, "to": 1978 },
+    "region": "JP",
+    "coverage": [[128, 30, 146.5, 45.8]],
+    "tiles": {
+      "urlTemplate": "https://cyberjapandata.gsi.go.jp/xyz/gazo1/{z}/{x}/{y}.jpg",
+      "scheme": "xyz",
+      "minzoom": 10,
+      "maxzoom": 17,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "国土画像情報",
+      "url": "https://maps.gsi.go.jp/development/ichiran.html",
+      "license": {
+        "name": "GSI content terms (attribution required)",
+        "url": "https://maps.gsi.go.jp/development/ichiran.html"
+      }
+    },
+    "flags": { "experimental": false, "requiresFeatureFlag": null },
+    "priority": 10
+  },
+  {
+    "id": "gsi-gazo2",
+    "type": "raster-era",
+    "provider": "gsi",
+    "title": {
+      "ja": "空中写真 1979–1983年",
+      "en": "Aerial photos 1979–1983"
+    },
+    "era": { "from": 1979, "to": 1983 },
+    "region": "JP",
+    "coverage": [[128, 30, 146.5, 45.8]],
+    "tiles": {
+      "urlTemplate": "https://cyberjapandata.gsi.go.jp/xyz/gazo2/{z}/{x}/{y}.jpg",
+      "scheme": "xyz",
+      "minzoom": 10,
+      "maxzoom": 17,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "国土画像情報",
+      "url": "https://maps.gsi.go.jp/development/ichiran.html",
+      "license": {
+        "name": "GSI content terms (attribution required)",
+        "url": "https://maps.gsi.go.jp/development/ichiran.html"
+      }
+    },
+    "flags": { "experimental": false, "requiresFeatureFlag": null },
+    "priority": 10
+  },
+  {
+    "id": "gsi-gazo3",
+    "type": "raster-era",
+    "provider": "gsi",
+    "title": {
+      "ja": "空中写真 1984–1986年",
+      "en": "Aerial photos 1984–1986"
+    },
+    "era": { "from": 1984, "to": 1986 },
+    "region": "JP",
+    "coverage": [[128, 30, 146.5, 45.8]],
+    "tiles": {
+      "urlTemplate": "https://cyberjapandata.gsi.go.jp/xyz/gazo3/{z}/{x}/{y}.jpg",
+      "scheme": "xyz",
+      "minzoom": 10,
+      "maxzoom": 17,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "国土画像情報",
+      "url": "https://maps.gsi.go.jp/development/ichiran.html",
+      "license": {
+        "name": "GSI content terms (attribution required)",
+        "url": "https://maps.gsi.go.jp/development/ichiran.html"
+      }
+    },
+    "flags": { "experimental": false, "requiresFeatureFlag": null },
+    "priority": 10
+  },
+  {
+    "id": "gsi-gazo4",
+    "type": "raster-era",
+    "provider": "gsi",
+    "title": {
+      "ja": "空中写真 1987–1990年",
+      "en": "Aerial photos 1987–1990"
+    },
+    "era": { "from": 1987, "to": 1990 },
+    "region": "JP",
+    "coverage": [[128, 30, 146.5, 45.8]],
+    "tiles": {
+      "urlTemplate": "https://cyberjapandata.gsi.go.jp/xyz/gazo4/{z}/{x}/{y}.jpg",
+      "scheme": "xyz",
+      "minzoom": 10,
+      "maxzoom": 17,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "国土画像情報",
+      "url": "https://maps.gsi.go.jp/development/ichiran.html",
+      "license": {
+        "name": "GSI content terms (attribution required)",
+        "url": "https://maps.gsi.go.jp/development/ichiran.html"
+      }
+    },
+    "flags": { "experimental": false, "requiresFeatureFlag": null },
+    "priority": 10
+  },
+  {
+    "id": "gsi-seamlessphoto",
+    "type": "raster-era",
+    "provider": "gsi",
+    "title": { "ja": "最新空中写真", "en": "Latest aerial photos" },
+    "era": { "from": 2007, "to": null },
+    "region": "JP",
+    "coverage": [[122.9, 20.4, 154, 45.6]],
+    "tiles": {
+      "urlTemplate": "https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg",
+      "scheme": "xyz",
+      "minzoom": 14,
+      "maxzoom": 18,
+      "tileSize": 256
+    },
+    "attribution": {
+      "text": "全国最新写真（シームレス） / GRUS画像（© Axelspace）",
+      "url": "https://maps.gsi.go.jp/development/ichiran.html",
+      "license": {
+        "name": "GSI content terms (attribution required)",
+        "url": "https://maps.gsi.go.jp/development/ichiran.html"
+      }
+    },
+    "flags": { "experimental": false, "requiresFeatureFlag": null },
+    "priority": 20
+  }
+]

@@ -61,6 +61,11 @@ extension per research/gsi-tiles.md §2. `scheme: "xyz"`, `tileSize: 256`, `regi
 
 `validate:registry` + one-time manual tile probes (curl, ≤ 2 requests/layer — politeness).
 
+## Review-fix evidence
+
+For `gsi-seamlessphoto`, the runtime attribution preserves the official GSI source text and always
+appends the exact additional credit `GRUS画像（© Axelspace）` (approved Option A for #16 / S15).
+
 ## Dependencies
 
 14 (schema/loader/validator).
