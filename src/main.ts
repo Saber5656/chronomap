@@ -98,6 +98,20 @@ const runtime = bootstrap(app, now, {
 });
 const { store, mapController, overlayManager, pointPicker } = runtime;
 
+// Onboarding is deliberately loaded only after the first map idle so it does not contribute to
+// the initial bundle or compete with the map's first interaction boundary.
+let onboardingStarted = false;
+const unsubscribeOnboardingIdle = mapController.onIdle(() => {
+  if (onboardingStarted) return;
+  onboardingStarted = true;
+  unsubscribeOnboardingIdle?.();
+  void import("./app/onboarding")
+    .then(({ mountOnboarding }) => mountOnboarding(document.body, runtime.shell, store))
+    .catch(() => {
+      // A coach failure must never make the map shell unusable.
+    });
+});
+
 if (import.meta.env.PROD) {
   void registerServiceWorker(runtime.shell.getSlot("toast-host"));
 }
