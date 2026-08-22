@@ -10,6 +10,7 @@ import {
   type MapLngLat,
 } from "./map";
 import { loadRegistry } from "./providers/layers";
+import { KONJAKU_FEATURE_FLAG } from "./security/hosts";
 import { createActions } from "./state/actions";
 import { YEAR_MIN, type AppState } from "./state/appState";
 import { initUrlSync } from "./state/urlSync";
@@ -67,7 +68,7 @@ const currentYear = Math.max(
 );
 const layerRegistry: LayerEntry[] = loadRegistry(gsiLayers, {
   currentYear,
-  featureFlags: { VITE_ENABLE_KONJAKU: import.meta.env.VITE_ENABLE_KONJAKU },
+  featureFlags: { [KONJAKU_FEATURE_FLAG]: import.meta.env.VITE_ENABLE_KONJAKU },
 });
 const registryIds = new Set(layerRegistry.map((entry) => entry.id));
 const basemap: BasemapInfo = {
