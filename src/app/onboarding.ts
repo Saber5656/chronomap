@@ -262,8 +262,25 @@ export function mountOnboarding(
   let currentTarget: HTMLElement | null = null;
   let destroyed = false;
   let resizeObserver: ResizeObserver | undefined;
+  let unsubscribeLanguage: () => void = () => undefined;
   const previousFocus =
     document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+  function teardown(): void {
+    unsubscribeLanguage();
+    nextButton.removeEventListener("click", handleNext);
+    skipButton.removeEventListener("click", complete);
+    document.removeEventListener("pointerdown", handleOutsidePointerDown, true);
+    document.removeEventListener("keydown", handleKeyDown);
+    view?.removeEventListener("resize", handleViewportChange);
+    view?.removeEventListener("scroll", handleViewportChange, true);
+    visualViewport?.removeEventListener("resize", handleViewportChange);
+    visualViewport?.removeEventListener("scroll", handleViewportChange);
+    clearTargetHighlight();
+    resizeObserver?.disconnect();
+    resizeObserver = undefined;
+    root.remove();
+  }
 
   function clearTargetHighlight(): void {
     currentTarget?.classList.remove("onboarding-target");
@@ -304,10 +321,7 @@ export function mountOnboarding(
     if (destroyed) return;
     markCompleted(storage);
     destroyed = true;
-    clearTargetHighlight();
-    resizeObserver?.disconnect();
-    resizeObserver = undefined;
-    root.remove();
+    teardown();
     if (previousFocus !== null && previousFocus.isConnected)
       previousFocus.focus({ preventScroll: true });
   }
@@ -460,7 +474,7 @@ export function mountOnboarding(
 
   const view = document.defaultView;
   const visualViewport = view?.visualViewport;
-  const unsubscribeLanguage = store.on(
+  unsubscribeLanguage = store.on(
     (state) => state.ui.lang,
     (next: AppState["ui"]["lang"]) => {
       const step = STEP_DEFINITIONS[currentStepIndex];
@@ -486,19 +500,7 @@ export function mountOnboarding(
     destroy() {
       if (destroyed) return;
       destroyed = true;
-      unsubscribeLanguage();
-      nextButton.removeEventListener("click", handleNext);
-      skipButton.removeEventListener("click", complete);
-      document.removeEventListener("pointerdown", handleOutsidePointerDown, true);
-      document.removeEventListener("keydown", handleKeyDown);
-      view?.removeEventListener("resize", handleViewportChange);
-      view?.removeEventListener("scroll", handleViewportChange, true);
-      visualViewport?.removeEventListener("resize", handleViewportChange);
-      visualViewport?.removeEventListener("scroll", handleViewportChange);
-      clearTargetHighlight();
-      resizeObserver?.disconnect();
-      resizeObserver = undefined;
-      root.remove();
+      teardown();
     },
   };
 }
