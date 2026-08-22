@@ -1,0 +1,16 @@
+{
+  "batchcomplete": "",
+  "query": {
+    "geosearch": [
+      {
+        "pageid": 123456,
+        "ns": 0,
+        "title": "大阪城",
+        "lat": 34.687315,
+        "lon": 135.526201,
+        "dist": 120.4,
+        "primary": ""
+      }
+    ]
+  }
+}
