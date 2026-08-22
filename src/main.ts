@@ -5,11 +5,13 @@ import {
   USER_LOCATION_DOT_LAYER_ID,
   USER_LOCATION_SOURCE_ID,
   type MapLngLat,
-} from "./map/mapController";
+} from "./map";
+import { loadRegistry } from "./providers/layers";
 import { createActions } from "./state/actions";
 import type { AppState } from "./state/appState";
 import { initUrlSync } from "./state/urlSync";
 import gsiLayers from "./providers/layers/gsi.layers.json";
+import type { LayerEntry } from "./providers/layers/types";
 import { mountLocateButton, mountMenuButton, mountToast } from "./ui/components";
 import "./ui/styles/base.css";
 import "./ui/components/MapHandoffMenu.css";
@@ -23,6 +25,9 @@ interface ChronomapDebugHook {
   getLastLongPress(): MapLngLat | null;
   isMapLoaded(): boolean;
   hasUserLocationLayers(): boolean;
+  setOpacity(percent: number): void;
+  getStyle(): unknown;
+  setOverlayLayer(entry: LayerEntry | null): void;
 }
 
 declare global {
@@ -38,9 +43,14 @@ if (app === null) {
 }
 
 const now = new Date();
-const registryIds = new Set(gsiLayers.map((entry) => entry.id));
+const layerRegistry: LayerEntry[] = loadRegistry(gsiLayers, {
+  currentYear: now.getFullYear(),
+  featureFlags: { VITE_ENABLE_KONJAKU: import.meta.env.VITE_ENABLE_KONJAKU },
+});
+const registryIds = new Set(layerRegistry.map((entry) => entry.id));
 let urlSync: ReturnType<typeof initUrlSync> | undefined;
 const runtime = bootstrap(app, now, {
+  layerRegistry,
   beforeShell: (store) => {
     urlSync = initUrlSync(store, registryIds, { now });
   },
@@ -68,7 +78,7 @@ const runtime = bootstrap(app, now, {
   mountLocateButton: (parent, store, mapController) =>
     mountLocateButton(parent, store, { mapController }),
 });
-const { store, mapController } = runtime;
+const { store, mapController, overlayManager } = runtime;
 
 if (import.meta.env.PROD) {
   void registerServiceWorker(runtime.shell.getSlot("toast-host"));
@@ -101,5 +111,8 @@ if (isDebugContext) {
         map.getLayer(USER_LOCATION_DOT_LAYER_ID) !== undefined
       );
     },
+    setOpacity: (percent) => actions.setOpacity(percent),
+    getStyle: () => mapController.getMap().getStyle(),
+    setOverlayLayer: (entry) => overlayManager?.setLayer(entry, store.get().timeLayer.opacity),
   };
 }
