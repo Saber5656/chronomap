@@ -18,6 +18,7 @@ import {
   type BasemapInfo,
   type PoiSourceInfo,
 } from "../ui/components/LayersSheet";
+import { mount as mountImportSheet } from "../ui/components/ImportSheet";
 import { mountMenuButton } from "../ui/components/MenuButton";
 import { mount as mountToast } from "../ui/components/Toast";
 import {
@@ -125,6 +126,7 @@ export function bootstrap(
           }),
         poi: createSheetStub("poi"),
         about: createSheetStub("about"),
+        import: (parent, sheetStore) => mountImportSheet(parent, sheetStore),
       },
     });
     layerInfoBadge = mountLayerInfoBadge(shell.getSlot("LayerInfoBadge"), store, { registry });
