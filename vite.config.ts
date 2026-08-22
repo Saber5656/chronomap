@@ -1,10 +1,14 @@
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
+import packageJson from "./package.json" with { type: "json" };
 
 const APP_SHELL_GLOB_PATTERNS = ["**/*.{js,css,html,svg,png,webmanifest}"];
 
 export default defineConfig({
   base: "/chronomap/",
+  define: {
+    __APP_VERSION__: JSON.stringify(packageJson.version),
+  },
   plugins: [
     VitePWA({
       // The owning service-worker issue handles runtime registration and update UI.

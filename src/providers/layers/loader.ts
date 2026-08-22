@@ -1,4 +1,4 @@
-import allowedHostsJson from "./allowed-hosts.json";
+import { TILE_HOSTS } from "../../security/hosts";
 import type {
   Bbox,
   LayerEntry,
@@ -18,7 +18,7 @@ const KONJAKU_REGION = "JP";
 const KONJAKU_FEATURE_FLAG = "VITE_ENABLE_KONJAKU";
 const KONJAKU_ATTRIBUTION = "今昔マップ on the web";
 const KONJAKU_LICENSE = "Provider terms / permission required";
-const allowedHosts = new Set<string>(allowedHostsJson);
+const allowedHosts = TILE_HOSTS;
 
 interface ParseSuccess {
   readonly entry: LayerEntry;

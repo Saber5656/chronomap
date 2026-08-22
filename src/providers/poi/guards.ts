@@ -1,10 +1,10 @@
 import { extract, httpsUrl, latLng, poiTitle } from "../../security/validate";
+import { WIKIMEDIA_IMG_HOSTS } from "../../security/hosts";
 import type { Poi, PoiDetail } from "./types";
 
 const WIKIPEDIA_LANGUAGES = new Set(["ja", "en"]);
 const WIKIPEDIA_PAGE_HOSTS = new Set(["ja.wikipedia.org", "en.wikipedia.org"]);
 const COMMONS_PAGE_HOSTS = new Set(["commons.wikimedia.org"]);
-const THUMBNAIL_HOSTS = new Set(["upload.wikimedia.org"]);
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -96,7 +96,7 @@ export function assertPoiDetail(raw: unknown): PoiDetail | null {
       attributionKey: "wikipedia-ccbysa",
     };
     if (raw.thumbnailUrl !== undefined) {
-      const thumbnailUrl = httpsUrl(raw.thumbnailUrl, THUMBNAIL_HOSTS);
+      const thumbnailUrl = httpsUrl(raw.thumbnailUrl, WIKIMEDIA_IMG_HOSTS);
       if (thumbnailUrl === null) return null;
       detail.thumbnailUrl = thumbnailUrl;
     }
