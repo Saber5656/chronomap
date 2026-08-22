@@ -70,9 +70,7 @@ export function resolve(input: LayerResolutionInput): LayerResolution {
 
   let selected = scoredCandidates[0]!;
   if (input.year >= input.currentYear - 2) {
-    const presentDay = scoredCandidates.find(
-      ({ entry }) => entry.provider === "gsi" && entry.id === "gsi-seamlessphoto",
-    );
+    const presentDay = scoredCandidates.find(({ entry }) => entry.id === "gsi-seamlessphoto");
     if (presentDay !== undefined) selected = presentDay;
   }
 

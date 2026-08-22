@@ -247,7 +247,7 @@ describe("resolve", () => {
       name: "prefers the present-day GSI photo in the recent-year window",
       registry: [
         layer("recent-specific", 2025, 2025, { provider: "gsi" }),
-        layer("gsi-seamlessphoto", 1900, 1900, { provider: "gsi" }),
+        layer("gsi-seamlessphoto", 1900, 1900, { provider: "different-provider" }),
       ],
       year: 2025,
       expected: {
@@ -303,6 +303,19 @@ describe("resolve", () => {
         activeLayerId: null,
         reason: "no-coverage",
         candidates: [],
+        snapped: false,
+      },
+    },
+    {
+      name: "does not honor an override outside its zoom range",
+      registry: [layer("nearest", 1930, 1930), layer("forced", 1900, 1900, { minzoom: 15 })],
+      year: 1930,
+      zoom: 14,
+      overrideId: "forced",
+      expected: {
+        activeLayerId: "nearest",
+        reason: "ok",
+        candidates: ["nearest"],
         snapped: false,
       },
     },
@@ -426,9 +439,9 @@ describe("resolve", () => {
     const registry = loadedGsi();
 
     for (let index = 0; index < 128; index += 1) {
-      const west = 122 + random() * 30;
-      const south = 20 + random() * 24;
-      const viewBbox: Bbox = [west, south, west + 0.1 + random() * 1.5, south + 0.1 + random() * 1];
+      const west = 128.5 + random() * 16.5;
+      const south = 30.5 + random() * 13.5;
+      const viewBbox: Bbox = [west, south, west + 0.1 + random() * 1, south + 0.1 + random() * 1];
       const input = {
         year: 1890 + Math.floor(random() * (CURRENT_YEAR - 1889)),
         viewBbox,
