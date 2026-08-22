@@ -1,4 +1,9 @@
-import { TILE_HOSTS } from "../../security/hosts";
+import {
+  isFeatureFlagEnabled,
+  KONJAKU_FEATURE_FLAG,
+  KONJAKU_HOST,
+  TILE_HOSTS,
+} from "../../security/hosts";
 import type {
   Bbox,
   LayerEntry,
@@ -12,10 +17,8 @@ const ID_PATTERN = /^[a-z0-9-]{1,64}$/;
 const REGION_PATTERN = /^(?:[A-Z]{2}|GLOBAL)$/;
 const TILE_TYPES = new Set<LayerType>(["raster-era", "vector-dated"]);
 const TILE_SCHEMES = new Set<TileScheme>(["xyz", "tms"]);
-const KONJAKU_HOST = "ktgis.net";
 const KONJAKU_PROVIDER = "konjaku";
 const KONJAKU_REGION = "JP";
-const KONJAKU_FEATURE_FLAG = "VITE_ENABLE_KONJAKU";
 const KONJAKU_ATTRIBUTION = "今昔マップ on the web";
 const KONJAKU_LICENSE = "Provider terms / permission required";
 const allowedHosts = TILE_HOSTS;
@@ -328,7 +331,7 @@ export function loadRegistry(json: readonly unknown[], env: RegistryEnv): LayerE
     }
     seenIds.add(parsed.entry.id);
     const requiredFlag = parsed.entry.flags.requiresFeatureFlag;
-    if (requiredFlag !== null && env.featureFlags[requiredFlag] !== "true") {
+    if (requiredFlag !== null && !isFeatureFlagEnabled(env.featureFlags, requiredFlag)) {
       continue;
     }
     entries.push(parsed.entry);
