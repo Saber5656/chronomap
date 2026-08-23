@@ -78,7 +78,7 @@ export function buildGeoProtocolHandlerUrl(
   baseUrl: string = import.meta.env.BASE_URL,
 ): string {
   const base = new URL(baseUrl, pageLocation.origin);
-  if (base.origin !== pageLocation.origin) {
+  if (base.origin !== pageLocation.origin || base.username !== "" || base.password !== "") {
     throw new Error("Geo protocol handler must stay on the current origin");
   }
   return new URL("share?text=%s", base).href;
@@ -184,6 +184,13 @@ export function mountMenuButton(
     class: "menu-item",
     "data-menu-item": "import",
   });
+  const aboutItem = el("li", { role: "none" });
+  const aboutButton = el("button", {
+    type: "button",
+    role: "menuitem",
+    class: "menu-item",
+    "data-menu-item": "about",
+  });
   const languageItem = createLanguageToggleItem(store);
   const languageItemContainer = el("li", { role: "none" });
   let geoItem: HTMLLIElement | null = null;
@@ -200,8 +207,9 @@ export function mountMenuButton(
   }
   shareItem.append(shareButton);
   importItem.append(importButton);
+  aboutItem.append(aboutButton);
   languageItemContainer.append(languageItem.element);
-  menu.append(shareItem, importItem, languageItemContainer);
+  menu.append(shareItem, importItem, aboutItem, languageItemContainer);
   if (geoItem !== null) menu.append(geoItem);
   menu.hidden = true;
   root.append(button, menu);
@@ -220,6 +228,7 @@ export function mountMenuButton(
     button.setAttribute("aria-label", t("menu.aria", {}, locale));
     shareButton.textContent = t("menu.share", {}, locale);
     importButton.textContent = t("menu.import", {}, locale);
+    aboutButton.textContent = t("menu.about", {}, locale);
     offlineDot.hidden = !store.get().ui.offline;
     if (geoButton !== null) geoButton.textContent = t("menu.registerGeo", {}, locale);
   }
@@ -257,6 +266,11 @@ export function mountMenuButton(
     actions.openImportSheet({ autofocus: true });
   }
 
+  function handleAboutClick(): void {
+    button.focus();
+    setOpen(false);
+    actions.openSheet("about");
+  }
   function handleRegisterGeo(): void {
     button.focus();
     setOpen(false);
@@ -296,6 +310,7 @@ export function mountMenuButton(
   button.addEventListener("click", handleButtonClick);
   shareButton.addEventListener("click", handleShareClick);
   importButton.addEventListener("click", handleImportClick);
+  aboutButton.addEventListener("click", handleAboutClick);
   geoButton?.addEventListener("click", handleRegisterGeo);
   document.addEventListener("pointerdown", handleDocumentOutside);
   document.addEventListener("click", handleDocumentOutside);
@@ -311,6 +326,7 @@ export function mountMenuButton(
       button.removeEventListener("click", handleButtonClick);
       shareButton.removeEventListener("click", handleShareClick);
       importButton.removeEventListener("click", handleImportClick);
+      aboutButton.removeEventListener("click", handleAboutClick);
       geoButton?.removeEventListener("click", handleRegisterGeo);
       document.removeEventListener("pointerdown", handleDocumentOutside);
       document.removeEventListener("click", handleDocumentOutside);
