@@ -28,7 +28,13 @@ describe("createInitialState", () => {
         selectedId: null,
       },
       geo: { status: "idle", fix: null },
-      ui: { sheet: "none", importRequest: null, toast: null, lang: "ja" },
+      ui: {
+        sheet: "none",
+        importRequest: null,
+        toast: null,
+        offline: false,
+        lang: "ja",
+      },
     });
   });
 

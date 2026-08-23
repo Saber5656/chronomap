@@ -38,6 +38,21 @@
   transition: none;
 }
 
+.bottom-sheet[data-sheet-kind="poi"] {
+  max-height: min(50dvh, calc(100dvh - var(--slider-dock-block-size) - 1rem));
+}
+
+#sheet-host > .bottom-sheet-layer[data-sheet-kind="poi"] {
+  padding-block-end: calc(
+    max(0.75rem, env(safe-area-inset-bottom, 0px)) + var(--slider-dock-block-size)
+  );
+  pointer-events: none;
+}
+
+.bottom-sheet-layer[data-sheet-kind="poi"] .bottom-sheet__backdrop {
+  inset-block-end: var(--slider-dock-block-size);
+}
+
 .bottom-sheet__handle {
   flex: 0 0 auto;
   width: 100%;

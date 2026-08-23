@@ -30,6 +30,7 @@ vi.mock("../../../src/map/mapController", () => ({
 }));
 
 import { bootstrap } from "../../../src/app/bootstrap";
+import { createActions } from "../../../src/state/actions";
 
 function storage(): Storage {
   const values = new Map<string, string>();
@@ -88,6 +89,16 @@ describe("production bootstrap", () => {
 
     expect(parent.querySelector(".bottom-sheet[role='dialog']")).not.toBeNull();
     expect(parent.querySelector("#chronomap-import-input")).not.toBeNull();
+    runtime.destroy();
+  });
+
+  it("mounts the POI detail renderer without layer configuration", () => {
+    const parent = document.createElement("div");
+    const runtime = bootstrap(parent, new Date(2026, 0, 1));
+    const actions = createActions(runtime.store);
+    actions.openSheet("poi");
+
+    expect(parent.querySelector(".poi-sheet")).not.toBeNull();
     runtime.destroy();
   });
 

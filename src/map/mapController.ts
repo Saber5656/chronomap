@@ -12,6 +12,8 @@ import { ZOOM_MAX, ZOOM_MIN, type AppState } from "../state/appState";
 import type { Store } from "../state/store";
 import { latLng, MAX_ACCURACY_METERS } from "../security/validate";
 import { metersToPixelsAtLat, type BoundingBox } from "../util/geo";
+import { recordTileFailure } from "../app/networkStatus";
+import { t } from "../ui/i18n";
 
 export const GSI_PALE_TILE_URL = "https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png";
 export const GSI_STANDARD_TILE_URL = "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png";
@@ -247,6 +249,18 @@ export function createMap(container: HTMLElement, store: Store<AppState>): MapCo
   let userCameraGesture = false;
   let userFix: UserLocationFix | null = null;
   let userFixRenderPending = false;
+  let tileFailures: readonly number[] = [];
+  let lastTileNotice = Number.NEGATIVE_INFINITY;
+  const handleTileError = (event: { sourceId?: string; error?: unknown }): void => {
+    if (store.get().ui.offline || event.sourceId !== GSI_BASEMAP_SOURCE_ID) return;
+    const status = (event.error as { status?: unknown } | undefined)?.status;
+    if (status === 404) return;
+    const result = recordTileFailure(Date.now(), tileFailures, lastTileNotice);
+    tileFailures = result.failures;
+    lastTileNotice = result.lastNotice;
+    if (result.notify)
+      createActions(store).showToast("error", t("net.tilesFailing", {}, store.get().ui.lang));
+  };
 
   function updateUserAccuracyRadius(): void {
     if (userFix === null || map.getLayer(USER_LOCATION_ACCURACY_LAYER_ID) === undefined) return;
@@ -515,6 +529,7 @@ export function createMap(container: HTMLElement, store: Store<AppState>): MapCo
   map.on("rotatestart", cancelLongPress);
   map.on("pitchstart", cancelLongPress);
   map.on("rollstart", cancelLongPress);
+  map.on("error", handleTileError);
 
   container.addEventListener("pointerdown", handlePointerDown);
   container.addEventListener("pointermove", handlePointerMove);
@@ -620,6 +635,7 @@ export function createMap(container: HTMLElement, store: Store<AppState>): MapCo
       map.off("rotatestart", cancelLongPress);
       map.off("pitchstart", cancelLongPress);
       map.off("rollstart", cancelLongPress);
+      map.off("error", handleTileError);
       map.off("contextmenu", handleContextMenu);
       idleListeners.clear();
       longPressListeners.clear();
