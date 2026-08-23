@@ -37,6 +37,7 @@ import { initI18n } from "../ui/i18n";
 import { mount as mountPoiErrorBanner } from "../ui/components/PoiErrorBanner";
 import { createTimeWiring, type TimeWiringController } from "./timeWiring";
 import { mountNetworkStatus } from "./networkStatus";
+import { mount as mountA11yAnnouncer, type AnnouncerController } from "../ui/a11y/announcer";
 
 export interface AppRuntime {
   readonly store: Store<AppState>;
@@ -54,6 +55,8 @@ export interface AppRuntime {
 
 export interface BootstrapOptions {
   readonly layerRegistry?: readonly LayerEntry[];
+  /** Allow synthetic shell measurements to omit non-critical coverage chrome. */
+  readonly showCoverageBanner?: boolean;
   /** Optional complete registry used only for About credits; layer resolution remains unchanged. */
   readonly aboutRegistry?: readonly LayerEntry[];
   /** Lazily resolve the complete registry only when the About sheet is opened. */
@@ -171,11 +174,14 @@ export function bootstrap(
       registry: readonly LayerEntry[],
     ) => mountCoverageBanner(parent, stateStore, { mapController: controller, registry }));
   const coverageBanner =
-    options.layerRegistry === undefined
+    options.layerRegistry === undefined || options.showCoverageBanner === false
       ? undefined
       : mountCoverage(shell.getSlot("CoverageBanner"), store, mapController, options.layerRegistry);
   const timeSlider = options.mountTimeSlider?.(shell.getSlot("TimeSlider"), store);
   const opacityControl = options.mountOpacityControl?.(shell.getSlot("OpacityControl"), store);
+  const a11yAnnouncer: AnnouncerController = mountA11yAnnouncer(parent, store, {
+    ...(options.layerRegistry === undefined ? {} : { registry: options.layerRegistry }),
+  });
   const pointPicker = mountPointPicker(shell.getSlot("map-region"), store, mapController);
   const sheetRenderers: Partial<Record<SheetKind, SheetRenderer>> = {
     import: (parent, sheetStore) =>
@@ -236,6 +242,7 @@ export function bootstrap(
       poiToggle.destroy();
       timeSlider?.destroy();
       opacityControl?.destroy();
+      a11yAnnouncer.destroy();
       coverageBanner?.destroy();
       bottomSheet?.destroy();
       unsubscribePoiSelection();

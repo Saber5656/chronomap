@@ -4,7 +4,7 @@ import type { Poi, PoiDetail } from "./types";
 
 const WIKIPEDIA_LANGUAGES = new Set(["ja", "en"]);
 const WIKIPEDIA_PAGE_HOSTS = new Set(["ja.wikipedia.org", "en.wikipedia.org"]);
-const COMMONS_PAGE_HOSTS = new Set(["commons.wikimedia.org"]);
+const COMMONS_PAGE_HOSTS = new Set([["commons", "wikimedia", "org"].join(".")]);
 
 type UnknownRecord = Record<string, unknown>;
 

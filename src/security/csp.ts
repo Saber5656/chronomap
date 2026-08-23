@@ -1,4 +1,5 @@
 import {
+  COMMONS_PHOTOS_FEATURE_FLAG,
   isKonjakuEnabled,
   KONJAKU_HOST,
   TILE_HOSTS,
@@ -8,6 +9,7 @@ import {
 
 export interface ContentSecurityPolicyOptions {
   readonly enableKonjaku?: boolean;
+  readonly enableCommonsPhotos?: boolean;
   readonly featureFlags?: Readonly<Record<string, unknown>>;
 }
 
@@ -36,7 +38,11 @@ export function cspConnectHosts(options: ContentSecurityPolicyOptions = {}): rea
     (options.featureFlags === undefined ? false : isKonjakuEnabled(options.featureFlags));
   const tileHosts = [...TILE_HOSTS].filter((host) => host !== KONJAKU_HOST);
   if (enableKonjaku) tileHosts.push(KONJAKU_HOST);
-  return [...tileHosts, ...WIKIMEDIA_API_HOSTS];
+  const hosts = [...tileHosts, ...WIKIMEDIA_API_HOSTS];
+  const enableCommonsPhotos =
+    options.enableCommonsPhotos ?? options.featureFlags?.[COMMONS_PHOTOS_FEATURE_FLAG] === "true";
+  if (enableCommonsPhotos) hosts.push("commons.wikimedia.org");
+  return hosts;
 }
 
 /** Build the exact meta-CSP from the auditable provider host inventory. */

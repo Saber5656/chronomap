@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://cyberjapandata.gsi.go.jp https://upload.wikimedia.org; connect-src 'self' https://cyberjapandata.gsi.go.jp https://ja.wikipedia.org https://en.wikipedia.org https://commons.wikimedia.org; worker-src 'self' blob:; child-src blob:; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'"
+      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://cyberjapandata.gsi.go.jp https://upload.wikimedia.org; connect-src 'self' https://cyberjapandata.gsi.go.jp https://ja.wikipedia.org https://en.wikipedia.org; worker-src 'self' blob:; child-src blob:; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'"
     />
     <meta name="referrer" content="no-referrer" />
     <meta name="theme-color" content="#2d6cdf" />
@@ -13,10 +13,14 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="chronomap" />
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/pwa-180.png" />
+    <link rel="stylesheet" href="./loading.css" />
     <title>chronomap</title>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <div class="app-loading" role="status">chronomap を読み込み中…</div>
+    </div>
+    <h1 class="app-brand">chronomap</h1>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

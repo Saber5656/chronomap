@@ -131,6 +131,7 @@ export function mount(
   const button = el("button", {
     class: "locate-button",
     type: "button",
+    "aria-haspopup": "dialog",
     "aria-controls": `locate-denied-popover-${instanceId}`,
   });
   const title = el("h2", { id: deniedTitleId, class: "locate-popover__title" });
@@ -142,6 +143,7 @@ export function mount(
       id: `locate-denied-popover-${instanceId}`,
       class: "locate-popover",
       role: "dialog",
+      "aria-modal": "true",
       "aria-labelledby": deniedTitleId,
       "aria-describedby": deniedBodyId,
     },
@@ -153,6 +155,7 @@ export function mount(
   let destroyed = false;
   let popoverOpen = false;
   let requestSequence = 0;
+  let restoreFocusAfterRequest = false;
 
   function render(): void {
     const status = store.get().geo.status;
@@ -182,9 +185,12 @@ export function mount(
     popover.setAttribute("aria-hidden", String(!showPopover));
   }
 
-  function setPopoverOpen(open: boolean): void {
+  function setPopoverOpen(open: boolean, restoreFocus = false): void {
     popoverOpen = open;
     render();
+    if (open) retryButton.focus({ preventScroll: true });
+    else if (restoreFocus && !button.disabled && button.isConnected)
+      button.focus({ preventScroll: true });
   }
 
   async function acquireFix(): Promise<void> {
@@ -213,6 +219,13 @@ export function mount(
       } else {
         actions.setGeoStatus(status);
       }
+    } finally {
+      if (!destroyed && sequence === requestSequence && restoreFocusAfterRequest) {
+        restoreFocusAfterRequest = false;
+        if (!root.hidden && !button.disabled && button.isConnected) {
+          button.focus({ preventScroll: true });
+        }
+      }
     }
   }
 
@@ -228,6 +241,7 @@ export function mount(
 
   function handleRetryClick(): void {
     if (store.get().geo.status !== "denied") return;
+    restoreFocusAfterRequest = true;
     void acquireFix();
   }
 
@@ -238,7 +252,15 @@ export function mount(
   }
 
   function handleDocumentKeyDown(event: KeyboardEvent): void {
-    if (event.key === "Escape" && popoverOpen) setPopoverOpen(false);
+    if (!popoverOpen) return;
+    if (event.key === "Tab") {
+      event.preventDefault();
+      retryButton.focus({ preventScroll: true });
+      return;
+    }
+    if (event.key !== "Escape") return;
+    event.preventDefault();
+    setPopoverOpen(false, true);
   }
 
   const unsubscribeStatus = store.on((state) => state.geo.status, render);
@@ -259,6 +281,7 @@ export function mount(
       if (destroyed) return;
       destroyed = true;
       requestSequence += 1;
+      restoreFocusAfterRequest = false;
       unsubscribeStatus();
       unsubscribeLang();
       button.removeEventListener("click", handleButtonClick);

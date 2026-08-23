@@ -186,6 +186,7 @@ const mocks = vi.hoisted(() => {
 vi.mock("maplibre-gl", () => ({
   AttributionControl: mocks.FakeAttributionControl,
   Map: mocks.FakeMap,
+  setWorkerUrl: vi.fn(),
 }));
 
 import {

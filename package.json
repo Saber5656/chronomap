@@ -12,7 +12,9 @@
     "check:pins": "node scripts/check-action-pinning.mjs",
     "validate:pwa": "node scripts/validate-pwa-build.mjs",
     "validate:pwa:preview": "node scripts/validate-pwa-preview.mjs",
+    "validate:commons:off": "node scripts/validate-commons-build.mjs",
     "validate:registry": "node scripts/validate-registry.mjs",
+    "lhci": "lhci autorun --config=lighthouserc.json",
     "validate:readme": "node scripts/validate-readme-links.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -20,12 +22,14 @@
     "test:security": "vitest run tests/security && playwright test security/e2e --project=mobile-chromium",
     "test:watch": "vitest",
     "e2e": "playwright test",
+    "e2e:commons": "playwright test --config=playwright.commons.config.ts",
     "e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "maplibre-gl": "^6.3.0"
   },
   "devDependencies": {
+    "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.62.1",
     "@vitest/coverage-v8": "^4.1.10",
     "eslint": "^10.8.1",

@@ -54,8 +54,8 @@
 
 .opacity-control__trigger:focus-visible,
 .opacity-control__slider:focus-visible {
-  outline: 3px solid var(--color-accent);
-  outline-offset: 2px;
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
 }
 
 .opacity-control__trigger:disabled {

@@ -1,12 +1,34 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { defineConfig, loadEnv, type Plugin } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 import packageJson from "./package.json" with { type: "json" };
 import { buildContentSecurityPolicy } from "./src/security/csp";
-import { isFeatureFlagEnabled, KONJAKU_FEATURE_FLAG } from "./src/security/hosts";
+import {
+  COMMONS_PHOTOS_FEATURE_FLAG,
+  isFeatureFlagEnabled,
+  KONJAKU_FEATURE_FLAG,
+} from "./src/security/hosts";
 
-const APP_SHELL_GLOB_PATTERNS = ["**/*.{js,css,html,svg,png,webmanifest}"];
+const APP_SHELL_GLOB_PATTERNS = ["**/*.{js,mjs,css,html,svg,png,webmanifest}"];
 
-function cspMetaPlugin(enableKonjaku: boolean): Plugin {
+function maplibreWorkerAssetsPlugin(): Plugin {
+  const packageDist = resolve(process.cwd(), "node_modules/maplibre-gl/dist");
+  return {
+    name: "chronomap-maplibre-worker-assets",
+    generateBundle() {
+      for (const fileName of ["maplibre-gl-worker.mjs", "maplibre-gl-shared.mjs"]) {
+        this.emitFile({
+          type: "asset",
+          fileName: `assets/${fileName}`,
+          source: readFileSync(resolve(packageDist, fileName)),
+        });
+      }
+    },
+  };
+}
+
+function cspMetaPlugin(enableKonjaku: boolean, enableCommonsPhotos: boolean): Plugin {
   return {
     name: "chronomap-csp-meta",
     transformIndexHtml: {
@@ -25,7 +47,7 @@ function cspMetaPlugin(enableKonjaku: boolean): Plugin {
 
         const updatedMeta = meta.replace(
           contentPattern,
-          `$1${buildContentSecurityPolicy({ enableKonjaku })}$2`,
+          `$1${buildContentSecurityPolicy({ enableKonjaku, enableCommonsPhotos })}$2`,
         );
         return html.replace(meta, updatedMeta);
       },
@@ -41,6 +63,10 @@ export default defineConfig(({ mode }) => {
     },
     KONJAKU_FEATURE_FLAG,
   );
+  const enableCommonsPhotos = isFeatureFlagEnabled(
+    { [COMMONS_PHOTOS_FEATURE_FLAG]: fileEnv[COMMONS_PHOTOS_FEATURE_FLAG] },
+    COMMONS_PHOTOS_FEATURE_FLAG,
+  );
 
   return {
     base: "/chronomap/",
@@ -48,7 +74,8 @@ export default defineConfig(({ mode }) => {
       __APP_VERSION__: JSON.stringify(packageJson.version),
     },
     plugins: [
-      cspMetaPlugin(enableKonjaku),
+      cspMetaPlugin(enableKonjaku, enableCommonsPhotos),
+      maplibreWorkerAssetsPlugin(),
       VitePWA({
         // The owning service-worker issue handles runtime registration and update UI.
         registerType: "prompt",
@@ -76,6 +103,7 @@ export default defineConfig(({ mode }) => {
           scope: ".",
           share_target: {
             action: "share",
+            enctype: "application/x-www-form-urlencoded",
             method: "GET",
             params: { title: "title", text: "text", url: "url" },
           },
