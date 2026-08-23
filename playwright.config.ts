@@ -9,8 +9,8 @@ const mobileProject = {
 };
 
 export default defineConfig({
-  testDir: "./tests/e2e",
-  testMatch: "**/*.spec.ts",
+  testDir: "./tests",
+  testMatch: ["e2e/**/*.spec.ts", "security/e2e/**/*.spec.ts"],
   fullyParallel: true,
   outputDir: "test-results",
   reporter: [["list"], ["html", { open: "never", outputFolder: "playwright-report" }]],
