@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createActions } from "../../../src/state/actions";
 import { createInitialState } from "../../../src/state/appState";
 import { createStore } from "../../../src/state/store";
-import { initUrlSync } from "../../../src/state/urlSync";
+import { initUrlSync, URL_SYNC_DEBOUNCE_MS } from "../../../src/state/urlSync";
 
 const NOW = new Date(2026, 0, 1);
 const REGISTRY_IDS = new Set(["gsi-1960"]);
@@ -59,6 +59,22 @@ describe("initUrlSync", () => {
     const orphanSync = initUrlSync(createTestStore(), REGISTRY_IDS, { now: NOW });
     expect(orphanSync.getInitialLabel()).toBeNull();
     orphanSync.destroy();
+  });
+
+  it("clears a shared label when the camera leaves its pinned view", () => {
+    resetLocation("?lat=34.7&lng=135.49&z=16&label=Osaka");
+    const replaceState = vi.spyOn(window.history, "replaceState");
+    const store = createTestStore();
+    const sync = initUrlSync(store, REGISTRY_IDS, { now: NOW });
+    const actions = createActions(store);
+    sync.markIdle();
+
+    actions.setView({ lat: 34.71, lng: 135.49, zoom: 16 });
+    vi.advanceTimersByTime(URL_SYNC_DEBOUNCE_MS);
+
+    expect(replaceState).toHaveBeenCalledWith(null, "", "?lat=34.71&lng=135.49&z=16");
+    expect(sync.getSerialized()).toBe("?lat=34.71&lng=135.49&z=16");
+    sync.destroy();
   });
 
   it("holds URL writes until the first idle event", () => {
