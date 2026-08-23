@@ -217,9 +217,12 @@ assert(
   new URL(manifest.share_target.action, manifestUrl).pathname === "/chronomap/share",
   "share_target.action escaped base",
 );
+const protocolHandlerUrl = new URL(manifest.protocol_handlers[0].url, manifestUrl);
 assert(
-  new URL(manifest.protocol_handlers[0].url, manifestUrl).pathname === "/chronomap/share" &&
-    new URL(manifest.protocol_handlers[0].url, manifestUrl).search === "?text=%s",
+  protocolHandlerUrl.origin === manifestUrl.origin &&
+    protocolHandlerUrl.protocol === manifestUrl.protocol &&
+    protocolHandlerUrl.pathname === "/chronomap/share" &&
+    protocolHandlerUrl.search === "?text=%s",
   "protocol_handlers escaped base",
 );
 
