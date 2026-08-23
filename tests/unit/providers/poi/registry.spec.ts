@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
+
 import { getPhotoProvider } from "../../../../src/providers/poi/registry";
 
-describe("POI photo registry", () => {
-  it("keeps the experimental provider disabled by default", () => {
+describe("getPhotoProvider", () => {
+  it("does not expose the Commons provider when the flag is off", () => {
     expect(getPhotoProvider(false)).toBeNull();
   });
 
-  it("returns the Commons provider only when explicitly enabled", () => {
+  it("returns a lazy provider only when explicitly enabled", () => {
     expect(getPhotoProvider(true)).not.toBeNull();
   });
 });

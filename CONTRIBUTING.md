@@ -87,3 +87,15 @@ That Playwright check verifies the base-correct manifest through Chrome DevTools
 Protocol, an active service worker controlling the reloaded page, and an empty
 Chrome installability-error list. It does not rely on the removed Lighthouse
 PWA category.
+
+## Commons photo feature-flag matrix
+
+The Commons photo strip is intentionally compiled only into the enabled build.
+Validate the flag-off asset boundary with:
+
+```sh
+VITE_ENABLE_COMMONS_PHOTOS=false npm run build
+npm run validate:commons:off
+```
+
+Run the enabled-build E2E coverage separately with `npm run e2e:commons`.

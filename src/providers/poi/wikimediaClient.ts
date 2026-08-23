@@ -11,6 +11,7 @@ export type FetchImpl = (input: RequestInfo | URL, init?: RequestInit) => Promis
 export interface WikimediaFetchOptions {
   signal?: AbortSignal;
   fetchImpl?: FetchImpl;
+  allowedApiHosts?: ReadonlySet<string>;
 }
 
 type UnknownRecord = Record<string, unknown>;
@@ -63,10 +64,10 @@ function malformedError(): PoiProviderException {
   return providerError({ kind: "malformed" });
 }
 
-function assertWikimediaUrl(url: URL): void {
+function assertWikimediaUrl(url: URL, allowedApiHosts = WIKIMEDIA_API_HOSTS): void {
   if (
     url.protocol !== "https:" ||
-    !WIKIMEDIA_API_HOSTS.has(url.host) ||
+    !allowedApiHosts.has(url.host) ||
     url.username !== "" ||
     url.password !== ""
   ) {
@@ -140,7 +141,7 @@ function readJson(response: Response): Promise<unknown> {
 
 /** Fetch one allowlisted Wikimedia API URL and return the parsed, still-unvalidated JSON value. */
 export function wikimediaFetch(url: URL, opts: WikimediaFetchOptions = {}): Promise<unknown> {
-  assertWikimediaUrl(url);
+  assertWikimediaUrl(url, opts.allowedApiHosts);
   const requestUrl = new URL(url.href);
   const combined = combinedSignal(opts.signal);
   const { signal } = combined;
@@ -179,7 +180,7 @@ export function cachedFetch(
   url: URL,
   opts: WikimediaFetchOptions = {},
 ): Promise<unknown> {
-  assertWikimediaUrl(url);
+  assertWikimediaUrl(url, opts.allowedApiHosts);
   const cached = responseCache.get(key);
   if (cached !== undefined && !cached.signal?.aborted) return cached.promise;
   if (cached !== undefined) responseCache.delete(key);

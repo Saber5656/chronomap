@@ -10,6 +10,7 @@ export const COMMONS_GEOSEARCH_LIMIT = 20;
 
 const COMMONS_HOST = "commons.wikimedia.org";
 const COMMONS_PAGE_HOSTS = new Set([COMMONS_HOST]);
+const COMMONS_API_HOSTS = new Set([COMMONS_HOST]);
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -176,11 +177,10 @@ async function fetchCommonsImages(
 
   throwIfAborted(options.signal);
   const key = cacheKey(coordinates.lat, coordinates.lng);
-  const searchResponse = await cachedFetch(
-    key,
-    geosearchUrl(coordinates.lat, coordinates.lng),
-    options,
-  );
+  const searchResponse = await cachedFetch(key, geosearchUrl(coordinates.lat, coordinates.lng), {
+    ...options,
+    allowedApiHosts: COMMONS_API_HOSTS,
+  });
   throwIfAborted(options.signal);
   const titles = geosearchTitles(searchResponse).slice(0, COMMONS_GEOSEARCH_LIMIT);
   if (titles.length === 0) return [];
@@ -188,7 +188,7 @@ async function fetchCommonsImages(
   const imageResponse = await cachedFetch(
     `${key}:images:${titles.join("|")}`,
     imageInfoUrl(titles),
-    options,
+    { ...options, allowedApiHosts: COMMONS_API_HOSTS },
   );
   throwIfAborted(options.signal);
   const images = imageInfoPages(imageResponse).flatMap((page) => {

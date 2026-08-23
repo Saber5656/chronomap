@@ -1,14 +1,14 @@
-/** Exact third-party hosts used by Wikimedia API, image, and tile requests. */
+/** Exact Wikimedia API hosts used by the core Wikipedia providers. */
 export const WIKIMEDIA_API_HOSTS: ReadonlySet<string> = new Set([
   "ja.wikipedia.org",
   "en.wikipedia.org",
-  "commons.wikimedia.org",
 ]);
 
 export const WIKIMEDIA_IMG_HOSTS: ReadonlySet<string> = new Set(["upload.wikimedia.org"]);
 
 export const KONJAKU_HOST = "ktgis.net";
 export const KONJAKU_FEATURE_FLAG = "VITE_ENABLE_KONJAKU";
+export const COMMONS_PHOTOS_FEATURE_FLAG = "VITE_ENABLE_COMMONS_PHOTOS";
 
 export const TILE_HOSTS: ReadonlySet<string> = new Set(["cyberjapandata.gsi.go.jp", KONJAKU_HOST]);
 

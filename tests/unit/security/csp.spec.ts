@@ -40,7 +40,10 @@ describe("Content Security Policy", () => {
 
   it("derives provider origins from hosts.ts and gates Konjaku exactly", () => {
     const defaultPolicy = buildContentSecurityPolicy();
-    const enabledPolicy = buildContentSecurityPolicy({ enableKonjaku: true });
+    const enabledPolicy = buildContentSecurityPolicy({
+      enableKonjaku: true,
+      enableCommonsPhotos: true,
+    });
 
     for (const host of [...TILE_HOSTS, ...WIKIMEDIA_IMG_HOSTS]) {
       expect(defaultPolicy.includes(`https://${host}`)).toBe(host !== KONJAKU_HOST);
@@ -50,6 +53,8 @@ describe("Content Security Policy", () => {
       expect(defaultPolicy).toContain(`https://${host}`);
       expect(enabledPolicy).toContain(`https://${host}`);
     }
+    expect(defaultPolicy).not.toContain("https://commons.wikimedia.org");
+    expect(enabledPolicy).toContain("https://commons.wikimedia.org");
 
     expect(cspImageHosts()).toEqual(["cyberjapandata.gsi.go.jp", "upload.wikimedia.org"]);
     expect(cspImageHosts({ enableKonjaku: true })).toEqual([
@@ -61,9 +66,10 @@ describe("Content Security Policy", () => {
       "cyberjapandata.gsi.go.jp",
       "ja.wikipedia.org",
       "en.wikipedia.org",
-      "commons.wikimedia.org",
     ]);
-    expect(cspConnectHosts({ enableKonjaku: true })).toContain(KONJAKU_HOST);
+    expect(cspConnectHosts({ enableKonjaku: true, enableCommonsPhotos: true })).toContain(
+      KONJAKU_HOST,
+    );
     expect(defaultPolicy).not.toContain(KONJAKU_HOST);
   });
 
