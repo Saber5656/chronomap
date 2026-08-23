@@ -23,12 +23,13 @@ chronomap の `/share` へ渡す「chronomapで開く」ショートカットを
    | --- | --- | --- | --- |
    | 1 | 「テキスト」 | `Text` | 次の固定値だけを入力する: `https://saber5656.github.io/chronomap/share?text=` |
    | 2 | 「URLエンコード」 | `URL Encode` | 入力を「ショートカットの入力」(`Shortcut Input`) にする |
-   | 3 | 「テキストを結合」 | `Combine Text` | 1 の出力、2 の出力の順に結合し、区切り文字は空にする |
-   | 4 | 「URLを開く」 | `Open URLs` | 3 の結合結果を入力にする |
+   | 3 | 「リスト」 | `List` | 1 の出力、2 の出力をこの順番でリストに追加する |
+   | 4 | 「テキストを結合」 | `Combine Text` | 3 のリストを入力し、区切り文字は空にする |
+   | 5 | 「URLを開く」 | `Open URLs` | 4 の結合結果を入力にする |
 
-   「テキストを結合」では、マジック変数を使って「テキスト」の出力を先に置き、
-   その後ろに「URLエンコード」の出力を置きます。`text=` を含む固定値全体を URL エンコードしたり、
-   共有入力を二重にエンコードしたりしないでください。
+   「リスト」では、マジック変数を使って「テキスト」の出力を先に置き、
+   その後ろに「URLエンコード」の出力を置きます。「テキストを結合」の区切り文字は空にします。
+   `text=` を含む固定値全体を URL エンコードしたり、共有入力を二重にエンコードしたりしないでください。
 
 5. 保存して編集を終了します。共有シートに表示されない場合は、共有シートの「その他」またはアクション編集画面で `chronomapで開く` を有効にします。
 
@@ -91,11 +92,13 @@ https://saber5656.github.io/chronomap/share?text=
    | --- | --- | --- | --- |
    | 1 | `テキスト` | `Text` | Enter only this fixed value: `https://saber5656.github.io/chronomap/share?text=` |
    | 2 | `URLエンコード` | `URL Encode` | Set the input to `ショートカットの入力` (`Shortcut Input`) |
-   | 3 | `テキストを結合` | `Combine Text` | Join the output of step 1 followed by step 2, with an empty separator |
-   | 4 | `URLを開く` | `Open URLs` | Use the combined result from step 3 as the input |
+   | 3 | `リスト` | `List` | Add the outputs of steps 1 and 2 to the list in that order |
+   | 4 | `テキストを結合` | `Combine Text` | Use the step 3 list as input, with an empty separator |
+   | 5 | `URLを開く` | `Open URLs` | Use the combined result from step 4 as the input |
 
-   In `Combine Text`, use Magic Variables so the `Text` output comes first and the `URL Encode` output comes second.
-   Do not URL-encode the whole fixed endpoint, and do not encode the shared input twice.
+   In `List`, use Magic Variables so the `Text` output comes first and the `URL Encode` output comes second.
+   Set `Combine Text` to use the list with no separator. Do not URL-encode the whole fixed endpoint,
+   and do not encode the shared input twice.
 
 5. Save the shortcut and leave the editor. If it does not appear in the share sheet, use `More` or the share-sheet action editor to enable `chronomapで開く`.
 
