@@ -67,7 +67,7 @@ test("traps keyboard focus and closes with Escape", async ({ page }) => {
   const dialog = page.locator(".bottom-sheet[role='dialog']");
   const close = dialog.locator(".bottom-sheet__close");
   await expect(close).toBeFocused();
-  await dialog.locator("a").last().focus();
+  await dialog.locator("[data-sheet-link='about']").focus();
   await page.keyboard.press("Tab");
   await expect(close).toBeFocused();
   await page.keyboard.press("Escape");
