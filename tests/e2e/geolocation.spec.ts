@@ -88,7 +88,7 @@ test.describe("geolocation granted flow", () => {
     await stubUpstream(page);
     await setFix(page, FIX.lat, FIX.lng, FIX.accuracy);
 
-    await page.goto("/");
+    await page.goto("/?poi=0");
     const button = page.locator("button.locate-button");
     await expect(button).toBeVisible();
     expect(await geoCallCount(page)).toBe(0);
