@@ -98,7 +98,7 @@ describe("AboutSheet", () => {
     });
 
     expect(parent.querySelector(".about-sheet__app-name")?.textContent).toBe("chronomap");
-    expect(parent.querySelector("[data-about-section='app']")?.textContent).toContain("0.0.0");
+    expect(parent.querySelector("[data-about-section='app']")?.textContent).toContain("0.1.0");
     expect(parent.querySelector("[data-source-row='fixture-provider']")?.textContent).toContain(
       "Fixture credit",
     );

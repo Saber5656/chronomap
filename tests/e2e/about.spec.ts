@@ -21,7 +21,7 @@ test("opens About from the menu and renders registry credits, privacy, and docum
   const dialog = page.locator(".bottom-sheet[role='dialog']");
   await expect(dialog).toBeVisible();
   await expect(dialog.locator(".about-sheet__app-name")).toHaveText("chronomap");
-  await expect(dialog.locator("[data-about-section='app']")).toContainText("0.0.0");
+  await expect(dialog.locator("[data-about-section='app']")).toContainText("0.1.0");
 
   const gsiCreditTexts = [...new Set(gsiLayers.map((entry) => entry.attribution.text))];
   const gsiRow = dialog.locator("[data-source-row='gsi']");
