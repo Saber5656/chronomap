@@ -20,6 +20,7 @@ import {
   mountLocateButton,
   mountMenuButton,
   mountOpacityControl,
+  mountPoiToggle,
   mountTimeSlider,
   mountToast,
 } from "./ui/components";
@@ -32,6 +33,7 @@ import "./ui/components/Toast.css";
 import "./ui/components/CoverageBanner.css";
 import "./ui/components/TimeSlider.css";
 import "./ui/components/OpacityControl.css";
+import "./ui/components/PoiToggle.css";
 import "./ui/components/BottomSheet.css";
 import "./ui/components/ImportSheet.css";
 import "./ui/components/LayerInfoBadge.css";
@@ -48,6 +50,17 @@ interface ChronomapDebugHook {
   setOpacity(percent: number): void;
   getStyle(): unknown;
   setOverlayLayer(entry: LayerEntry | null): void;
+  getPoiScreenPoint(id: string): { x: number; y: number } | null;
+}
+
+const ONBOARDING_DEEP_LINK_KEYS = new Set(["lat", "lng", "z", "year", "l", "op", "poi", "label"]);
+
+function hasOnboardingDeepLinkParams(search: string): boolean {
+  const params = new URLSearchParams(search);
+  for (const key of params.keys()) {
+    if (ONBOARDING_DEEP_LINK_KEYS.has(key)) return true;
+  }
+  return false;
 }
 
 declare global {
@@ -105,6 +118,7 @@ const runtime = bootstrap(app, now, {
   mountTimeSlider: (parent, store) =>
     mountTimeSlider(parent, store, { registry: layerRegistry, currentYear, now }),
   mountOpacityControl: (parent, store) => mountOpacityControl(parent, store),
+  mountPoiToggle: (parent, store) => mountPoiToggle(parent, store),
   afterMap: ({ mapController }) => {
     urlSync?.connectIdle((callback) => {
       const map = mapController.getMap();
@@ -126,18 +140,25 @@ const runtime = bootstrap(app, now, {
 const { store, mapController, overlayManager, pointPicker } = runtime;
 
 // Onboarding is deliberately loaded only after the first map idle so it does not contribute to
-// the initial bundle or compete with the map's first interaction boundary.
+// the initial bundle or compete with the map's first interaction boundary. Deep links are the
+// exception: they must mark the first visit complete even when a stubbed/offline map never idles.
 let onboardingStarted = false;
-const unsubscribeOnboardingIdle = mapController.onIdle(() => {
+const startOnboarding = (): void => {
   if (onboardingStarted) return;
   onboardingStarted = true;
-  unsubscribeOnboardingIdle?.();
+  unsubscribeOnboardingIdle();
   void import("./app/onboarding")
     .then(({ mountOnboarding }) => mountOnboarding(document.body, runtime.shell, store))
     .catch(() => {
       // A coach failure must never make the map shell unusable.
     });
-});
+};
+const unsubscribeOnboardingIdle = mapController.onIdle(startOnboarding);
+// A fast deep-link bootstrap can settle before the idle listener is attached. The onboarding
+// module still stays lazy; deep-link detection is the only pre-idle fallback.
+if (hasOnboardingDeepLinkParams(window.location.search)) {
+  queueMicrotask(startOnboarding);
+}
 
 if (import.meta.env.PROD) {
   void registerServiceWorker(runtime.shell.getSlot("toast-host"));
@@ -174,5 +195,11 @@ if (isDebugContext) {
     setOpacity: (percent) => actions.setOpacity(percent),
     getStyle: () => mapController.getMap().getStyle(),
     setOverlayLayer: (entry) => overlayManager?.setLayer(entry, store.get().timeLayer.opacity),
+    getPoiScreenPoint: (id) => {
+      const item = store.get().poi.items.find((candidate) => candidate.id === id);
+      if (item === undefined) return null;
+      const point = mapController.getMap().project([item.lng, item.lat]);
+      return { x: point.x, y: point.y };
+    },
   };
 }

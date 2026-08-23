@@ -1,4 +1,6 @@
 export { mount as mountLocateButton } from "./LocateButton";
+export { mount as mountPoiToggle } from "./PoiToggle";
+export type { PoiToggleController } from "./PoiToggle";
 export { mount as mountOpacityControl } from "./OpacityControl";
 export { mount as mountToast } from "./Toast";
 export { mount as mountCoverageBanner } from "./CoverageBanner";
