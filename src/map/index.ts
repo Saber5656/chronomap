@@ -13,6 +13,25 @@ export {
 } from "./mapController";
 export type { MapController, MapLngLat, UserFix, UserLocationFix } from "./mapController";
 export {
+  calculatePoiRadius,
+  initPoiController,
+  poiRadiusBucket,
+  POI_CIRCLE_LAYER_ID,
+  POI_FETCH_DEBOUNCE_MS,
+  POI_ICON_IMAGE_ID,
+  POI_PIN_HIT_TOLERANCE_PX,
+  POI_SOURCE_ID,
+  POI_SYMBOL_LAYER_ID,
+  shouldFetchPoi,
+  stablePoiItems,
+} from "./poiLayer";
+export type {
+  PoiController,
+  PoiFetchSnapshot,
+  PoiProviderResolver,
+  PoiTriggerInput,
+} from "./poiLayer";
+export {
   createOverlayManager,
   firstLayerIdWithPrefix,
   pastLayerId,

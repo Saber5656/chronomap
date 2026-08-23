@@ -28,6 +28,10 @@ export interface StubUpstreamOptions {
   readonly missing?: readonly MissingTile[];
   /** Let browser-level security tests observe the request before the harness blocks it. */
   readonly passthroughHosts?: readonly string[];
+  /** Override the GeoSearch payload for request-budget and rendering scenarios. */
+  readonly geosearch?: unknown;
+  /** Delay GeoSearch responses so abort/retry behavior can be exercised deterministically. */
+  readonly geosearchDelayMs?: number;
   /** Allow the dedicated onboarding spec to exercise the first-visit coach. */
   readonly onboarding?: "first-visit";
 }
@@ -162,7 +166,11 @@ async function handleRequest(
     (url.pathname === "/w/api.php" || url.pathname.startsWith("/api/rest_v1/page/summary/"))
   ) {
     if (url.pathname === "/w/api.php") {
-      await fulfillJson(route, geosearchFixture);
+      const delayMs = options.geosearchDelayMs;
+      if (delayMs !== undefined && Number.isFinite(delayMs) && delayMs > 0) {
+        await new Promise<void>((resolve) => setTimeout(resolve, delayMs));
+      }
+      await fulfillJson(route, options.geosearch ?? geosearchFixture);
     } else {
       await fulfillJson(route, summaryFixture);
     }
