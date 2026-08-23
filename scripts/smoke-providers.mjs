@@ -155,6 +155,9 @@ async function fetchAndValidateWithTimeout(fetchImpl, url, timeoutMs, validate) 
       signal: controller.signal,
     });
     return await validate(response);
+  } catch (cause) {
+    if (isAbortError(cause)) throw new Error("Provider request timed out.", { cause });
+    throw cause;
   } finally {
     clearTimeout(timeout);
   }
@@ -162,6 +165,10 @@ async function fetchAndValidateWithTimeout(fetchImpl, url, timeoutMs, validate) 
 
 function responseStatus(response) {
   return Number.isInteger(response?.status) ? response.status : null;
+}
+
+function isAbortError(error) {
+  return isRecord(error) && error.name === "AbortError";
 }
 
 async function jsonResponse(response, target) {
@@ -172,6 +179,7 @@ async function jsonResponse(response, target) {
   try {
     payload = await response.json();
   } catch (cause) {
+    if (isAbortError(cause)) throw cause;
     throw new Error(`${target} returned invalid JSON.`, { cause });
   }
   return payload;

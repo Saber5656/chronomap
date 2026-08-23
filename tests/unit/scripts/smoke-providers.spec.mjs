@@ -130,9 +130,15 @@ describe("smoke:providers", () => {
       status: 200,
       json: () =>
         new Promise((_resolve, reject) => {
-          init.signal.addEventListener("abort", () => reject(new Error("body read aborted")), {
-            once: true,
-          });
+          init.signal.addEventListener(
+            "abort",
+            () => {
+              const error = new Error("body read aborted");
+              error.name = "AbortError";
+              reject(error);
+            },
+            { once: true },
+          );
         }),
     }));
 
@@ -140,7 +146,7 @@ describe("smoke:providers", () => {
       runSmoke({ registries: [], fetchImpl, intervalMs: 0, timeoutMs: 5 }),
     ).rejects.toMatchObject({
       name: "SmokeError",
-      message: expect.stringContaining("invalid JSON"),
+      message: expect.stringContaining("timed out"),
     });
     expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
