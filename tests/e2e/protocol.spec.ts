@@ -82,10 +82,14 @@ test("registers geo links through an explicit menu action", async ({ page }) => 
   await page.locator(".menu-trigger").click();
   const registerButton = page.locator("[data-menu-item='register-geo']");
   await expect(registerButton).toBeVisible();
+  await expect(registerButton).toHaveText("geo リンクをこのアプリで開く");
   await registerButton.click();
 
   await expect
     .poll(() => page.evaluate(() => (window as DebugWindow).__geoProtocolCalls ?? []))
     .toEqual([["geo", "http://127.0.0.1:4174/chronomap/share?text=%s", "chronomap"]]);
+  await expect(page.locator(".toast")).toContainText(
+    "geo リンクをこのアプリで開く設定を登録しました。",
+  );
   assertNoUnstubbedRequests(page);
 });
