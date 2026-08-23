@@ -39,6 +39,7 @@ import "./ui/components/BottomSheet.css";
 import "./ui/components/ImportSheet.css";
 import "./ui/components/LayerInfoBadge.css";
 import "./ui/components/LayersSheet.css";
+import "./ui/components/PoiSheet.css";
 
 interface ChronomapDebugHook {
   getState(): Readonly<AppState>;
@@ -174,7 +175,7 @@ function startApp(shareFallback: ShareFallback | null): void {
   }
 
   if (import.meta.env.PROD) {
-    void registerServiceWorker(runtime.shell.getSlot("toast-host"));
+    void registerServiceWorker(runtime.shell.getSlot("toast-host"), runtime.toast);
   }
 
   const isDebugContext = import.meta.env.DEV || import.meta.env.VITE_E2E === "true";

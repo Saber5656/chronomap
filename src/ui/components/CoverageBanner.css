@@ -25,6 +25,56 @@
   display: none;
 }
 
+.poi-error-banner {
+  position: absolute;
+  z-index: var(--z-chrome);
+  inset-block-start: calc(
+    var(--top-controls-block-start) + var(--top-controls-stack-block-size) + var(--top-chrome-gap) +
+      4rem
+  );
+  inset-inline: max(0.75rem, env(safe-area-inset-left, 0px))
+    max(0.75rem, env(safe-area-inset-right, 0px));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: min(calc(100% - 1.5rem), 30rem);
+  min-height: 44px;
+  margin-inline: auto;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid color-mix(in srgb, #b42318 60%, transparent);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--color-bg) 94%, transparent);
+  box-shadow: var(--shadow);
+  pointer-events: auto;
+}
+
+.poi-error-banner[hidden] {
+  display: none;
+}
+
+.poi-error-banner__message {
+  min-width: 0;
+}
+
+.poi-error-banner__retry {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 65%, transparent);
+  border-radius: 0.625rem;
+  background: var(--color-accent);
+  color: var(--color-bg);
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.poi-error-banner__retry:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
 .coverage-banner__message {
   min-width: 0;
 }
@@ -81,5 +131,21 @@
   .coverage-banner__action {
     margin-block-start: 0.35rem;
     margin-inline-start: 0;
+  }
+}
+
+@media (min-width: 40rem) {
+  .poi-error-banner {
+    inset-block-start: calc(
+      max(0.75rem, env(safe-area-inset-top, 0px)) + var(--coverage-banner-block-size, 0px) + 0.75rem
+    );
+    inset-inline-start: auto;
+    inset-inline-end: calc(var(--top-controls-inline-size) + var(--top-chrome-gap));
+    width: min(
+      calc(100% - var(--top-controls-inline-size) - var(--top-chrome-gap) - 1.5rem),
+      30rem
+    );
+    max-width: calc(100% - var(--top-controls-inline-size) - var(--top-chrome-gap) - 1.5rem);
+    margin-inline: 0;
   }
 }
