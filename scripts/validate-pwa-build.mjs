@@ -178,6 +178,13 @@ assert(manifest.display === "standalone", "manifest.display mismatch");
 assert(manifest.orientation === "any", "manifest.orientation mismatch");
 assert(manifest.start_url === ".", "manifest.start_url must stay base-relative");
 assert(manifest.scope === ".", "manifest.scope must stay base-relative");
+assert(manifest.share_target?.action === "share", "manifest.share_target.action mismatch");
+assert(manifest.share_target?.method === "GET", "manifest.share_target.method mismatch");
+assert(
+  JSON.stringify(manifest.share_target?.params) ===
+    JSON.stringify({ title: "title", text: "text", url: "url" }),
+  "manifest.share_target.params mismatch",
+);
 assert(manifest.theme_color === "#2d6cdf", "manifest.theme_color mismatch");
 assert(manifest.background_color === "#f5f7fa", "manifest.background_color mismatch");
 
@@ -201,6 +208,10 @@ assert(
   "start_url escaped base",
 );
 assert(new URL(manifest.scope, manifestUrl).pathname === "/chronomap/", "scope escaped base");
+assert(
+  new URL(manifest.share_target.action, manifestUrl).pathname === "/chronomap/share",
+  "share_target.action escaped base",
+);
 
 const index = await readText("index.html");
 assert(index.includes('<html lang="ja">'), "HTML language metadata missing");

@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createActions } from "../../../src/state/actions";
 import { createInitialState } from "../../../src/state/appState";
 import { createStore } from "../../../src/state/store";
-import { initUrlSync } from "../../../src/state/urlSync";
+import { initUrlSync, URL_SYNC_DEBOUNCE_MS } from "../../../src/state/urlSync";
 
 const NOW = new Date(2026, 0, 1);
 const REGISTRY_IDS = new Set(["gsi-1960"]);
@@ -44,6 +44,36 @@ describe("initUrlSync", () => {
       "?lat=34.7025&lng=135.4959&z=16&year=1965&l=gsi-1960&op=60&poi=0",
     );
 
+    sync.destroy();
+  });
+
+  it("exposes a sanitized label only when the initial URL contains a view", () => {
+    resetLocation("?lat=34.7&lng=135.49&z=16&label=%3COsaka%3E");
+    const store = createTestStore();
+    const sync = initUrlSync(store, REGISTRY_IDS, { now: NOW });
+
+    expect(sync.getInitialLabel()).toBe("<Osaka>");
+    sync.destroy();
+
+    resetLocation("?label=orphan");
+    const orphanSync = initUrlSync(createTestStore(), REGISTRY_IDS, { now: NOW });
+    expect(orphanSync.getInitialLabel()).toBeNull();
+    orphanSync.destroy();
+  });
+
+  it("clears a shared label when the camera leaves its pinned view", () => {
+    resetLocation("?lat=34.7&lng=135.49&z=16&label=Osaka");
+    const replaceState = vi.spyOn(window.history, "replaceState");
+    const store = createTestStore();
+    const sync = initUrlSync(store, REGISTRY_IDS, { now: NOW });
+    const actions = createActions(store);
+    sync.markIdle();
+
+    actions.setView({ lat: 34.71, lng: 135.49, zoom: 16 });
+    vi.advanceTimersByTime(URL_SYNC_DEBOUNCE_MS);
+
+    expect(replaceState).toHaveBeenCalledWith(null, "", "?lat=34.71&lng=135.49&z=16");
+    expect(sync.getSerialized()).toBe("?lat=34.71&lng=135.49&z=16");
     sync.destroy();
   });
 
