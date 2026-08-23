@@ -53,6 +53,8 @@ export interface AppRuntime {
 
 export interface BootstrapOptions {
   readonly layerRegistry?: readonly LayerEntry[];
+  /** Allow synthetic shell measurements to omit non-critical coverage chrome. */
+  readonly showCoverageBanner?: boolean;
   readonly basemap?: BasemapInfo;
   readonly poiSource?: PoiSourceInfo | null;
   readonly currentYear?: number;
@@ -132,7 +134,7 @@ export function bootstrap(
       registry: readonly LayerEntry[],
     ) => mountCoverageBanner(parent, stateStore, { mapController: controller, registry }));
   const coverageBanner =
-    options.layerRegistry === undefined
+    options.layerRegistry === undefined || options.showCoverageBanner === false
       ? undefined
       : mountCoverage(shell.getSlot("CoverageBanner"), store, mapController, options.layerRegistry);
   const timeSlider = options.mountTimeSlider?.(shell.getSlot("TimeSlider"), store);

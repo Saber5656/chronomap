@@ -70,6 +70,10 @@ export function mount<S>(parent: HTMLElement, store: Store<S>): AppShell {
     toastHost,
   ]);
 
+  // Remove only the server-rendered loading state; callers may own other children in the parent.
+  for (const child of Array.from(parent.children)) {
+    if (child.classList.contains("app-loading")) child.remove();
+  }
   parent.append(shell);
 
   const slots: Partial<Record<AppShellSlotName, HTMLElement>> = {

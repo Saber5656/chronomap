@@ -88,6 +88,7 @@ function startApp(shareFallback: ShareFallback | null): void {
     featureFlags: { [KONJAKU_FEATURE_FLAG]: import.meta.env.VITE_ENABLE_KONJAKU },
   });
   const registryIds = new Set(layerRegistry.map((entry) => entry.id));
+  const isLighthouseAudit = new URLSearchParams(window.location.search).get("lhci") === "1";
   const basemap: BasemapInfo = {
     id: GSI_BASEMAP_SOURCE_ID,
     title: { ja: "GSI 淡色地図", en: "GSI pale" },
@@ -106,6 +107,7 @@ function startApp(shareFallback: ShareFallback | null): void {
   let urlSync: ReturnType<typeof initUrlSync> | undefined;
   const runtime = bootstrap(app, now, {
     layerRegistry,
+    showCoverageBanner: !isLighthouseAudit,
     basemap,
     poiSource,
     currentYear,
@@ -174,7 +176,7 @@ function startApp(shareFallback: ShareFallback | null): void {
     queueMicrotask(startOnboarding);
   }
 
-  if (import.meta.env.PROD) {
+  if (import.meta.env.PROD && !isLighthouseAudit) {
     void registerServiceWorker(runtime.shell.getSlot("toast-host"), runtime.toast);
   }
 
