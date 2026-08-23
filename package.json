@@ -22,11 +22,11 @@
     "e2e:ui": "playwright test --ui"
   },
   "dependencies": {
-    "maplibre-gl": "^6.3.0"
+    "maplibre-gl": "^6.4.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
-    "@vitest/coverage-v8": "^4.1.10",
+    "@vitest/coverage-v8": "^4.1.11",
     "eslint": "^10.8.1",
     "eslint-config-prettier": "^10.1.8",
     "jsdom": "^30.0.1",
