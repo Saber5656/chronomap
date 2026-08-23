@@ -39,6 +39,7 @@ import "./ui/components/BottomSheet.css";
 import "./ui/components/ImportSheet.css";
 import "./ui/components/LayerInfoBadge.css";
 import "./ui/components/LayersSheet.css";
+import "./ui/components/PoiSheet.css";
 
 interface ChronomapDebugHook {
   getState(): Readonly<AppState>;

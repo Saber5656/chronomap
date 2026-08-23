@@ -5,6 +5,7 @@ import type { LayerEntry } from "../providers/layers/types";
 import { getPoiProvider } from "../providers/poi/registry";
 import { mountPointPicker, type PointPickerController } from "./pointPicker";
 import { createInitialState, type AppState } from "../state/appState";
+import { createActions } from "../state/actions";
 import { createStore, type Store } from "../state/store";
 import {
   createSheetStub,
@@ -23,6 +24,7 @@ import {
   type PoiSourceInfo,
 } from "../ui/components/LayersSheet";
 import { mount as mountImportSheet } from "../ui/components/ImportSheet";
+import { mount as mountPoiSheet } from "../ui/components/PoiSheet";
 import { mountMenuButton } from "../ui/components/MenuButton";
 import { mount as mountPoiToggle, type PoiToggleController } from "../ui/components/PoiToggle";
 import { mount as mountToast } from "../ui/components/Toast";
@@ -133,6 +135,7 @@ export function bootstrap(
           pointPicker.setPickedPoint({ lat: result.lat, lng: result.lng }, result.label);
         },
       }),
+    poi: (parent, sheetStore) => mountPoiSheet(parent, sheetStore),
   };
   let layerInfoBadge: LayerInfoBadgeController | undefined;
   if (options.layerRegistry !== undefined && options.basemap !== undefined) {
@@ -144,13 +147,18 @@ export function bootstrap(
         basemap,
         poiSource: options.poiSource ?? null,
       });
-    sheetRenderers.poi = createSheetStub("poi");
     sheetRenderers.about = createSheetStub("about");
     layerInfoBadge = mountLayerInfoBadge(shell.getSlot("LayerInfoBadge"), store, { registry });
   }
   const bottomSheet: BottomSheetController = mountBottomSheet(shell.getSlot("sheet-host"), store, {
     renderers: sheetRenderers,
   });
+  const unsubscribePoiSelection = store.on(
+    (state) => state.poi.selectedId,
+    (next) => {
+      if (next === null && store.get().ui.sheet === "poi") createActions(store).closeSheet();
+    },
+  );
   options.afterMap?.({ store, shell, mapController });
   const locateButton = options.mountLocateButton?.(
     shell.getSlot("LocateButton"),
@@ -176,6 +184,7 @@ export function bootstrap(
       opacityControl?.destroy();
       coverageBanner?.destroy();
       bottomSheet?.destroy();
+      unsubscribePoiSelection();
       layerInfoBadge?.destroy();
       timeWiring?.destroy();
       overlayManager?.destroy();

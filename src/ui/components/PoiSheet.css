@@ -1,0 +1,109 @@
+.poi-sheet {
+  padding-block-end: 0.5rem;
+}
+
+.poi-sheet:focus {
+  outline: 3px solid var(--color-accent);
+  outline-offset: -3px;
+}
+.poi-sheet__heading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  justify-content: space-between;
+}
+.poi-sheet__name {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 1.15rem;
+}
+.poi-sheet__distance {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  padding: 0.25rem 0.5rem;
+  background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+  font-size: 0.85rem;
+}
+.poi-sheet__body {
+  display: flex;
+  gap: 0.75rem;
+  margin-block: 1rem;
+}
+.poi-sheet__body--loading {
+  align-items: flex-start;
+}
+.poi-sheet__body--loading .poi-sheet__skeleton {
+  flex: 1 1 auto;
+  margin-block: 0;
+}
+.poi-sheet__thumbnail {
+  flex: 0 0 96px;
+  width: 96px;
+  height: 96px;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--color-text) 8%, transparent);
+}
+.poi-sheet__thumbnail[hidden] {
+  display: none;
+}
+.poi-sheet__thumbnail img {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+}
+.poi-sheet__extract {
+  position: relative;
+  min-width: 0;
+  margin: 0;
+  line-height: 1.4;
+  white-space: pre-line;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 8;
+  overflow: hidden;
+}
+.poi-sheet__extract::after {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline: 0;
+  height: 1.5em;
+  background: linear-gradient(to bottom, transparent, var(--color-bg));
+  content: "";
+  pointer-events: none;
+}
+.poi-sheet__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.poi-sheet__actions a,
+.poi-sheet__actions button,
+.poi-sheet__retry {
+  min-height: 44px;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--color-text) 20%, transparent);
+  border-radius: 0.5rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+.poi-sheet__footer {
+  margin-block-start: 1rem;
+  font-size: 0.8rem;
+}
+.poi-sheet__skeleton {
+  display: grid;
+  gap: 0.5rem;
+  margin-block: 1rem;
+}
+.poi-sheet__skeleton span {
+  display: block;
+  height: 1rem;
+  border-radius: 0.25rem;
+  background: color-mix(in srgb, var(--color-text) 12%, transparent);
+}
+.poi-sheet__skeleton span:last-child {
+  width: 65%;
+}
