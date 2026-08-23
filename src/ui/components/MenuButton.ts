@@ -255,6 +255,7 @@ export function mountMenuButton(
   }
 
   function handleRegisterGeo(): void {
+    button.focus();
     setOpen(false);
     const result = registerGeoProtocolHandler(
       pageNavigator,
