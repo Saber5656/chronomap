@@ -114,7 +114,7 @@ describe("MenuButton language item", () => {
     );
     expect(store.get().ui.toast).toMatchObject({
       kind: "info",
-      text: "geo リンクをこのアプリで開く設定を登録しました。",
+      text: "geo リンクをこのアプリで開く設定をブラウザへ要求しました。確認が表示されたら許可してください。",
     });
 
     controller.destroy();

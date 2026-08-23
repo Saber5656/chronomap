@@ -265,7 +265,7 @@ export function mountMenuButton(
     actions.showToast(
       result === "requested" ? "info" : "error",
       t(
-        result === "requested" ? "geo.registered" : "geo.registerFailed",
+        result === "requested" ? "geo.requested" : "geo.registerFailed",
         {},
         localeFor(store.get()),
       ),
