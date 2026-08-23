@@ -5,6 +5,7 @@ import type { LayerEntry } from "../providers/layers/types";
 import { getPoiProvider } from "../providers/poi/registry";
 import { mountPointPicker, type PointPickerController } from "./pointPicker";
 import { createInitialState, type AppState } from "../state/appState";
+import { createActions } from "../state/actions";
 import { createStore, type Store } from "../state/store";
 import {
   createSheetStub,
@@ -23,15 +24,18 @@ import {
   type PoiSourceInfo,
 } from "../ui/components/LayersSheet";
 import { mount as mountImportSheet } from "../ui/components/ImportSheet";
+import { mount as mountPoiSheet } from "../ui/components/PoiSheet";
 import { mountMenuButton } from "../ui/components/MenuButton";
 import { mount as mountPoiToggle, type PoiToggleController } from "../ui/components/PoiToggle";
-import { mount as mountToast } from "../ui/components/Toast";
+import { mount as mountToast, type ToastController } from "../ui/components/Toast";
 import {
   mount as mountCoverageBanner,
   type CoverageBannerController,
 } from "../ui/components/CoverageBanner";
 import { initI18n } from "../ui/i18n";
+import { mount as mountPoiErrorBanner } from "../ui/components/PoiErrorBanner";
 import { createTimeWiring, type TimeWiringController } from "./timeWiring";
+import { mountNetworkStatus } from "./networkStatus";
 
 export interface AppRuntime {
   readonly store: Store<AppState>;
@@ -42,6 +46,7 @@ export interface AppRuntime {
   readonly pointPicker: PointPickerController;
   readonly poiController: PoiController;
   readonly poiToggle: PoiToggleController;
+  readonly toast: ToastController;
   readonly coverageBanner: CoverageBannerController | undefined;
   destroy(): void;
 }
@@ -87,18 +92,25 @@ export function bootstrap(
 ): AppRuntime {
   const store = createStore(createInitialState(now));
   const i18n = initI18n(store);
+  const networkStatus = mountNetworkStatus(store);
   options.beforeShell?.(store);
   const shell = mount(parent, store);
   const menuButton = (options.mountMenuButton ?? mountMenuButton)(
     shell.getSlot("MenuButton"),
     store,
   );
-  const toast = (options.mountToast ?? mountToast)(shell.getSlot("toast-host"), store);
+  const toast: ToastController = (options.mountToast ?? mountToast)(
+    shell.getSlot("toast-host"),
+    store,
+  );
   const mapController = createMap(shell.getSlot("map"), store);
   const poiController = initPoiController(
     mapController,
     store,
     options.poiProvider ?? getPoiProvider,
+  );
+  const poiErrorBanner = mountPoiErrorBanner(shell.getSlot("map-region"), store, () =>
+    poiController.retry(),
   );
   const poiToggle = (options.mountPoiToggle ?? mountPoiToggle)(shell.getSlot("PoiToggle"), store);
   const overlayManager =
@@ -133,6 +145,7 @@ export function bootstrap(
           pointPicker.setPickedPoint({ lat: result.lat, lng: result.lng }, result.label);
         },
       }),
+    poi: (parent, sheetStore) => mountPoiSheet(parent, sheetStore),
   };
   let layerInfoBadge: LayerInfoBadgeController | undefined;
   if (options.layerRegistry !== undefined && options.basemap !== undefined) {
@@ -144,13 +157,18 @@ export function bootstrap(
         basemap,
         poiSource: options.poiSource ?? null,
       });
-    sheetRenderers.poi = createSheetStub("poi");
     sheetRenderers.about = createSheetStub("about");
     layerInfoBadge = mountLayerInfoBadge(shell.getSlot("LayerInfoBadge"), store, { registry });
   }
   const bottomSheet: BottomSheetController = mountBottomSheet(shell.getSlot("sheet-host"), store, {
     renderers: sheetRenderers,
   });
+  const unsubscribePoiSelection = store.on(
+    (state) => state.poi.selectedId,
+    (next) => {
+      if (next === null && store.get().ui.sheet === "poi") createActions(store).closeSheet();
+    },
+  );
   options.afterMap?.({ store, shell, mapController });
   const locateButton = options.mountLocateButton?.(
     shell.getSlot("LocateButton"),
@@ -167,15 +185,18 @@ export function bootstrap(
     pointPicker,
     poiController,
     poiToggle,
+    toast,
     coverageBanner,
     destroy() {
       pointPicker.destroy();
       poiController.destroy();
+      poiErrorBanner.destroy();
       poiToggle.destroy();
       timeSlider?.destroy();
       opacityControl?.destroy();
       coverageBanner?.destroy();
       bottomSheet?.destroy();
+      unsubscribePoiSelection();
       layerInfoBadge?.destroy();
       timeWiring?.destroy();
       overlayManager?.destroy();
@@ -185,6 +206,7 @@ export function bootstrap(
       locateButton?.destroy();
       shell.destroy();
       i18n.destroy();
+      networkStatus.destroy();
     },
   };
 }
