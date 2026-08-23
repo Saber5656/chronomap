@@ -78,6 +78,9 @@ export function buildGeoProtocolHandlerUrl(
   baseUrl: string = import.meta.env.BASE_URL,
 ): string {
   const base = new URL(baseUrl, pageLocation.origin);
+  if (base.origin !== pageLocation.origin) {
+    throw new Error("Geo protocol handler must stay on the current origin");
+  }
   return new URL("share?text=%s", base).href;
 }
 

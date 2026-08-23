@@ -143,4 +143,28 @@ describe("MenuButton language item", () => {
     controller.destroy();
     i18n.destroy();
   });
+
+  it("rejects a cross-origin geo handler URL", () => {
+    const store = createStore(createInitialState(new Date(2026, 0, 1)));
+    const i18n = initI18n(store);
+    const parent = document.createElement("div");
+    const registerProtocolHandler = vi.fn();
+    const controller = mountMenuButton(parent, store, {
+      baseUrl: "https://evil.example/",
+      pageLocation: { origin: "https://example.test", search: "" },
+      pageNavigator: { registerProtocolHandler },
+    });
+
+    parent.querySelector<HTMLButtonElement>(".menu-trigger")?.click();
+    parent.querySelector<HTMLButtonElement>("[data-menu-item='register-geo']")?.click();
+
+    expect(registerProtocolHandler).not.toHaveBeenCalled();
+    expect(store.get().ui.toast).toMatchObject({
+      kind: "error",
+      text: "geo リンクの登録に失敗しました。ブラウザの設定を確認してください。",
+    });
+
+    controller.destroy();
+    i18n.destroy();
+  });
 });
