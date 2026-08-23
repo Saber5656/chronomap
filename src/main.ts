@@ -83,10 +83,14 @@ function startApp(shareFallback: ShareFallback | null): void {
     YEAR_MIN,
     Number.isFinite(now.getFullYear()) ? now.getFullYear() : YEAR_MIN,
   );
-  const layerRegistry: LayerEntry[] = loadRegistry(gsiLayers, {
+  const registryEnv = {
     currentYear,
     featureFlags: { [KONJAKU_FEATURE_FLAG]: import.meta.env.VITE_ENABLE_KONJAKU },
-  });
+  };
+  // Keep runtime layer resolution on the currently authorized GSI registry. The separate About
+  // registry can expose a permission-gated Konjaku credit row without activating those tiles before
+  // ADR-006's human permission gate is complete.
+  const layerRegistry: LayerEntry[] = loadRegistry(gsiLayers, registryEnv);
   const registryIds = new Set(layerRegistry.map((entry) => entry.id));
   const isLighthouseAudit = new URLSearchParams(window.location.search).get("lhci") === "1";
   const basemap: BasemapInfo = {
@@ -103,11 +107,19 @@ function startApp(shareFallback: ShareFallback | null): void {
       text: "Wikipedia (CC BY-SA)",
       url: "https://creativecommons.org/licenses/by-sa/4.0/",
     },
+    license: {
+      text: "CC BY-SA 4.0",
+      url: "https://creativecommons.org/licenses/by-sa/4.0/",
+    },
   };
   let urlSync: ReturnType<typeof initUrlSync> | undefined;
   const runtime = bootstrap(app, now, {
     layerRegistry,
     showCoverageBanner: !isLighthouseAudit,
+    aboutRegistryLoader: async () => {
+      const { default: konjakuLayers } = await import("./providers/layers/konjaku.layers.json");
+      return loadRegistry([...gsiLayers, ...konjakuLayers], registryEnv);
+    },
     basemap,
     poiSource,
     currentYear,

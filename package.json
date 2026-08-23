@@ -14,6 +14,7 @@
     "validate:pwa:preview": "node scripts/validate-pwa-preview.mjs",
     "validate:registry": "node scripts/validate-registry.mjs",
     "lhci": "lhci autorun --config=lighthouserc.json",
+    "validate:readme": "node scripts/validate-readme-links.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run --coverage",

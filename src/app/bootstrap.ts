@@ -11,6 +11,7 @@ import {
   createSheetStub,
   mount as mountBottomSheet,
   type BottomSheetController,
+  type SheetContentController,
   type SheetKind,
   type SheetRenderer,
 } from "../ui/components/BottomSheet";
@@ -55,6 +56,10 @@ export interface BootstrapOptions {
   readonly layerRegistry?: readonly LayerEntry[];
   /** Allow synthetic shell measurements to omit non-critical coverage chrome. */
   readonly showCoverageBanner?: boolean;
+  /** Optional complete registry used only for About credits; layer resolution remains unchanged. */
+  readonly aboutRegistry?: readonly LayerEntry[];
+  /** Lazily resolve the complete registry only when the About sheet is opened. */
+  readonly aboutRegistryLoader?: () => Promise<readonly LayerEntry[]>;
   readonly basemap?: BasemapInfo;
   readonly poiSource?: PoiSourceInfo | null;
   readonly currentYear?: number;
@@ -84,6 +89,40 @@ export interface BootstrapOptions {
     shell: AppShell;
     mapController: MapController;
   }) => void;
+}
+
+function createLazyAboutRenderer(
+  registry: readonly LayerEntry[] | (() => Promise<readonly LayerEntry[]>),
+  poiSource: PoiSourceInfo | null,
+): SheetRenderer {
+  return (parent, store): SheetContentController => {
+    let destroyed = false;
+    let loadingController: SheetContentController | null = createSheetStub("about")(parent, store);
+    let aboutController: SheetContentController | null = null;
+
+    const registryPromise =
+      typeof registry === "function" ? Promise.resolve().then(registry) : Promise.resolve(registry);
+    void Promise.all([import("../ui/components/AboutSheet"), registryPromise])
+      .then(([{ mount }, resolvedRegistry]) => {
+        if (destroyed) return;
+        loadingController?.destroy();
+        loadingController = null;
+        aboutController = mount(parent, store, { registry: resolvedRegistry, poiSource });
+      })
+      .catch(() => {
+        // Keep the safe loading stub if the optional About chunk cannot be loaded.
+      });
+
+    return {
+      destroy() {
+        destroyed = true;
+        loadingController?.destroy();
+        loadingController = null;
+        aboutController?.destroy();
+        aboutController = null;
+      },
+    };
+  };
 }
 
 /** Create the production runtime, initializing locale state before any UI renders. */
@@ -149,6 +188,10 @@ export function bootstrap(
       }),
     poi: (parent, sheetStore) => mountPoiSheet(parent, sheetStore),
   };
+  sheetRenderers.about = createLazyAboutRenderer(
+    options.aboutRegistryLoader ?? options.aboutRegistry ?? options.layerRegistry ?? [],
+    options.poiSource ?? null,
+  );
   let layerInfoBadge: LayerInfoBadgeController | undefined;
   if (options.layerRegistry !== undefined && options.basemap !== undefined) {
     const registry = options.layerRegistry;
@@ -159,7 +202,6 @@ export function bootstrap(
         basemap,
         poiSource: options.poiSource ?? null,
       });
-    sheetRenderers.about = createSheetStub("about");
     layerInfoBadge = mountLayerInfoBadge(shell.getSlot("LayerInfoBadge"), store, { registry });
   }
   const bottomSheet: BottomSheetController = mountBottomSheet(shell.getSlot("sheet-host"), store, {

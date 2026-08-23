@@ -1,4 +1,5 @@
 import type { LayerEntry } from "../../providers/layers/types";
+import { createActions } from "../../state/actions";
 import type { AppState } from "../../state/appState";
 import type { Store } from "../../state/store";
 import { el } from "../../util/dom";
@@ -22,6 +23,10 @@ export interface PoiSourceInfo {
   readonly id: string;
   readonly title: LocalizedLabel;
   readonly attribution: {
+    readonly text: string;
+    readonly url: string;
+  };
+  readonly license?: {
     readonly text: string;
     readonly url: string;
   };
@@ -136,7 +141,12 @@ export function mount(
   options: LayersSheetOptions,
 ): LayersSheetController {
   const root = el("div", { class: "layers-sheet" });
+  const actions = createActions(store);
   parent.append(root);
+
+  function handleAboutClick(): void {
+    actions.openSheet("about");
+  }
 
   function render(): void {
     const locale: Locale = store.get().ui.lang;
@@ -174,18 +184,17 @@ export function mount(
     }
 
     const footer = el("footer", { class: "layers-sheet__footer" });
-    footer.append(
-      el(
-        "button",
-        {
-          type: "button",
-          class: "layers-sheet__about-stub",
-          disabled: true,
-          "data-sheet-stub": "about",
-        },
-        `${t("layers.about", {}, locale)} — ${t("common.comingSoon", {}, locale)}`,
-      ),
+    const aboutButton = el(
+      "button",
+      {
+        type: "button",
+        class: "layers-sheet__about-link",
+        "data-sheet-link": "about",
+      },
+      t("layers.about", {}, locale),
     );
+    aboutButton.addEventListener("click", handleAboutClick);
+    footer.append(aboutButton);
     root.replaceChildren(
       el("p", { class: "layers-sheet__description" }, t("layers.description", {}, locale)),
       ...content,
