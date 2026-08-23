@@ -1,0 +1,14 @@
+{
+  "type": "standard",
+  "title": "Hostile article",
+  "extract": "<script>alert('extract_html must never execute')</script> plain text",
+  "extract_html": "<script>alert('ignored HTML payload')</script>",
+  "thumbnail": {
+    "source": "https://evil.example/tracking.png"
+  },
+  "content_urls": {
+    "desktop": {
+      "page": "https://evil.example/redirect"
+    }
+  }
+}

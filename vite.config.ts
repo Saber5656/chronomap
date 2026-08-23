@@ -79,6 +79,7 @@ export default defineConfig(({ mode }) => {
             method: "GET",
             params: { title: "title", text: "text", url: "url" },
           },
+          protocol_handlers: [{ protocol: "geo", url: "share?text=%s" }],
           theme_color: "#2d6cdf",
           background_color: "#f5f7fa",
           icons: [

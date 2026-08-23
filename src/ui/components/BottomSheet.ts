@@ -262,13 +262,14 @@ export function mount(
     currentKind = kind;
     const locale: Locale = store.get().ui.lang;
     const titleId = `chronomap-sheet-title-${kind}`;
-    const nextLayer = el("div", { class: "bottom-sheet-layer" });
+    const nextLayer = el("div", { class: "bottom-sheet-layer", "data-sheet-kind": kind });
     const backdrop = el("div", {
       class: "bottom-sheet__backdrop",
       "aria-hidden": "true",
     });
     const nextDialog = el("section", {
       class: "bottom-sheet",
+      "data-sheet-kind": kind,
       role: "dialog",
       "aria-modal": "true",
       "aria-labelledby": titleId,

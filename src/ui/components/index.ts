@@ -20,6 +20,8 @@ export type { LayerInfoBadgeController, LayerInfoBadgeOptions } from "./LayerInf
 export { mount as mountLayersSheet } from "./LayersSheet";
 export { mount as mountImportSheet } from "./ImportSheet";
 export type { ImportSheetController, ImportSheetOptions } from "./ImportSheet";
+export { mount as mountPoiSheet } from "./PoiSheet";
+export type { PoiSheetController, PoiSheetOptions } from "./PoiSheet";
 export type {
   BasemapInfo,
   LayersSheetController,
