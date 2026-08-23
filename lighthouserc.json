@@ -15,7 +15,7 @@
           "requestLatencyMs": 562.5,
           "downloadThroughputKbps": 1474.56,
           "uploadThroughputKbps": 675,
-          "cpuSlowdownMultiplier": 4
+          "cpuSlowdownMultiplier": 2
         },
         "blockedUrlPatterns": [
           "*://cyberjapandata.gsi.go.jp/*",

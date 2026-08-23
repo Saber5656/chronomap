@@ -53,6 +53,11 @@ describe the local shell and MapLibre code under simulated mobile 4G, not live
 tile or provider performance. Provider/device performance is a release-time
 manual check.
 
+The CI profile keeps Lighthouse's simulated mobile Slow 4G network values but uses a CPU
+slowdown multiplier of `2` instead of Lighthouse's default `4`. This is an explicit CI
+repeatability trade-off for the MapLibre worker-heavy shell; it is not a claim about a particular
+phone CPU. Real-device CPU/network behavior remains a release-time manual measurement.
+
 The 2026-08-23 local baseline is recorded explicitly: before the production
 worker assets were made same-origin, Issue #41's
 degraded-state merge, three runs returned Performance `0.88, 0.88, 0.88`

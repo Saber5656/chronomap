@@ -188,7 +188,7 @@ function startApp(shareFallback: ShareFallback | null): void {
     queueMicrotask(startOnboarding);
   }
 
-  if (import.meta.env.PROD && !isLighthouseAudit) {
+  if (import.meta.env.PROD) {
     void registerServiceWorker(runtime.shell.getSlot("toast-host"), runtime.toast);
   }
 
