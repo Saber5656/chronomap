@@ -1,4 +1,5 @@
 import { t } from "../ui/i18n";
+import type { ToastController } from "../ui/components/Toast";
 import { el } from "../util/dom";
 
 const OFFLINE_READY_DURATION_MS = 4_000;
@@ -30,6 +31,7 @@ function createToast(attributes: Readonly<Record<string, string>>): HTMLDivEleme
 export function mountServiceWorkerUpdate(
   parent: HTMLElement,
   registerSW: RegisterServiceWorker,
+  toastController?: Pick<ToastController, "showToast" | "showActionToast">,
 ): ServiceWorkerUpdateController {
   let destroyed = false;
   let offlineReadyShown = false;
@@ -55,8 +57,11 @@ export function mountServiceWorkerUpdate(
     if (destroyed || offlineReadyShown) return;
     offlineReadyShown = true;
 
-    // Keep this boundary out of the shared `.toast` selector so the offline-ready
-    // notification cannot collide with the app's single store-backed toast.
+    if (toastController?.showToast !== undefined) {
+      toastController.showToast("info", t("sw.offlineReady"));
+      return;
+    }
+
     const toast = createToast({
       class: "sw-offline-ready-toast",
       "data-sw-offline-ready": "true",
@@ -70,6 +75,26 @@ export function mountServiceWorkerUpdate(
   function showUpdateAvailable(): void {
     if (destroyed || updateToast !== null) return;
 
+    const handleUpdate = (): void => {
+      // The shared Toast removes the action item before invoking this callback.
+      // Clear the sentinel as well so a failed update can present a retry prompt.
+      updateToast = null;
+      void updateServiceWorker(true).catch(() => {
+        if (!destroyed) showUpdateAvailable();
+      });
+    };
+    if (toastController?.showActionToast !== undefined) {
+      updateToast = document.createElement("div");
+      toastController.showActionToast("info", t("sw.updateReady"), {
+        label: t("sw.reload"),
+        onAction: handleUpdate,
+        onDismiss: () => {
+          updateToast = null;
+        },
+      });
+      return;
+    }
+
     const toast = createToast({ class: "toast sw-update-toast", "data-sw-update": "true" });
     const message = el("span", { class: "sw-update-toast__message" }, t("sw.updateReady"));
     const action = el(
@@ -82,15 +107,15 @@ export function mountServiceWorkerUpdate(
       t("sw.reload"),
     );
 
-    const handleUpdate = (): void => {
+    const handleFallbackUpdate = (): void => {
       action.disabled = true;
       void updateServiceWorker(true).catch(() => {
         if (!destroyed) action.disabled = false;
       });
     };
 
-    action.addEventListener("click", handleUpdate);
-    updateHandler = handleUpdate;
+    action.addEventListener("click", handleFallbackUpdate);
+    updateHandler = handleFallbackUpdate;
     toast.append(message, action);
     parent.append(toast);
     updateToast = toast;
@@ -124,7 +149,8 @@ export function mountServiceWorkerUpdate(
 /** Register the generated production worker; Vite resolves this virtual module at build time. */
 export async function registerServiceWorker(
   parent: HTMLElement,
+  toastController?: Pick<ToastController, "showToast" | "showActionToast">,
 ): Promise<ServiceWorkerUpdateController> {
   const { registerSW } = await import("virtual:pwa-register");
-  return mountServiceWorkerUpdate(parent, registerSW);
+  return mountServiceWorkerUpdate(parent, registerSW, toastController);
 }

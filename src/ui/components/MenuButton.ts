@@ -51,6 +51,7 @@ export function createLanguageToggleItem(store: Store<AppState>): LanguageToggle
 export interface ShareNavigator {
   readonly share?: (data: { title: string; url: string }) => Promise<void> | void;
   readonly clipboard?: { writeText(text: string): Promise<void> | void };
+  readonly registerProtocolHandler?: (protocol: string, url: string, title: string) => void;
 }
 
 export interface MenuButtonOptions {
@@ -70,6 +71,36 @@ export function buildShareUrl(
   url.search = serialized;
   url.hash = "";
   return url.href;
+}
+
+export function buildGeoProtocolHandlerUrl(
+  pageLocation: Pick<Location, "origin"> = globalThis.location,
+  baseUrl: string = import.meta.env.BASE_URL,
+): string {
+  const base = new URL(baseUrl, pageLocation.origin);
+  if (base.origin !== pageLocation.origin) {
+    throw new Error("Geo protocol handler must stay on the current origin");
+  }
+  return new URL("share?text=%s", base).href;
+}
+
+export function registerGeoProtocolHandler(
+  pageNavigator: ShareNavigator,
+  pageLocation: Pick<Location, "origin"> = globalThis.location,
+  baseUrl: string = import.meta.env.BASE_URL,
+): "requested" | "unavailable" | "failed" {
+  if (typeof pageNavigator.registerProtocolHandler !== "function") return "unavailable";
+
+  try {
+    pageNavigator.registerProtocolHandler(
+      "geo",
+      buildGeoProtocolHandlerUrl(pageLocation, baseUrl),
+      "chronomap",
+    );
+    return "requested";
+  } catch {
+    return "failed";
+  }
 }
 
 function serializableState(
@@ -141,6 +172,8 @@ export function mountMenuButton(
     },
     "⋯",
   );
+  const offlineDot = el("span", { class: "menu-trigger__offline-dot", "aria-hidden": "true" });
+  button.append(offlineDot);
   const menu = el("ul", { id: menuId, class: "menu-popover", role: "menu" });
   const shareItem = el("li", { role: "none" });
   const shareButton = el("button", { type: "button", role: "menuitem", class: "menu-item" });
@@ -153,10 +186,23 @@ export function mountMenuButton(
   });
   const languageItem = createLanguageToggleItem(store);
   const languageItemContainer = el("li", { role: "none" });
+  let geoItem: HTMLLIElement | null = null;
+  let geoButton: HTMLButtonElement | null = null;
+  if (typeof pageNavigator.registerProtocolHandler === "function") {
+    geoItem = el("li", { role: "none" });
+    geoButton = el("button", {
+      type: "button",
+      role: "menuitem",
+      class: "menu-item",
+      "data-menu-item": "register-geo",
+    });
+    geoItem.append(geoButton);
+  }
   shareItem.append(shareButton);
   importItem.append(importButton);
   languageItemContainer.append(languageItem.element);
   menu.append(shareItem, importItem, languageItemContainer);
+  if (geoItem !== null) menu.append(geoItem);
   menu.hidden = true;
   root.append(button, menu);
   parent.append(root);
@@ -174,6 +220,8 @@ export function mountMenuButton(
     button.setAttribute("aria-label", t("menu.aria", {}, locale));
     shareButton.textContent = t("menu.share", {}, locale);
     importButton.textContent = t("menu.import", {}, locale);
+    offlineDot.hidden = !store.get().ui.offline;
+    if (geoButton !== null) geoButton.textContent = t("menu.registerGeo", {}, locale);
   }
 
   async function handleShare(): Promise<void> {
@@ -209,6 +257,24 @@ export function mountMenuButton(
     actions.openImportSheet({ autofocus: true });
   }
 
+  function handleRegisterGeo(): void {
+    button.focus();
+    setOpen(false);
+    const result = registerGeoProtocolHandler(
+      pageNavigator,
+      pageLocation,
+      options.baseUrl ?? import.meta.env.BASE_URL,
+    );
+    actions.showToast(
+      result === "requested" ? "info" : "error",
+      t(
+        result === "requested" ? "geo.requested" : "geo.registerFailed",
+        {},
+        localeFor(store.get()),
+      ),
+    );
+  }
+
   function handleDocumentOutside(event: Event): void {
     if (open && !root.contains(event.target as Node)) setOpen(false);
   }
@@ -222,10 +288,15 @@ export function mountMenuButton(
   }
 
   const unsubscribeLanguage = store.on((state) => state.ui.lang, render);
+  const unsubscribeOffline = store.on(
+    (state) => state.ui.offline,
+    () => render(store.get().ui.lang),
+  );
   render(store.get().ui.lang);
   button.addEventListener("click", handleButtonClick);
   shareButton.addEventListener("click", handleShareClick);
   importButton.addEventListener("click", handleImportClick);
+  geoButton?.addEventListener("click", handleRegisterGeo);
   document.addEventListener("pointerdown", handleDocumentOutside);
   document.addEventListener("click", handleDocumentOutside);
   document.addEventListener("keydown", handleKeyDown);
@@ -235,10 +306,12 @@ export function mountMenuButton(
       if (destroyed) return;
       destroyed = true;
       unsubscribeLanguage();
+      unsubscribeOffline();
       languageItem.destroy();
       button.removeEventListener("click", handleButtonClick);
       shareButton.removeEventListener("click", handleShareClick);
       importButton.removeEventListener("click", handleImportClick);
+      geoButton?.removeEventListener("click", handleRegisterGeo);
       document.removeEventListener("pointerdown", handleDocumentOutside);
       document.removeEventListener("click", handleDocumentOutside);
       document.removeEventListener("keydown", handleKeyDown);
