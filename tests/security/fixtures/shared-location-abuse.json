@@ -1,0 +1,111 @@
+[
+  {
+    "name": "javascript URI",
+    "input": "javascript:alert(1)",
+    "expected": { "ok": false, "reason": "no-coords" }
+  },
+  {
+    "name": "data HTML URI",
+    "input": "data:text/html,<svg/onload=alert(1)>",
+    "expected": { "ok": false, "reason": "no-coords" }
+  },
+  {
+    "name": "vbscript URI",
+    "input": "vbscript:msgbox(1)",
+    "expected": { "ok": false, "reason": "no-coords" }
+  },
+  {
+    "name": "credential-bearing Apple URL",
+    "input": "https://user:pass@maps.apple.com/?ll=35,139",
+    "expected": { "ok": false, "reason": "invalid" }
+  },
+  {
+    "name": "username-bearing Google URL",
+    "input": "https://user@www.google.com/maps?q=35,139",
+    "expected": { "ok": false, "reason": "invalid" }
+  },
+  {
+    "name": "credential-bearing shortlink",
+    "input": "https://:secret@maps.app.goo.gl/35,139",
+    "expected": { "ok": false, "reason": "invalid" }
+  },
+  {
+    "name": "nested HTTPS encoding",
+    "input": "https%3A%2F%2Fmaps.apple.com%2F%3Fll%3D35.68%252C139.76",
+    "expected": { "ok": false, "reason": "no-coords" }
+  },
+  {
+    "name": "nested JavaScript encoding",
+    "input": "javascript%253Aalert%25281%2529",
+    "expected": { "ok": false, "reason": "no-coords" }
+  },
+  {
+    "name": "encoded data URL",
+    "input": "data%3Atext%2Fhtml%2C%253Cscript%253Ealert%25281%2529",
+    "expected": { "ok": false, "reason": "no-coords" }
+  },
+  {
+    "name": "over-length binary-like input",
+    "repeat": "\u0000",
+    "count": 4097,
+    "expected": { "ok": false, "reason": "invalid" }
+  },
+  {
+    "name": "over-length script input",
+    "repeat": "<script>",
+    "count": 600,
+    "expected": { "ok": false, "reason": "invalid" }
+  },
+  {
+    "name": "hostile user URL without coordinates",
+    "input": "https://evil.example/redirect?next=javascript%3Aalert(1)",
+    "expected": { "ok": false, "reason": "no-coords" }
+  },
+  {
+    "name": "hostile data URL with whitespace",
+    "input": "data:text/plain,constructor%20__proto__",
+    "expected": { "ok": false, "reason": "no-coords" }
+  },
+  {
+    "name": "geo URI drops an infinite zoom",
+    "input": "geo:35,139?z=1e309",
+    "expected": { "ok": true, "lat": 35, "lng": 139, "source": "geo" }
+  },
+  {
+    "name": "Apple label strips bidi and controls",
+    "input": "https://maps.apple.com/?ll=35%2C139&q=%E2%80%AEabc%00%3Cscript%3E",
+    "expected": {
+      "ok": true,
+      "lat": 35,
+      "lng": 139,
+      "label": "abc<script>",
+      "source": "apple"
+    }
+  },
+  {
+    "name": "Apple nested label encoding remains plain text",
+    "input": "https://maps.apple.com/?ll=35%2C139&q=%253Cscript%253E",
+    "expected": {
+      "ok": true,
+      "lat": 35,
+      "lng": 139,
+      "label": "%3Cscript%3E",
+      "source": "apple"
+    }
+  },
+  {
+    "name": "unsupported HTTP map URL never becomes a provider URL",
+    "input": "http://www.google.com/maps?q=place%20name",
+    "expected": { "ok": false, "reason": "no-coords" }
+  },
+  {
+    "name": "out-of-range coordinates in dangerous-looking URL",
+    "input": "javascript:91,181",
+    "expected": { "ok": false, "reason": "no-coords" }
+  },
+  {
+    "name": "shortlink is not expanded",
+    "input": "https://maps.app.goo.gl/javascript:alert(1)",
+    "expected": { "ok": false, "reason": "shortlink" }
+  }
+]
