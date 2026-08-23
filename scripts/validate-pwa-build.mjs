@@ -185,6 +185,11 @@ assert(
     JSON.stringify({ title: "title", text: "text", url: "url" }),
   "manifest.share_target.params mismatch",
 );
+assert(
+  JSON.stringify(manifest.protocol_handlers) ===
+    JSON.stringify([{ protocol: "geo", url: "share?text=%s" }]),
+  "manifest.protocol_handlers mismatch",
+);
 assert(manifest.theme_color === "#2d6cdf", "manifest.theme_color mismatch");
 assert(manifest.background_color === "#f5f7fa", "manifest.background_color mismatch");
 
@@ -211,6 +216,11 @@ assert(new URL(manifest.scope, manifestUrl).pathname === "/chronomap/", "scope e
 assert(
   new URL(manifest.share_target.action, manifestUrl).pathname === "/chronomap/share",
   "share_target.action escaped base",
+);
+assert(
+  new URL(manifest.protocol_handlers[0].url, manifestUrl).pathname === "/chronomap/share" &&
+    new URL(manifest.protocol_handlers[0].url, manifestUrl).search === "?text=%s",
+  "protocol_handlers escaped base",
 );
 
 const index = await readText("index.html");

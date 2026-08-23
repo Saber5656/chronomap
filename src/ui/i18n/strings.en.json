@@ -21,6 +21,8 @@
   "geo.denied.title": "Location access is not allowed",
   "geo.granted.aria": "Find my location again",
   "geo.locate.aria": "Find my location",
+  "geo.registered": "This app is now registered to open geo links.",
+  "geo.registerFailed": "The geo link registration failed. Check your browser settings.",
   "geo.requesting.aria": "Finding your location",
   "geo.timeout": "Getting your location timed out",
   "handoff.apple": "Open in Apple Maps…",

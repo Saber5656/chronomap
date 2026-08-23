@@ -21,6 +21,8 @@
   "geo.denied.title": "位置情報が許可されていません",
   "geo.granted.aria": "現在地を再取得",
   "geo.locate.aria": "現在地を取得",
+  "geo.registered": "geo リンクをこのアプリで開く設定を登録しました。",
+  "geo.registerFailed": "geo リンクの登録に失敗しました。ブラウザの設定を確認してください。",
   "geo.requesting.aria": "現在地を取得中",
   "geo.timeout": "位置情報の取得がタイムアウトしました",
   "handoff.apple": "Apple マップで開く…",

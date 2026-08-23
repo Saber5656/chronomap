@@ -75,4 +75,72 @@ describe("MenuButton language item", () => {
     expect(parent.childElementCount).toBe(0);
     i18n.destroy();
   });
+
+  it("hides geo registration when the browser API is unavailable", () => {
+    const store = createStore(createInitialState(new Date(2026, 0, 1)));
+    const i18n = initI18n(store);
+    const parent = document.createElement("div");
+    const controller = mountMenuButton(parent, store, { pageNavigator: {} });
+
+    parent.querySelector<HTMLButtonElement>(".menu-trigger")?.click();
+
+    expect(parent.querySelector("[data-menu-item='register-geo']")).toBeNull();
+    controller.destroy();
+    i18n.destroy();
+  });
+
+  it("registers geo links only after an explicit menu action", () => {
+    const store = createStore(createInitialState(new Date(2026, 0, 1)));
+    const i18n = initI18n(store);
+    const parent = document.createElement("div");
+    const registerProtocolHandler = vi.fn();
+    const controller = mountMenuButton(parent, store, {
+      baseUrl: "/chronomap/",
+      pageLocation: { origin: "https://example.test", search: "" },
+      pageNavigator: { registerProtocolHandler },
+    });
+    const trigger = parent.querySelector<HTMLButtonElement>(".menu-trigger");
+    const geoButton = parent.querySelector<HTMLButtonElement>("[data-menu-item='register-geo']");
+
+    expect(registerProtocolHandler).not.toHaveBeenCalled();
+    expect(geoButton).not.toBeNull();
+    trigger?.click();
+    geoButton?.click();
+
+    expect(registerProtocolHandler).toHaveBeenCalledWith(
+      "geo",
+      "https://example.test/chronomap/share?text=%s",
+      "chronomap",
+    );
+    expect(store.get().ui.toast).toMatchObject({
+      kind: "info",
+      text: "geo リンクをこのアプリで開く設定を登録しました。",
+    });
+
+    controller.destroy();
+    i18n.destroy();
+  });
+
+  it("shows an error toast when registration is rejected", () => {
+    const store = createStore(createInitialState(new Date(2026, 0, 1)));
+    const i18n = initI18n(store);
+    const parent = document.createElement("div");
+    const registerProtocolHandler = vi.fn(() => {
+      throw new Error("Not allowed");
+    });
+    const controller = mountMenuButton(parent, store, {
+      pageNavigator: { registerProtocolHandler },
+    });
+
+    parent.querySelector<HTMLButtonElement>(".menu-trigger")?.click();
+    parent.querySelector<HTMLButtonElement>("[data-menu-item='register-geo']")?.click();
+
+    expect(store.get().ui.toast).toMatchObject({
+      kind: "error",
+      text: "geo リンクの登録に失敗しました。ブラウザの設定を確認してください。",
+    });
+
+    controller.destroy();
+    i18n.destroy();
+  });
 });
