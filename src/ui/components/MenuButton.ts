@@ -88,7 +88,7 @@ export function registerGeoProtocolHandler(
   pageNavigator: ShareNavigator,
   pageLocation: Pick<Location, "origin"> = globalThis.location,
   baseUrl: string = import.meta.env.BASE_URL,
-): "registered" | "unavailable" | "failed" {
+): "requested" | "unavailable" | "failed" {
   if (typeof pageNavigator.registerProtocolHandler !== "function") return "unavailable";
 
   try {
@@ -97,7 +97,7 @@ export function registerGeoProtocolHandler(
       buildGeoProtocolHandlerUrl(pageLocation, baseUrl),
       "chronomap",
     );
-    return "registered";
+    return "requested";
   } catch {
     return "failed";
   }
@@ -262,9 +262,9 @@ export function mountMenuButton(
       options.baseUrl ?? import.meta.env.BASE_URL,
     );
     actions.showToast(
-      result === "registered" ? "info" : "error",
+      result === "requested" ? "info" : "error",
       t(
-        result === "registered" ? "geo.registered" : "geo.registerFailed",
+        result === "requested" ? "geo.registered" : "geo.registerFailed",
         {},
         localeFor(store.get()),
       ),
