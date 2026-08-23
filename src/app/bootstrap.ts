@@ -1,6 +1,8 @@
 import { mount, type AppShell } from "./appShell";
 import { createOverlayManager, createMap, type MapController, type OverlayManager } from "../map";
+import { initPoiController, type PoiController, type PoiProviderResolver } from "../map/poiLayer";
 import type { LayerEntry } from "../providers/layers/types";
+import { getPoiProvider } from "../providers/poi/registry";
 import { mountPointPicker, type PointPickerController } from "./pointPicker";
 import { createInitialState, type AppState } from "../state/appState";
 import { createStore, type Store } from "../state/store";
@@ -22,6 +24,7 @@ import {
 } from "../ui/components/LayersSheet";
 import { mount as mountImportSheet } from "../ui/components/ImportSheet";
 import { mountMenuButton } from "../ui/components/MenuButton";
+import { mount as mountPoiToggle, type PoiToggleController } from "../ui/components/PoiToggle";
 import { mount as mountToast } from "../ui/components/Toast";
 import {
   mount as mountCoverageBanner,
@@ -37,6 +40,8 @@ export interface AppRuntime {
   readonly overlayManager: OverlayManager | undefined;
   readonly timeWiring: TimeWiringController | null;
   readonly pointPicker: PointPickerController;
+  readonly poiController: PoiController;
+  readonly poiToggle: PoiToggleController;
   readonly coverageBanner: CoverageBannerController | undefined;
   destroy(): void;
 }
@@ -65,6 +70,8 @@ export interface BootstrapOptions {
     store: Store<AppState>,
     mapController: MapController,
   ) => { destroy(): void };
+  readonly mountPoiToggle?: (parent: HTMLElement, store: Store<AppState>) => PoiToggleController;
+  readonly poiProvider?: PoiProviderResolver;
   readonly afterMap?: (runtime: {
     store: Store<AppState>;
     shell: AppShell;
@@ -88,6 +95,12 @@ export function bootstrap(
   );
   const toast = (options.mountToast ?? mountToast)(shell.getSlot("toast-host"), store);
   const mapController = createMap(shell.getSlot("map"), store);
+  const poiController = initPoiController(
+    mapController,
+    store,
+    options.poiProvider ?? getPoiProvider,
+  );
+  const poiToggle = (options.mountPoiToggle ?? mountPoiToggle)(shell.getSlot("PoiToggle"), store);
   const overlayManager =
     options.layerRegistry === undefined
       ? undefined
@@ -152,9 +165,13 @@ export function bootstrap(
     overlayManager,
     timeWiring,
     pointPicker,
+    poiController,
+    poiToggle,
     coverageBanner,
     destroy() {
       pointPicker.destroy();
+      poiController.destroy();
+      poiToggle.destroy();
       timeSlider?.destroy();
       opacityControl?.destroy();
       coverageBanner?.destroy();
