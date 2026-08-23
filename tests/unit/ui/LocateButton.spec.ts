@@ -131,6 +131,7 @@ describe("LocateButton", () => {
     await flushPromises();
     expect(requestFix).toHaveBeenCalledTimes(2);
     expect(store.get().geo.status).toBe("granted");
+    expect(document.activeElement).toBe(button);
     handle.destroy();
   });
 

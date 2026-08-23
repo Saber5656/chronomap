@@ -155,6 +155,7 @@ export function mount(
   let destroyed = false;
   let popoverOpen = false;
   let requestSequence = 0;
+  let restoreFocusAfterRequest = false;
 
   function render(): void {
     const status = store.get().geo.status;
@@ -218,6 +219,13 @@ export function mount(
       } else {
         actions.setGeoStatus(status);
       }
+    } finally {
+      if (!destroyed && sequence === requestSequence && restoreFocusAfterRequest) {
+        restoreFocusAfterRequest = false;
+        if (!root.hidden && !button.disabled && button.isConnected) {
+          button.focus({ preventScroll: true });
+        }
+      }
     }
   }
 
@@ -233,6 +241,7 @@ export function mount(
 
   function handleRetryClick(): void {
     if (store.get().geo.status !== "denied") return;
+    restoreFocusAfterRequest = true;
     void acquireFix();
   }
 
@@ -272,6 +281,7 @@ export function mount(
       if (destroyed) return;
       destroyed = true;
       requestSequence += 1;
+      restoreFocusAfterRequest = false;
       unsubscribeStatus();
       unsubscribeLang();
       button.removeEventListener("click", handleButtonClick);
