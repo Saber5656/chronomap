@@ -81,9 +81,9 @@ test("fetches a bounded POI set, coalesces movement, toggles, and opens a pin sh
   if (point === null) throw new Error("Expected the first POI to be projected on screen.");
   await page.mouse.click(point.x, point.y);
   await expect.poll(async () => (await readState(page)).poi.selectedId).toBe("wikipedia-ja:1000");
-  await expect(page.locator("[data-sheet-stub='poi']")).toBeVisible();
+  await expect(page.locator(".bottom-sheet[data-sheet-kind='poi'] .poi-sheet")).toBeVisible();
   await page.locator(".bottom-sheet__close").click();
-  await expect(page.locator("[data-sheet-stub='poi']")).toHaveCount(0);
+  await expect(page.locator(".bottom-sheet[data-sheet-kind='poi']")).toHaveCount(0);
 
   await setView(page, { ...TOKYO_VIEW, lat: TOKYO_VIEW.lat + 0.0001 });
   await page.waitForTimeout(450);
