@@ -97,6 +97,7 @@ describe("LocateButton", () => {
       .mockRejectedValueOnce(new GeoError("denied"))
       .mockResolvedValueOnce(FIX);
     const { parent, store, handle, button } = setup({ requestFix });
+    document.body.append(parent);
 
     button.click();
     await flushPromises();
@@ -110,8 +111,13 @@ describe("LocateButton", () => {
     const popover = parent.querySelector<HTMLElement>(".locate-popover");
     const retryButton = parent.querySelector<HTMLButtonElement>(".locate-popover__retry");
     expect(popover?.hidden).toBe(false);
+    expect(popover?.getAttribute("aria-modal")).toBe("true");
     expect(popover?.textContent).toContain("位置情報");
+    expect(document.activeElement).toBe(retryButton);
     expect(requestFix).toHaveBeenCalledOnce();
+
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true }));
+    expect(document.activeElement).toBe(retryButton);
 
     document.body.dispatchEvent(new Event("pointerdown", { bubbles: true }));
     expect(popover?.hidden).toBe(true);
@@ -125,6 +131,25 @@ describe("LocateButton", () => {
     await flushPromises();
     expect(requestFix).toHaveBeenCalledTimes(2);
     expect(store.get().geo.status).toBe("granted");
+    handle.destroy();
+  });
+
+  it("returns focus to the locate button when the denied popover closes with Escape", async () => {
+    const requestFix = vi.fn<() => Promise<Fix>>().mockRejectedValue(new GeoError("denied"));
+    const { parent, handle, button } = setup({ requestFix });
+    document.body.append(parent);
+
+    button.click();
+    await flushPromises();
+    await flushPromises();
+    button.click();
+    const popover = parent.querySelector<HTMLElement>(".locate-popover");
+    if (popover === null || popover.hidden) throw new Error("Expected the denied popover.");
+
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+
+    expect(popover.hidden).toBe(true);
+    expect(document.activeElement).toBe(button);
     handle.destroy();
   });
 

@@ -13,7 +13,7 @@
 }
 
 .onboarding-target {
-  outline: 3px solid var(--color-accent);
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
   outline-offset: 4px;
 }
 
@@ -72,13 +72,13 @@
 .onboarding-next {
   border-color: var(--color-accent);
   background: var(--color-accent);
-  color: #ffffff;
+  color: var(--color-accent-contrast);
 }
 
 .onboarding-skip:focus-visible,
 .onboarding-next:focus-visible {
-  outline: 3px solid var(--color-accent);
-  outline-offset: 2px;
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
 }
 
 @media (prefers-reduced-motion: reduce) {

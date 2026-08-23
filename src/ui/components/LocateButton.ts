@@ -131,6 +131,7 @@ export function mount(
   const button = el("button", {
     class: "locate-button",
     type: "button",
+    "aria-haspopup": "dialog",
     "aria-controls": `locate-denied-popover-${instanceId}`,
   });
   const title = el("h2", { id: deniedTitleId, class: "locate-popover__title" });
@@ -142,6 +143,7 @@ export function mount(
       id: `locate-denied-popover-${instanceId}`,
       class: "locate-popover",
       role: "dialog",
+      "aria-modal": "true",
       "aria-labelledby": deniedTitleId,
       "aria-describedby": deniedBodyId,
     },
@@ -182,9 +184,12 @@ export function mount(
     popover.setAttribute("aria-hidden", String(!showPopover));
   }
 
-  function setPopoverOpen(open: boolean): void {
+  function setPopoverOpen(open: boolean, restoreFocus = false): void {
     popoverOpen = open;
     render();
+    if (open) retryButton.focus({ preventScroll: true });
+    else if (restoreFocus && !button.disabled && button.isConnected)
+      button.focus({ preventScroll: true });
   }
 
   async function acquireFix(): Promise<void> {
@@ -238,7 +243,15 @@ export function mount(
   }
 
   function handleDocumentKeyDown(event: KeyboardEvent): void {
-    if (event.key === "Escape" && popoverOpen) setPopoverOpen(false);
+    if (!popoverOpen) return;
+    if (event.key === "Tab") {
+      event.preventDefault();
+      retryButton.focus({ preventScroll: true });
+      return;
+    }
+    if (event.key !== "Escape") return;
+    event.preventDefault();
+    setPopoverOpen(false, true);
   }
 
   const unsubscribeStatus = store.on((state) => state.geo.status, render);

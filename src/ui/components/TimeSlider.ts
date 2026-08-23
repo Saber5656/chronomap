@@ -164,8 +164,13 @@ export function mount(
   const trackBase = el("span", { class: "time-slider__track-base" });
   const segments = el("span", { class: "time-slider__segments" });
   const valueLabel = el("span", { class: "time-slider__value", "aria-hidden": "true" });
+  const thumbHit = el("span", {
+    class: "time-slider__thumb-hit",
+    "aria-hidden": "true",
+  });
   const thumb = el("span", { class: "time-slider__thumb", "aria-hidden": "true" });
-  track.append(trackBase, segments, valueLabel, thumb);
+  thumbHit.append(thumb);
+  track.append(trackBase, segments, valueLabel, thumbHit);
   root.append(track);
   parent.append(root);
 
@@ -181,7 +186,7 @@ export function mount(
 
   function renderPosition(): void {
     const x = yearToX(displayedYear, YEAR_MIN, maxYear, geometry.width);
-    thumb.style.left = `${x}px`;
+    thumbHit.style.left = `${x}px`;
     valueLabel.style.left = `${x}px`;
   }
 

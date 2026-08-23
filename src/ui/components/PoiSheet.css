@@ -3,8 +3,8 @@
 }
 
 .poi-sheet:focus {
-  outline: 3px solid var(--color-accent);
-  outline-offset: -3px;
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: calc(-1 * var(--focus-ring-offset));
 }
 .poi-sheet__heading {
   display: flex;
@@ -88,6 +88,13 @@
   background: transparent;
   color: inherit;
   font: inherit;
+}
+
+.poi-sheet__actions a:focus-visible,
+.poi-sheet__actions button:focus-visible,
+.poi-sheet__retry:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
 }
 .poi-sheet__footer {
   margin-block-start: 1rem;
