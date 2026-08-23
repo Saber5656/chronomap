@@ -112,4 +112,16 @@ describe("LayersSheet", () => {
     );
     controller.destroy();
   });
+
+  it("opens the About sheet from the enabled footer link", () => {
+    const { parent, store, controller } = setup();
+    const aboutLink = parent.querySelector<HTMLButtonElement>("[data-sheet-link='about']");
+
+    expect(aboutLink).not.toBeNull();
+    expect(aboutLink?.disabled).toBe(false);
+    aboutLink?.click();
+    expect(store.get().ui.sheet).toBe("about");
+
+    controller.destroy();
+  });
 });
