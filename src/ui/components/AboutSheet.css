@@ -1,0 +1,75 @@
+.about-sheet {
+  display: grid;
+  gap: 1.25rem;
+  min-width: 0;
+  padding-block: 0.25rem 0.5rem;
+}
+
+.about-sheet__section {
+  display: grid;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.about-sheet__section-heading {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.about-sheet__version,
+.about-sheet p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.about-sheet__app-name {
+  font-size: 1.1rem;
+  font-weight: 650;
+}
+
+.about-sheet__label {
+  color: color-mix(in srgb, var(--color-text) 62%, transparent);
+}
+
+.about-sheet__source-row {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+  padding-block: 0.15rem 0.75rem;
+  border-block-end: 1px solid color-mix(in srgb, var(--color-text) 14%, transparent);
+}
+
+.about-sheet__source-name {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.about-sheet__source-value {
+  min-width: 0;
+  color: color-mix(in srgb, var(--color-text) 82%, transparent);
+  font-size: 0.84rem;
+  overflow-wrap: anywhere;
+}
+
+.about-sheet__privacy-list,
+.about-sheet__link-list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding-inline-start: 1.25rem;
+  line-height: 1.5;
+}
+
+.about-sheet a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  overflow-wrap: anywhere;
+}
+
+.about-sheet__plain-text {
+  overflow-wrap: anywhere;
+}

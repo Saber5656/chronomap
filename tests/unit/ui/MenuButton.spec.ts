@@ -67,6 +67,7 @@ describe("MenuButton language item", () => {
     const store = createStore(createInitialState(new Date(2026, 0, 1)));
     const i18n = initI18n(store);
     const parent = document.createElement("div");
+    document.body.append(parent);
     const controller = mountMenuButton(parent, store);
 
     expect(parent.querySelector("[data-menu-item='language']")).not.toBeNull();
@@ -163,6 +164,49 @@ describe("MenuButton language item", () => {
       kind: "error",
       text: "geo リンクの登録に失敗しました。ブラウザの設定を確認してください。",
     });
+
+    controller.destroy();
+    i18n.destroy();
+  });
+  it("rejects credentials in a same-origin geo handler URL", () => {
+    const store = createStore(createInitialState(new Date(2026, 0, 1)));
+    const i18n = initI18n(store);
+    const parent = document.createElement("div");
+    const registerProtocolHandler = vi.fn();
+    const controller = mountMenuButton(parent, store, {
+      baseUrl: "https://user:pass@example.test/chronomap/",
+      pageLocation: { origin: "https://example.test", search: "" },
+      pageNavigator: { registerProtocolHandler },
+    });
+
+    parent.querySelector<HTMLButtonElement>(".menu-trigger")?.click();
+    parent.querySelector<HTMLButtonElement>("[data-menu-item='register-geo']")?.click();
+
+    expect(registerProtocolHandler).not.toHaveBeenCalled();
+    expect(store.get().ui.toast?.kind).toBe("error");
+
+    controller.destroy();
+    i18n.destroy();
+  });
+
+  it("opens the About sheet from the menu and restores trigger focus", () => {
+    const store = createStore(createInitialState(new Date(2026, 0, 1)));
+    const i18n = initI18n(store);
+    const parent = document.createElement("div");
+    document.body.append(parent);
+    const controller = mountMenuButton(parent, store);
+    const trigger = parent.querySelector<HTMLButtonElement>(".menu-trigger");
+    const about = parent.querySelector<HTMLButtonElement>("[data-menu-item='about']");
+
+    if (trigger === null || about === null) throw new Error("Expected menu About controls.");
+    trigger.click();
+    expect(about.textContent).toBe("このアプリについて");
+
+    about.click();
+
+    expect(store.get().ui.sheet).toBe("about");
+    expect(document.activeElement).toBe(trigger);
+    expect(parent.querySelector(".menu-popover")?.hasAttribute("hidden")).toBe(true);
 
     controller.destroy();
     i18n.destroy();
