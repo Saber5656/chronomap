@@ -151,6 +151,7 @@ async function fetchAndValidateWithTimeout(fetchImpl, url, timeoutMs, validate) 
   try {
     const response = await fetchImpl(url, {
       headers: requestHeaders(),
+      redirect: "error",
       signal: controller.signal,
     });
     return await validate(response);

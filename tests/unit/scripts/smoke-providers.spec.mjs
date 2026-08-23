@@ -71,6 +71,7 @@ describe("smoke:providers", () => {
     expect(fetchImpl.mock.calls[0][1].headers).toEqual(
       expect.objectContaining({ "Api-User-Agent": USER_AGENT, "User-Agent": USER_AGENT }),
     );
+    expect(fetchImpl.mock.calls[0][1].redirect).toBe("error");
     expect(renderTable(result.rows)).toContain("| Kind");
   });
 
