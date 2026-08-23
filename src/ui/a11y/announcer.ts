@@ -148,16 +148,22 @@ export function mount(
 
   function handleLayerChange(next: string | null, previous: string | null): void {
     if (destroyed || next === previous) return;
-    const entry = next === null ? undefined : registry.find((candidate) => candidate.id === next);
+    const locale = store.get().ui.lang;
+    if (next === null) {
+      layerMessage.textContent = translate("badge.presentDay", {}, locale);
+      return;
+    }
+
+    const entry = registry.find((candidate) => candidate.id === next);
     layerMessage.textContent =
       entry === undefined
         ? ""
         : translate(
             "announce.layerChanged",
             {
-              layerTitle: entry.title[store.get().ui.lang],
+              layerTitle: entry.title[locale],
             },
-            store.get().ui.lang,
+            locale,
           );
   }
 

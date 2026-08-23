@@ -139,4 +139,17 @@ describe("a11y announcer", () => {
 
     controller.destroy();
   });
+
+  it("announces the present-day state when the historical layer is cleared", () => {
+    const { controller, layerMessage, store } = setup();
+
+    createActions(store).setActiveLayer(null, {
+      candidates: [],
+      reason: "no-coverage",
+      snapped: false,
+    });
+
+    expect(layerMessage.textContent).toBe("現在の地図");
+    controller.destroy();
+  });
 });
