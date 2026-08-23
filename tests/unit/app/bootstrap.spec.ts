@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
     destroy: vi.fn(),
     getMap: vi.fn(() => ({
       isStyleLoaded: () => true,
+      getZoom: vi.fn(() => 5),
       getLayer: vi.fn(() => undefined),
       getSource: vi.fn(() => undefined),
       addLayer: vi.fn(),
@@ -19,6 +20,7 @@ const mocks = vi.hoisted(() => ({
       off: vi.fn(),
     })),
     getViewportBbox: vi.fn(() => [0, 0, 1, 1]),
+    onIdle: vi.fn(() => vi.fn()),
     onLongPress: vi.fn(() => vi.fn()),
   })),
 }));
