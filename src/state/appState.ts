@@ -14,6 +14,12 @@ export interface ImportSheetRequest {
   autofocus: boolean;
 }
 
+export interface ToastAction {
+  readonly label: string;
+  readonly onAction: () => void;
+  readonly onDismiss?: () => void;
+}
+
 export type { Poi } from "../providers/poi/types";
 
 export interface AppState {
@@ -43,7 +49,8 @@ export interface AppState {
   ui: {
     sheet: "none" | "poi" | "layers" | "about" | "import";
     importRequest: ImportSheetRequest | null;
-    toast: { id: number; kind: "info" | "error"; text: string } | null;
+    toast: { id: number; kind: "info" | "error"; text: string; action?: ToastAction } | null;
+    offline: boolean;
     lang: "ja" | "en";
   };
 }
@@ -73,6 +80,7 @@ export function createInitialState(now: Date): AppState {
       sheet: "none",
       importRequest: null,
       toast: null,
+      offline: typeof navigator !== "undefined" ? navigator.onLine === false : false,
       lang: "ja",
     },
   };

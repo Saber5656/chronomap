@@ -272,6 +272,7 @@ function removeMapLayerIfPresent(map: MapLibreMap, id: string): void {
 
 /** Owns the idle-driven POI request policy and the MapLibre POI rendering layers. */
 export interface PoiController {
+  retry(): void;
   destroy(): void;
 }
 
@@ -599,6 +600,10 @@ export function initPoiController(
   renderItems(latestItems);
 
   return {
+    retry() {
+      clearDebounce();
+      if (lastFetch !== null) beginFetch(lastFetch);
+    },
     destroy() {
       if (destroyed) return;
       destroyed = true;

@@ -583,6 +583,37 @@ describe("createMap", () => {
     controller.destroy();
   });
 
+  it("ignores 404 tiles and rate-limits repeated basemap failures", () => {
+    const { controller, map, store } = setup();
+
+    for (let index = 0; index < 12; index += 1) {
+      map.emit("error", {
+        sourceId: GSI_BASEMAP_SOURCE_ID,
+        error: { status: 404 },
+      });
+    }
+    expect(store.get().ui.toast).toBeNull();
+
+    for (let index = 0; index < 11; index += 1) {
+      map.emit("error", {
+        sourceId: GSI_BASEMAP_SOURCE_ID,
+        error: { status: 503 },
+      });
+    }
+    expect(store.get().ui.toast?.text).toBe(
+      "地図画像を読み込めません。しばらくしてからお試しください。",
+    );
+
+    const firstToastId = store.get().ui.toast?.id;
+    map.emit("error", {
+      sourceId: GSI_BASEMAP_SOURCE_ID,
+      error: { status: 503 },
+    });
+    expect(store.get().ui.toast?.id).toBe(firstToastId);
+
+    controller.destroy();
+  });
+
   it("retries the latest user fix after a source update finishes", () => {
     const { controller, map } = setup();
     const firstFix = { lat: 35.681236, lng: 139.767125, accuracyM: 100, at: 123 };

@@ -6,6 +6,9 @@ import {
   type RegisterServiceWorker,
   type UpdateServiceWorker,
 } from "../../../src/app/swUpdate";
+import { createInitialState } from "../../../src/state/appState";
+import { createStore } from "../../../src/state/store";
+import { mount as mountToast } from "../../../src/ui/components/Toast";
 
 describe("service worker update boundary", () => {
   afterEach(() => {
@@ -59,5 +62,52 @@ describe("service worker update boundary", () => {
 
     await Promise.resolve();
     controller.destroy();
+  });
+
+  it("re-presents the shared update prompt when the reload action fails", async () => {
+    const parent = document.createElement("div");
+    const store = createStore(createInitialState(new Date(2026, 0, 1)));
+    const toast = mountToast(parent, store);
+    let options: RegisterSWOptions | undefined;
+    const updateServiceWorker = vi.fn<UpdateServiceWorker>(() =>
+      Promise.reject(new Error("update failed")),
+    );
+    const registerSW: RegisterServiceWorker = (nextOptions) => {
+      options = nextOptions;
+      return updateServiceWorker;
+    };
+    const controller = mountServiceWorkerUpdate(parent, registerSW, toast);
+
+    options?.onNeedRefresh?.();
+    expect(parent.querySelector(".toast__action")).not.toBeNull();
+    parent.querySelector<HTMLButtonElement>(".toast__action")?.click();
+    await Promise.resolve();
+
+    expect(updateServiceWorker).toHaveBeenCalledOnce();
+    expect(parent.querySelector(".toast__action")).not.toBeNull();
+
+    controller.destroy();
+    toast.destroy();
+  });
+
+  it("allows a later shared update notification after the prompt expires", () => {
+    vi.useFakeTimers();
+    const parent = document.createElement("div");
+    const store = createStore(createInitialState(new Date(2026, 0, 1)));
+    const toast = mountToast(parent, store);
+    let options: RegisterSWOptions | undefined;
+    const registerSW: RegisterServiceWorker = (nextOptions) => {
+      options = nextOptions;
+      return () => Promise.resolve();
+    };
+    const controller = mountServiceWorkerUpdate(parent, registerSW, toast);
+
+    options?.onNeedRefresh?.();
+    vi.advanceTimersByTime(8_000);
+    options?.onNeedRefresh?.();
+
+    expect(parent.querySelectorAll(".toast__action")).toHaveLength(1);
+    controller.destroy();
+    toast.destroy();
   });
 });

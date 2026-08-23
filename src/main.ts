@@ -174,7 +174,7 @@ function startApp(shareFallback: ShareFallback | null): void {
   }
 
   if (import.meta.env.PROD) {
-    void registerServiceWorker(runtime.shell.getSlot("toast-host"));
+    void registerServiceWorker(runtime.shell.getSlot("toast-host"), runtime.toast);
   }
 
   const isDebugContext = import.meta.env.DEV || import.meta.env.VITE_E2E === "true";

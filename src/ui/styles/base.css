@@ -1,6 +1,7 @@
 :root {
   --color-bg: #f5f7fa;
   --color-accent: #2d6cdf;
+  --color-action: #2d6cdf;
   --color-text: #17202a;
   --radius: 0.75rem;
   --shadow: 0 0.5rem 1.5rem rgb(15 23 42 / 18%);
@@ -14,6 +15,7 @@
   :root {
     --color-bg: #161a1f;
     --color-accent: #83b4ff;
+    --color-action: #2d6cdf;
     --color-text: #f2f5f7;
     --shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 45%);
   }
