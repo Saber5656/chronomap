@@ -1,6 +1,6 @@
 import { latLng, MAX_ACCURACY_METERS, opacity, year, zoom } from "../security/validate";
 import type { Poi } from "../providers/poi/types";
-import type { AppState, ImportFailureReason, ImportSheetRequest } from "./appState";
+import type { AppState, ImportFailureReason, ImportSheetRequest, ToastAction } from "./appState";
 import { POI_MAX } from "./appState";
 import type { Store } from "./store";
 
@@ -21,7 +21,8 @@ export interface AppActions {
   openSheet(sheet: Exclude<AppState["ui"]["sheet"], "none">): void;
   openImportSheet(options?: OpenImportSheetOptions): void;
   closeSheet(): void;
-  showToast(kind: "info" | "error", text: string): void;
+  showToast(kind: "info" | "error", text: string, action?: ToastAction): void;
+  setOffline(offline: boolean): void;
   setLang(lang: AppState["ui"]["lang"]): void;
 }
 
@@ -151,14 +152,22 @@ export function createActions(store: Store<AppState>): AppActions {
         ui: { ...state.ui, sheet: "none", importRequest: null },
       }));
     },
-    showToast(kind, text) {
+    showToast(kind, text, action) {
       store.set((state) => ({
         ...state,
         ui: {
           ...state.ui,
-          toast: { id: (state.ui.toast?.id ?? 0) + 1, kind, text },
+          toast: {
+            id: (state.ui.toast?.id ?? 0) + 1,
+            kind,
+            text,
+            ...(action === undefined ? {} : { action }),
+          },
         },
       }));
+    },
+    setOffline(offline) {
+      store.set((state) => ({ ...state, ui: { ...state.ui, offline } }));
     },
     setLang(lang) {
       store.set((state) => ({ ...state, ui: { ...state.ui, lang } }));

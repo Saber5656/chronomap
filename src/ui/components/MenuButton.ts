@@ -172,6 +172,8 @@ export function mountMenuButton(
     },
     "⋯",
   );
+  const offlineDot = el("span", { class: "menu-trigger__offline-dot", "aria-hidden": "true" });
+  button.append(offlineDot);
   const menu = el("ul", { id: menuId, class: "menu-popover", role: "menu" });
   const shareItem = el("li", { role: "none" });
   const shareButton = el("button", { type: "button", role: "menuitem", class: "menu-item" });
@@ -218,6 +220,7 @@ export function mountMenuButton(
     button.setAttribute("aria-label", t("menu.aria", {}, locale));
     shareButton.textContent = t("menu.share", {}, locale);
     importButton.textContent = t("menu.import", {}, locale);
+    offlineDot.hidden = !store.get().ui.offline;
     if (geoButton !== null) geoButton.textContent = t("menu.registerGeo", {}, locale);
   }
 
@@ -285,6 +288,10 @@ export function mountMenuButton(
   }
 
   const unsubscribeLanguage = store.on((state) => state.ui.lang, render);
+  const unsubscribeOffline = store.on(
+    (state) => state.ui.offline,
+    () => render(store.get().ui.lang),
+  );
   render(store.get().ui.lang);
   button.addEventListener("click", handleButtonClick);
   shareButton.addEventListener("click", handleShareClick);
@@ -299,6 +306,7 @@ export function mountMenuButton(
       if (destroyed) return;
       destroyed = true;
       unsubscribeLanguage();
+      unsubscribeOffline();
       languageItem.destroy();
       button.removeEventListener("click", handleButtonClick);
       shareButton.removeEventListener("click", handleShareClick);
