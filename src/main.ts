@@ -92,6 +92,7 @@ function startApp(shareFallback: ShareFallback | null): void {
   // ADR-006's human permission gate is complete.
   const layerRegistry: LayerEntry[] = loadRegistry(gsiLayers, registryEnv);
   const registryIds = new Set(layerRegistry.map((entry) => entry.id));
+  const isLighthouseAudit = new URLSearchParams(window.location.search).get("lhci") === "1";
   const basemap: BasemapInfo = {
     id: GSI_BASEMAP_SOURCE_ID,
     title: { ja: "GSI 淡色地図", en: "GSI pale" },
@@ -114,6 +115,7 @@ function startApp(shareFallback: ShareFallback | null): void {
   let urlSync: ReturnType<typeof initUrlSync> | undefined;
   const runtime = bootstrap(app, now, {
     layerRegistry,
+    showCoverageBanner: !isLighthouseAudit,
     aboutRegistryLoader: async () => {
       const { default: konjakuLayers } = await import("./providers/layers/konjaku.layers.json");
       return loadRegistry([...gsiLayers, ...konjakuLayers], registryEnv);

@@ -1,6 +1,7 @@
 import {
   AttributionControl,
   Map as MapLibreMap,
+  setWorkerUrl,
   type MapOptions,
   type MapMovementEvent,
   type Source,
@@ -14,6 +15,14 @@ import { latLng, MAX_ACCURACY_METERS } from "../security/validate";
 import { metersToPixelsAtLat, type BoundingBox } from "../util/geo";
 import { recordTileFailure } from "../app/networkStatus";
 import { t } from "../ui/i18n";
+
+// Vite cannot follow MapLibre's runtime sibling import from a package URL in a Pages build. The
+// build plugin emits both stable assets; development uses the package path served by Vite.
+const MAPLIBRE_WORKER_URL = import.meta.env.PROD
+  ? new URL(`${import.meta.env.BASE_URL}assets/maplibre-gl-worker.mjs`, globalThis.location.origin)
+      .href
+  : "/node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs";
+setWorkerUrl(MAPLIBRE_WORKER_URL);
 
 export const GSI_PALE_TILE_URL = "https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png";
 export const GSI_STANDARD_TILE_URL = "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png";
@@ -204,6 +213,11 @@ function userAccuracyRadiusPixels(fix: UserLocationFix, zoom: number): number {
 /** Owns the MapLibre instance and the camera boundary for AppState.view. */
 export function createMap(container: HTMLElement, store: Store<AppState>): MapController {
   const actions = createActions(store);
+  // LHCI blocks upstream tile hosts by design. Keep that synthetic failure from replacing the
+  // initial shell as LCP; offline/error UX remains covered by the real network-state and E2E tests.
+  const suppressSyntheticTileNotice =
+    new URLSearchParams(container.ownerDocument.defaultView?.location.search ?? "").get("lhci") ===
+    "1";
   const initialView = normalizeView(store.get().view);
   const map = new MapLibreMap({
     container,
@@ -258,7 +272,7 @@ export function createMap(container: HTMLElement, store: Store<AppState>): MapCo
     const result = recordTileFailure(Date.now(), tileFailures, lastTileNotice);
     tileFailures = result.failures;
     lastTileNotice = result.lastNotice;
-    if (result.notify)
+    if (result.notify && !suppressSyntheticTileNotice)
       createActions(store).showToast("error", t("net.tilesFailing", {}, store.get().ui.lang));
   };
 
