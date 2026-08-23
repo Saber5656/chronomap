@@ -17,6 +17,8 @@ export interface UrlSyncController {
   connectIdle(register: (callback: () => void) => () => void): void;
   /** Return the current canonical query string without mutating browser history. */
   getSerialized(): string;
+  /** Return the sanitized label supplied with the initial view, if any. */
+  getInitialLabel(): string | null;
   destroy(): void;
 }
 
@@ -46,6 +48,15 @@ function mergeUrlState(store: Store<AppState>, patch: ReturnType<typeof parseUrl
   }));
 }
 
+function sameView(
+  left: Readonly<AppState["view"]>,
+  right: Readonly<AppState["view"]> | null,
+): boolean {
+  return (
+    right !== null && left.lat === right.lat && left.lng === right.lng && left.zoom === right.zoom
+  );
+}
+
 /**
  * Apply the public URL state before map construction and synchronize selected state back to it.
  * The first map idle is the boundary after which a redirect/import can no longer be overwritten.
@@ -60,7 +71,8 @@ export function initUrlSync(
   const now = options.now ?? new Date();
   const initialPatch =
     pageLocation === undefined ? {} : parseUrlState(pageLocation.search, now, registryIds);
-  const labelValue = initialPatch.label ?? null;
+  const initialView = initialPatch.view ?? null;
+  let labelValue = initialView === null ? null : (initialPatch.label ?? null);
   let idle = false;
   let destroyed = false;
   let timer: ReturnType<typeof setTimeout> | null = null;
@@ -87,7 +99,13 @@ export function initUrlSync(
     timer = setTimeout(writeUrl, URL_SYNC_DEBOUNCE_MS);
   }
 
-  const unsubscribeView = store.on((state) => state.view, scheduleWrite);
+  const unsubscribeView = store.on(
+    (state) => state.view,
+    (nextView) => {
+      if (labelValue !== null && !sameView(nextView, initialView)) labelValue = null;
+      scheduleWrite();
+    },
+  );
   const unsubscribeYear = store.on((state) => state.year, scheduleWrite);
   const unsubscribeOpacity = store.on((state) => state.timeLayer.opacity, scheduleWrite);
   const unsubscribePoi = store.on((state) => state.poi.enabled, scheduleWrite);
@@ -104,6 +122,7 @@ export function initUrlSync(
       });
     },
     getSerialized,
+    getInitialLabel: () => labelValue,
     destroy() {
       if (destroyed) return;
       destroyed = true;

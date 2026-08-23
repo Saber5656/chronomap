@@ -13,6 +13,7 @@ export interface AppActions {
     resolution?: AppState["timeLayer"]["resolution"],
   ): void;
   setPoiStatus(status: AppState["poi"]["status"]): void;
+  setPoiEnabled(enabled: boolean): void;
   setPoiItems(items: readonly Poi[]): void;
   selectPoi(id: string | null): void;
   setGeoStatus(status: AppState["geo"]["status"]): void;
@@ -75,6 +76,9 @@ export function createActions(store: Store<AppState>): AppActions {
     },
     setPoiStatus(status) {
       store.set((state) => ({ ...state, poi: { ...state.poi, status } }));
+    },
+    setPoiEnabled(enabled) {
+      store.set((state) => ({ ...state, poi: { ...state.poi, enabled } }));
     },
     setPoiItems(items) {
       const limited = items.slice(0, POI_MAX);
