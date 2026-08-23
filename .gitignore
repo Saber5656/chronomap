@@ -3,6 +3,7 @@ dist/
 coverage/
 .lighthouseci/
 playwright-report/
+playwright-report-commons/
 test-results/
 .DS_Store
 *.local

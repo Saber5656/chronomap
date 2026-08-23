@@ -12,6 +12,9 @@
             "descriptionurl": "https://commons.wikimedia.org/wiki/File:Osaka_Castle_sample.jpg",
             "descriptionshorturl": "https://commons.wikimedia.org/w/index.php?curid=987654",
             "thumburl": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Osaka_Castle_02bs3200.jpg/320px-Osaka_Castle_02bs3200.jpg",
+            "extmetadata": {
+              "DateTimeOriginal": { "value": "1900-01-02" }
+            },
             "thumbwidth": 320,
             "thumbheight": 240,
             "mime": "image/jpeg"

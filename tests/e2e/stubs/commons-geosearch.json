@@ -1,0 +1,15 @@
+{
+  "batchcomplete": "",
+  "query": {
+    "geosearch": [
+      {
+        "pageid": 987654,
+        "ns": 6,
+        "title": "File:Osaka Castle sample.jpg",
+        "lat": 34.687315,
+        "lon": 135.526201,
+        "dist": 120.4
+      }
+    ]
+  }
+}

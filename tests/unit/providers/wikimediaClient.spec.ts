@@ -107,6 +107,31 @@ describe("wikimediaFetch", () => {
     );
     expect(fetchImpl).not.toHaveBeenCalled();
   });
+
+  it("honors a provider-specific API host allowlist without weakening HTTPS checks", async () => {
+    const fetchImpl = vi.fn<typeof fetch>().mockResolvedValue(response('{"commons":true}'));
+    const allowedApiHosts = new Set(["commons.wikimedia.org"]);
+
+    await expect(
+      wikimediaFetch(new URL("https://commons.wikimedia.org/w/api.php"), {
+        fetchImpl,
+        allowedApiHosts,
+      }),
+    ).resolves.toEqual({ commons: true });
+    expect(() =>
+      wikimediaFetch(new URL("https://ja.wikipedia.org/w/api.php"), {
+        fetchImpl,
+        allowedApiHosts,
+      }),
+    ).toThrow(Error);
+    expect(() =>
+      wikimediaFetch(new URL("http://commons.wikimedia.org/w/api.php"), {
+        fetchImpl,
+        allowedApiHosts,
+      }),
+    ).toThrow(Error);
+    expect(fetchImpl).toHaveBeenCalledOnce();
+  });
 });
 
 describe("cachedFetch", () => {

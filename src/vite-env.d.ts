@@ -4,6 +4,7 @@
 interface ImportMetaEnv {
   readonly VITE_E2E?: string;
   readonly VITE_ENABLE_KONJAKU?: string;
+  readonly VITE_ENABLE_COMMONS_PHOTOS?: string;
 }
 
 interface ImportMeta {
