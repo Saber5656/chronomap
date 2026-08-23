@@ -58,6 +58,35 @@ body {
   min-height: 100dvh;
 }
 
+.app-loading {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 2rem;
+  color: var(--color-text);
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.app-brand {
+  position: fixed;
+  z-index: var(--z-chrome);
+  inset-block-start: 0.75rem;
+  inset-inline-start: 0.75rem;
+  min-inline-size: 12rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--color-text) 20%, transparent);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--color-bg) 94%, transparent);
+  color: var(--color-text);
+  font-size: 1.75rem;
+  font-weight: 650;
+  line-height: 1.35;
+  text-align: center;
+}
+
 .shell {
   --top-controls-block-start: max(8px, env(safe-area-inset-top, 0px));
   --top-controls-slot-block-size: 44px;
