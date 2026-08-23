@@ -1,0 +1,18 @@
+{
+  "type": "standard",
+  "title": "東京駅",
+  "displaytitle": "東京駅",
+  "thumbnail": {
+    "source": "https://upload.wikimedia.org/wikipedia/commons/thumb/example.jpg/320px-example.jpg",
+    "width": 320,
+    "height": 240
+  },
+  "lang": "ja",
+  "extract": "東京駅は、東京都千代田区丸の内にある鉄道駅です。",
+  "extract_html": "<p><strong>この HTML は使用しない</strong></p>",
+  "content_urls": {
+    "desktop": {
+      "page": "https://ja.wikipedia.org/wiki/%E6%9D%B1%E4%BA%AC%E9%A7%85"
+    }
+  }
+}

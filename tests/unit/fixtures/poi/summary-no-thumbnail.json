@@ -1,0 +1,11 @@
+{
+  "type": "standard",
+  "title": "Tokyo Station",
+  "lang": "en",
+  "extract": "Tokyo Station is a railway station in Tokyo, Japan.",
+  "content_urls": {
+    "desktop": {
+      "page": "https://evil.example/article"
+    }
+  }
+}

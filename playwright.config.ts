@@ -31,7 +31,11 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "VITE_E2E=true npm run build && npm run preview -- --host 127.0.0.1 --port 4174",
+    // The TMS compatibility spec exercises the feature-gated Konjaku host. The unit CSP
+    // matrix separately covers the default (disabled) policy, so the E2E build enables the
+    // feature to let MapLibre reach the allowlisted TMS fixture.
+    command:
+      "VITE_E2E=true VITE_ENABLE_KONJAKU=true npm run build && npm run preview -- --host 127.0.0.1 --port 4174",
     url: "http://127.0.0.1:4174/chronomap/",
     reuseExistingServer: true,
     timeout: 120_000,
