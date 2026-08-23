@@ -1,10 +1,28 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { defineConfig, loadEnv, type Plugin } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 import packageJson from "./package.json" with { type: "json" };
 import { buildContentSecurityPolicy } from "./src/security/csp";
 import { isFeatureFlagEnabled, KONJAKU_FEATURE_FLAG } from "./src/security/hosts";
 
-const APP_SHELL_GLOB_PATTERNS = ["**/*.{js,css,html,svg,png,webmanifest}"];
+const APP_SHELL_GLOB_PATTERNS = ["**/*.{js,mjs,css,html,svg,png,webmanifest}"];
+
+function maplibreWorkerAssetsPlugin(): Plugin {
+  const packageDist = resolve(process.cwd(), "node_modules/maplibre-gl/dist");
+  return {
+    name: "chronomap-maplibre-worker-assets",
+    generateBundle() {
+      for (const fileName of ["maplibre-gl-worker.mjs", "maplibre-gl-shared.mjs"]) {
+        this.emitFile({
+          type: "asset",
+          fileName: `assets/${fileName}`,
+          source: readFileSync(resolve(packageDist, fileName)),
+        });
+      }
+    },
+  };
+}
 
 function cspMetaPlugin(enableKonjaku: boolean): Plugin {
   return {
@@ -49,6 +67,7 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       cspMetaPlugin(enableKonjaku),
+      maplibreWorkerAssetsPlugin(),
       VitePWA({
         // The owning service-worker issue handles runtime registration and update UI.
         registerType: "prompt",
@@ -76,6 +95,7 @@ export default defineConfig(({ mode }) => {
           scope: ".",
           share_target: {
             action: "share",
+            enctype: "application/x-www-form-urlencoded",
             method: "GET",
             params: { title: "title", text: "text", url: "url" },
           },

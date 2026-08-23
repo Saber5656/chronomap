@@ -13,10 +13,14 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="chronomap" />
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/pwa-180.png" />
+    <link rel="stylesheet" href="./loading.css" />
     <title>chronomap</title>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <div class="app-loading" role="status">chronomap を読み込み中…</div>
+    </div>
+    <h1 class="app-brand">chronomap</h1>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

@@ -13,6 +13,7 @@
     "validate:pwa": "node scripts/validate-pwa-build.mjs",
     "validate:pwa:preview": "node scripts/validate-pwa-preview.mjs",
     "validate:registry": "node scripts/validate-registry.mjs",
+    "lhci": "lhci autorun --config=lighthouserc.json",
     "validate:readme": "node scripts/validate-readme-links.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -26,6 +27,7 @@
     "maplibre-gl": "^6.3.0"
   },
   "devDependencies": {
+    "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.62.1",
     "@vitest/coverage-v8": "^4.1.10",
     "eslint": "^10.8.1",
