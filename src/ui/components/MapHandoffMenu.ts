@@ -61,6 +61,9 @@ export function showMapHandoffMenu(
   activeMenu?.destroy();
 
   const parent = options.parent ?? document.body;
+  const ownerDocument = parent.ownerDocument;
+  const opener =
+    ownerDocument.activeElement instanceof HTMLElement ? ownerDocument.activeElement : null;
   const store = options.store;
   const actions = store === undefined ? undefined : createActions(store);
   const targets = mapHandoffTargets();
@@ -155,6 +158,7 @@ export function showMapHandoffMenu(
       popover.remove();
       if (activeMenu === controller) activeMenu = undefined;
       options.onClose?.();
+      if (opener?.isConnected) opener.focus({ preventScroll: true });
     },
   };
   activeMenu = controller;

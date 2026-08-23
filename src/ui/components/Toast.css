@@ -28,19 +28,20 @@
 
 .toast__action {
   flex: 0 0 auto;
+  min-width: 44px;
   min-height: 44px;
   padding: 0.5rem 0.75rem;
   border: 1px solid color-mix(in srgb, var(--color-action) 60%, transparent);
   border-radius: 0.625rem;
-  background: var(--color-action);
-  color: #ffffff;
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
   font: inherit;
   cursor: pointer;
 }
 
 .toast__action:focus-visible {
-  outline: 3px solid var(--color-accent);
-  outline-offset: 2px;
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
 }
 
 .sw-update-toast {
@@ -56,19 +57,20 @@
 
 .sw-update-toast__action {
   flex: 0 0 auto;
+  min-width: 44px;
   min-height: 44px;
   padding: 0.5rem 0.75rem;
   border: 1px solid color-mix(in srgb, var(--color-action) 60%, transparent);
   border-radius: 0.625rem;
-  background: var(--color-action);
-  color: #ffffff;
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
   font: inherit;
   cursor: pointer;
 }
 
 .sw-update-toast__action:focus-visible {
-  outline: 3px solid var(--color-accent);
-  outline-offset: 2px;
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
 }
 
 .sw-update-toast__action:disabled {

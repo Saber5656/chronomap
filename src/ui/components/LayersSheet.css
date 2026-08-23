@@ -75,6 +75,7 @@
 }
 
 .layers-sheet__about-link {
+  min-width: 44px;
   min-height: 44px;
   padding: 0.55rem 0.75rem;
   border: 1px solid color-mix(in srgb, var(--color-text) 18%, transparent);
@@ -85,7 +86,8 @@
   cursor: pointer;
 }
 
+.layers-sheet a:focus-visible,
 .layers-sheet__about-link:focus-visible {
-  outline: 3px solid var(--color-accent);
-  outline-offset: 2px;
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
 }

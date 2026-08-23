@@ -24,8 +24,8 @@
 .import-sheet__input:focus-visible,
 .import-sheet__paste:focus-visible,
 .import-sheet__submit:focus-visible {
-  outline: 3px solid var(--color-accent);
-  outline-offset: 2px;
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
 }
 
 .import-sheet__guidance {
@@ -45,6 +45,7 @@
 
 .import-sheet__paste,
 .import-sheet__submit {
+  min-width: 44px;
   min-height: 44px;
   padding: 0.625rem 0.875rem;
   border: 1px solid color-mix(in srgb, var(--color-text) 24%, transparent);
@@ -58,7 +59,7 @@
 .import-sheet__submit {
   border-color: var(--color-accent);
   background: var(--color-accent);
-  color: var(--color-accent-contrast, #fff);
+  color: var(--color-accent-contrast);
 }
 
 .import-sheet__paste:hover,

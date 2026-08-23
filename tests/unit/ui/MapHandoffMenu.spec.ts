@@ -121,4 +121,20 @@ describe("MapHandoffMenu", () => {
     controller.destroy();
     i18n.destroy();
   });
+
+  it("returns focus to the opener when Escape closes the menu", () => {
+    const store = createStore(createInitialState(new Date(2026, 0, 1)));
+    const i18n = initI18n(store);
+    const opener = document.createElement("button");
+    opener.type = "button";
+    document.body.append(opener);
+    opener.focus();
+
+    showMapHandoffMenu(35, 139, { store });
+    expect((document.activeElement as HTMLElement).dataset.handoffTarget).toBe("google");
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+
+    expect(document.activeElement).toBe(opener);
+    i18n.destroy();
+  });
 });

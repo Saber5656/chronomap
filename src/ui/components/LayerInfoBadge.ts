@@ -27,7 +27,7 @@ export function mount(
   const badge = el("button", {
     type: "button",
     class: "layer-info-badge",
-    "aria-live": "polite",
+    "aria-haspopup": "dialog",
     "data-layer-id": "",
   });
   parent.append(badge);
