@@ -47,6 +47,20 @@ describe("initUrlSync", () => {
     sync.destroy();
   });
 
+  it("exposes a sanitized label only when the initial URL contains a view", () => {
+    resetLocation("?lat=34.7&lng=135.49&z=16&label=%3COsaka%3E");
+    const store = createTestStore();
+    const sync = initUrlSync(store, REGISTRY_IDS, { now: NOW });
+
+    expect(sync.getInitialLabel()).toBe("<Osaka>");
+    sync.destroy();
+
+    resetLocation("?label=orphan");
+    const orphanSync = initUrlSync(createTestStore(), REGISTRY_IDS, { now: NOW });
+    expect(orphanSync.getInitialLabel()).toBeNull();
+    orphanSync.destroy();
+  });
+
   it("holds URL writes until the first idle event", () => {
     const replaceState = vi.spyOn(window.history, "replaceState");
     const store = createTestStore();

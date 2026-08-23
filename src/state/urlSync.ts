@@ -17,6 +17,8 @@ export interface UrlSyncController {
   connectIdle(register: (callback: () => void) => () => void): void;
   /** Return the current canonical query string without mutating browser history. */
   getSerialized(): string;
+  /** Return the sanitized label supplied with the initial view, if any. */
+  getInitialLabel(): string | null;
   destroy(): void;
 }
 
@@ -60,7 +62,7 @@ export function initUrlSync(
   const now = options.now ?? new Date();
   const initialPatch =
     pageLocation === undefined ? {} : parseUrlState(pageLocation.search, now, registryIds);
-  const labelValue = initialPatch.label ?? null;
+  const labelValue = initialPatch.view === undefined ? null : (initialPatch.label ?? null);
   let idle = false;
   let destroyed = false;
   let timer: ReturnType<typeof setTimeout> | null = null;
@@ -104,6 +106,7 @@ export function initUrlSync(
       });
     },
     getSerialized,
+    getInitialLabel: () => labelValue,
     destroy() {
       if (destroyed) return;
       destroyed = true;
