@@ -12,7 +12,7 @@
 | 方法 | Android | iOS / iPadOS | Desktop | 手順・仕様 |
 | --- | --- | --- | --- | --- |
 | Android の共有シート | インストール済み PWA と対応ブラウザが必要 | — | — | [Web Share Target と `/share`](docs/issues/35-share-target-route.md) |
-| `geo:` リンク | PWA の protocol handler が対応する環境 | v1 では未登録 | `registerProtocolHandler` に対応するブラウザ | [`geo:` protocol handler](docs/issues/37-geo-protocol-handler.md) |
+| `geo:` リンク | 未対応（Issue #37 実装後） | v1 では未登録 | 未対応（Issue #37 実装後） | [`geo:` protocol handler](docs/issues/37-geo-protocol-handler.md) |
 | iOS ショートカット | — | iOS 16+ の「ショートカット」アプリ | — | [iOS Shortcut レシピ](docs/integrations/ios-shortcut.md) |
 | 貼り付け / 手動 URL | 利用可能 | 利用可能 | 利用可能 | [ImportSheet の貼り付けフォールバック](docs/issues/36-import-paste-fallback.md) |
 
@@ -28,7 +28,7 @@ Shared values are parsed by `/share`; short-link expansion is not performed.
 | Method | Android | iOS / iPadOS | Desktop | Guide / specification |
 | --- | --- | --- | --- | --- |
 | Android share sheet | Requires an installed PWA and a supporting browser | — | — | [Web Share Target and `/share`](docs/issues/35-share-target-route.md) |
-| `geo:` link | Where the installed PWA’s protocol handler is honored | Not registered in v1 | Browsers supporting `registerProtocolHandler` | [`geo:` protocol handler](docs/issues/37-geo-protocol-handler.md) |
+| `geo:` link | Not available until issue #37 is implemented | Not registered in v1 | Not available until issue #37 is implemented | [`geo:` protocol handler](docs/issues/37-geo-protocol-handler.md) |
 | iOS Shortcut | — | Shortcuts on iOS 16+ | — | [iOS Shortcut recipe](docs/integrations/ios-shortcut.md) |
 | Paste / manual URL | Available | Available | Available | [ImportSheet paste fallback](docs/issues/36-import-paste-fallback.md) |
 
