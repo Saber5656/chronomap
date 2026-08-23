@@ -1,7 +1,7 @@
 {
   "name": "chronomap",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,6 +10,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "check:pins": "node scripts/check-action-pinning.mjs",
+    "licenses:refresh": "node scripts/update-third-party-notices.mjs",
+    "smoke:providers": "node scripts/smoke-providers.mjs",
     "validate:pwa": "node scripts/validate-pwa-build.mjs",
     "validate:pwa:preview": "node scripts/validate-pwa-preview.mjs",
     "validate:commons:off": "node scripts/validate-commons-build.mjs",
@@ -29,12 +31,14 @@
     "maplibre-gl": "^6.3.0"
   },
   "devDependencies": {
+    "@types/node": "^26.2.0",
     "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.62.1",
     "@vitest/coverage-v8": "^4.1.10",
     "eslint": "^10.8.1",
     "eslint-config-prettier": "^10.1.8",
     "jsdom": "^30.0.1",
+    "license-checker": "25.0.1",
     "prettier": "^3.9.6",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.67.0",

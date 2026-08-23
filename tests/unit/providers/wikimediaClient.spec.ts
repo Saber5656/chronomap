@@ -33,7 +33,7 @@ describe("wikimediaFetch", () => {
     expect(fetchImpl).toHaveBeenCalledOnce();
     const init = fetchImpl.mock.calls[0]?.[1];
     expect(init?.headers).toEqual({
-      "Api-User-Agent": "chronomap/0.0.0 (+https://github.com/Saber5656/chronomap)",
+      "Api-User-Agent": "chronomap/0.1.0 (+https://github.com/Saber5656/chronomap)",
     });
     expect(init?.signal).toBeInstanceOf(AbortSignal);
   });
