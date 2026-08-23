@@ -27,13 +27,15 @@ import { mount as mountImportSheet } from "../ui/components/ImportSheet";
 import { mount as mountPoiSheet } from "../ui/components/PoiSheet";
 import { mountMenuButton } from "../ui/components/MenuButton";
 import { mount as mountPoiToggle, type PoiToggleController } from "../ui/components/PoiToggle";
-import { mount as mountToast } from "../ui/components/Toast";
+import { mount as mountToast, type ToastController } from "../ui/components/Toast";
 import {
   mount as mountCoverageBanner,
   type CoverageBannerController,
 } from "../ui/components/CoverageBanner";
 import { initI18n } from "../ui/i18n";
+import { mount as mountPoiErrorBanner } from "../ui/components/PoiErrorBanner";
 import { createTimeWiring, type TimeWiringController } from "./timeWiring";
+import { mountNetworkStatus } from "./networkStatus";
 
 export interface AppRuntime {
   readonly store: Store<AppState>;
@@ -44,6 +46,7 @@ export interface AppRuntime {
   readonly pointPicker: PointPickerController;
   readonly poiController: PoiController;
   readonly poiToggle: PoiToggleController;
+  readonly toast: ToastController;
   readonly coverageBanner: CoverageBannerController | undefined;
   destroy(): void;
 }
@@ -89,18 +92,25 @@ export function bootstrap(
 ): AppRuntime {
   const store = createStore(createInitialState(now));
   const i18n = initI18n(store);
+  const networkStatus = mountNetworkStatus(store);
   options.beforeShell?.(store);
   const shell = mount(parent, store);
   const menuButton = (options.mountMenuButton ?? mountMenuButton)(
     shell.getSlot("MenuButton"),
     store,
   );
-  const toast = (options.mountToast ?? mountToast)(shell.getSlot("toast-host"), store);
+  const toast: ToastController = (options.mountToast ?? mountToast)(
+    shell.getSlot("toast-host"),
+    store,
+  );
   const mapController = createMap(shell.getSlot("map"), store);
   const poiController = initPoiController(
     mapController,
     store,
     options.poiProvider ?? getPoiProvider,
+  );
+  const poiErrorBanner = mountPoiErrorBanner(shell.getSlot("map-region"), store, () =>
+    poiController.retry(),
   );
   const poiToggle = (options.mountPoiToggle ?? mountPoiToggle)(shell.getSlot("PoiToggle"), store);
   const overlayManager =
@@ -175,10 +185,12 @@ export function bootstrap(
     pointPicker,
     poiController,
     poiToggle,
+    toast,
     coverageBanner,
     destroy() {
       pointPicker.destroy();
       poiController.destroy();
+      poiErrorBanner.destroy();
       poiToggle.destroy();
       timeSlider?.destroy();
       opacityControl?.destroy();
@@ -194,6 +206,7 @@ export function bootstrap(
       locateButton?.destroy();
       shell.destroy();
       i18n.destroy();
+      networkStatus.destroy();
     },
   };
 }

@@ -16,3 +16,15 @@
   outline: 3px solid var(--color-accent);
   outline-offset: 2px;
 }
+.menu-trigger {
+  position: relative;
+}
+.menu-trigger__offline-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: #b42318;
+  position: absolute;
+  inset-block-start: 0.35rem;
+  inset-inline-end: 0.35rem;
+}

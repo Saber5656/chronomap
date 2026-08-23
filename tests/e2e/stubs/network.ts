@@ -41,10 +41,13 @@ export interface StubUpstreamOptions {
   readonly commonsImageInfo?: unknown;
   /** Return a configured failure for every Commons API request. */
   readonly commonsStatus?: number;
+  /** Return deterministic HTTP statuses for successive GeoSearch requests. */
+  readonly geosearchStatuses?: readonly number[];
 }
 
 interface RequestRecorder {
   readonly unstubbedRequests: string[];
+  geosearchRequests: number;
 }
 
 const recorders = new WeakMap<Page, RequestRecorder>();
@@ -173,9 +176,21 @@ async function handleRequest(
     (url.pathname === "/w/api.php" || url.pathname.startsWith("/api/rest_v1/page/summary/"))
   ) {
     if (url.pathname === "/w/api.php") {
+      const geosearchRequest = recorder.geosearchRequests;
+      recorder.geosearchRequests += 1;
       const delayMs = options.geosearchDelayMs;
       if (delayMs !== undefined && Number.isFinite(delayMs) && delayMs > 0) {
         await new Promise<void>((resolve) => setTimeout(resolve, delayMs));
+      }
+      const status = options.geosearchStatuses?.[geosearchRequest] ?? 200;
+      if (status !== 200) {
+        await route.fulfill({
+          status,
+          contentType: "text/plain; charset=utf-8",
+          headers: CORS_HEADERS,
+          body: "stubbed GeoSearch failure",
+        });
+        return;
       }
       await fulfillJson(route, options.geosearch ?? geosearchFixture);
     } else {
@@ -227,7 +242,7 @@ export async function stubUpstream(page: Page, options: StubUpstreamOptions = {}
       value: ONBOARDING_COMPLETE_VALUE,
     });
   }
-  const recorder: RequestRecorder = { unstubbedRequests: [] };
+  const recorder: RequestRecorder = { unstubbedRequests: [], geosearchRequests: 0 };
   recorders.set(page, recorder);
   await page.route("**/*", (route) => handleRequest(page, route, options, recorder));
 }

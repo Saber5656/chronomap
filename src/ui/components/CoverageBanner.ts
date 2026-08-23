@@ -181,6 +181,18 @@ export function mount(
   root.append(message, action);
   parent.append(root);
 
+  const layoutParent = parent.parentElement;
+  const resizeObserver =
+    typeof ResizeObserver === "function" ? new ResizeObserver(() => updateLayoutSize()) : null;
+
+  function updateLayoutSize(): void {
+    if (layoutParent === null) return;
+    const blockSize = root.hidden ? 0 : root.getBoundingClientRect().height;
+    layoutParent.style.setProperty("--coverage-banner-block-size", `${blockSize}px`);
+  }
+
+  resizeObserver?.observe(root);
+
   let destroyed = false;
   let renderedView: BannerView | null = null;
   let pendingView: BannerView | null = null;
@@ -213,6 +225,7 @@ export function mount(
       message.textContent = "";
       action.hidden = true;
       action.textContent = "";
+      updateLayoutSize();
       return;
     }
 
@@ -224,6 +237,7 @@ export function mount(
 
     if (view.kind === "registry-error") {
       message.textContent = translate("coverage.registryError", undefined, locale());
+      updateLayoutSize();
       return;
     }
 
@@ -237,16 +251,21 @@ export function mount(
         },
         locale(),
       );
+      updateLayoutSize();
       return;
     }
 
     message.textContent = translate("coverage.none", undefined, locale());
-    if (view.nearby === null) return;
+    if (view.nearby === null) {
+      updateLayoutSize();
+      return;
+    }
 
     action.hidden = false;
     action.dataset.layerId = view.nearby.entry.id;
     action.dataset.year = String(view.nearby.year);
     action.textContent = translate("coverage.nearby", { year: view.nearby.year }, locale());
+    updateLayoutSize();
   }
 
   function applyView(view: BannerView | null): void {
@@ -362,6 +381,8 @@ export function mount(
       action.removeEventListener("click", handleNearbyClick);
       clearTransitionTimer();
       clearSnappedHideTimer();
+      resizeObserver?.disconnect();
+      layoutParent?.style.removeProperty("--coverage-banner-block-size");
       root.remove();
     },
   };
