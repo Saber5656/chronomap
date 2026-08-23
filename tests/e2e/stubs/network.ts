@@ -1,6 +1,7 @@
 import { expect, type Page, type Route } from "@playwright/test";
 
 import commonsFixture from "./commons.json" with { type: "json" };
+import commonsGeosearchFixture from "./commons-geosearch.json" with { type: "json" };
 import geosearchFixture from "./geosearch.json" with { type: "json" };
 import summaryFixture from "./summary.json" with { type: "json" };
 
@@ -34,6 +35,12 @@ export interface StubUpstreamOptions {
   readonly geosearchDelayMs?: number;
   /** Allow the dedicated onboarding spec to exercise the first-visit coach. */
   readonly onboarding?: "first-visit";
+  /** Override the Commons file GeoSearch response. */
+  readonly commonsGeosearch?: unknown;
+  /** Override the Commons imageinfo response. */
+  readonly commonsImageInfo?: unknown;
+  /** Return a configured failure for every Commons API request. */
+  readonly commonsStatus?: number;
 }
 
 interface RequestRecorder {
@@ -188,7 +195,23 @@ async function handleRequest(
   }
 
   if (url.hostname === COMMONS_HOST) {
-    await fulfillJson(route, commonsFixture);
+    const status = options.commonsStatus ?? 200;
+    if (status !== 200) {
+      await route.fulfill({
+        status,
+        contentType: "text/plain; charset=utf-8",
+        headers: CORS_HEADERS,
+        body: "stubbed Commons failure",
+      });
+      return;
+    }
+    const isGeoSearch = url.searchParams.get("list") === "geosearch";
+    await fulfillJson(
+      route,
+      isGeoSearch
+        ? (options.commonsGeosearch ?? commonsGeosearchFixture)
+        : (options.commonsImageInfo ?? commonsFixture),
+    );
     return;
   }
 

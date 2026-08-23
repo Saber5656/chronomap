@@ -1,3 +1,4 @@
+import { getCommonsPhotoProvider, type CommonsPhotoProvider } from "./commonsImages";
 import { createWikipediaProvider, isWikipediaLanguage } from "./wikipediaGeosearch";
 import type { PoiProvider } from "./types";
 
@@ -12,4 +13,11 @@ export function getPoiProvider(locale: "ja" | "en"): PoiProvider {
     throw new RangeError("POI provider locale must be ja or en.");
   }
   return PROVIDERS[locale];
+}
+
+/** Return the experimental Commons provider only in an explicitly enabled build. */
+export function getPhotoProvider(
+  enabled = import.meta.env.VITE_ENABLE_COMMONS_PHOTOS === "true",
+): CommonsPhotoProvider | null {
+  return enabled ? getCommonsPhotoProvider() : null;
 }
