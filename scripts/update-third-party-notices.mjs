@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
 export const LICENSE_CHECKER_VERSION = "25.0.1";
-export const LICENSE_CHECKER_COMMAND = "npx --no-install license-checker";
+export const LICENSE_CHECKER_COMMAND = "./node_modules/.bin/license-checker";
 export const GENERATED_START = "<!-- license-checker:production:start -->";
 export const GENERATED_END = "<!-- license-checker:production:end -->";
 export const DEFAULT_GENERATED_DATE = "1970-01-01";

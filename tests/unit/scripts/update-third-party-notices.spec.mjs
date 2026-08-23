@@ -3,12 +3,17 @@ import { describe, expect, it } from "vitest";
 import {
   GENERATED_END,
   GENERATED_START,
+  LICENSE_CHECKER_COMMAND,
   formatPackageTable,
   replaceGeneratedSection,
   resolveGeneratedDate,
 } from "../../../scripts/update-third-party-notices.mjs";
 
 describe("update-third-party-notices", () => {
+  it("records the pinned local license-checker binary", () => {
+    expect(LICENSE_CHECKER_COMMAND).toBe("./node_modules/.bin/license-checker");
+  });
+
   it("formats production packages and excludes the private application", () => {
     const table = formatPackageTable({
       "chronomap@0.1.0": { private: true, licenses: "UNLICENSED" },

@@ -25,8 +25,8 @@ Summary command (the summary includes the private application package as `UNLICE
 The package table uses the corresponding JSON command and excludes the private application package:
 
 ```sh
-npx --no-install license-checker --production --summary
-npx --no-install license-checker --production --json --excludePrivatePackages
+./node_modules/.bin/license-checker --production --summary
+./node_modules/.bin/license-checker --production --json --excludePrivatePackages
 ```
 
 | Package                           | Version   | License             | Repository                                              |
