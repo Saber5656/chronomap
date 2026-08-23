@@ -33,8 +33,9 @@ chronomap の `/share` へ渡す「chronomapで開く」ショートカットを
 
 5. 保存して編集を終了します。共有シートに表示されない場合は、共有シートの「その他」またはアクション編集画面で `chronomapで開く` を有効にします。
 
-このレシピで使う固定エンドポイントは、Issue 06 で定めた canonical deployed origin の正本です。
-カスタムドメインへ移行するときは、この値とリリース時に公開する iCloud ショートカットを更新してください。
+このレシピで使う固定エンドポイントは、GitHub Pages を有効化した後に公開する入口を想定した値です。
+Pages が有効になるまでは、この URL でアプリが公開されているとは限りません。カスタムドメインへ移行するときは、
+この値とリリース時に公開する iCloud ショートカットを更新してください。
 
 ```text
 https://saber5656.github.io/chronomap/share?text=
@@ -102,8 +103,9 @@ https://saber5656.github.io/chronomap/share?text=
 
 5. Save the shortcut and leave the editor. If it does not appear in the share sheet, use `More` or the share-sheet action editor to enable `chronomapで開く`.
 
-The fixed endpoint above is the canonical deployed origin defined by Issue 06.
-If the project moves to a custom domain, update this value and the iCloud Shortcut published for the release.
+The fixed endpoint above is the intended entry point after GitHub Pages is enabled; it is not a claim
+that the app is currently deployed there. If the project moves to a custom domain, update this value
+and the iCloud Shortcut published for the release.
 
 ```text
 https://saber5656.github.io/chronomap/share?text=

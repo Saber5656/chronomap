@@ -2,22 +2,56 @@
 
 現在地から過去を遡れるタイムトラベル地図アプリ
 
+## これは何か / What it is
+
+chronomap は、現在地または共有された座標を地図上で確認し、年代スライダーで国土地理院の
+過去の空中写真を切り替える静的クライアントサイド PWA です。周辺の Wikipedia 記事を表示し、
+選択した地点を別の地図アプリへ渡す機能も、利用者の操作に応じてブラウザ内で実行します。
+
+chronomap is a client-side PWA for viewing the current or shared coordinates on a map and switching
+through historical GSI aerial-photo layers with a year slider. It can show nearby Wikipedia articles
+and hand a selected point to another map app after the user chooses that action.
+
+<!-- Screenshot placeholder: add a verified product screenshot at release time. -->
+
+### 試す / Try it
+
+GitHub Pages の入口（Pages 有効化後）: <https://saber5656.github.io/chronomap/>
+
+GitHub Pages entry point (after Pages is enabled): <https://saber5656.github.io/chronomap/>
+
+### 機能 / Features
+
+- 年代スライダーと GSI の過去空中写真レイヤー。
+- 許諾ゲート通過後に `VITE_ENABLE_KONJAKU=true` で地図レイヤーへ追加できる今昔マップ registry。現状の実行 registry は GSI のみで、About のクレジット行だけ flag ON 時に表示します。
+- ズームした地点の Wikipedia / Wikimedia 記事検索と記事詳細。
+- 共有 URL、Android の Web Share Target、貼り付けによる座標・地図 URL の取り込み。
+- 選択した地点を Google マップ、Apple マップ、または `geo:` URI へ渡す操作。
+- インストール後のアプリシェルのオフライン起動と、日本語 / English の切り替え。
+
+- A year slider and historical GSI aerial-photo layers.
+- A Konjaku Map registry reserved for a later permission-gated integration. With `VITE_ENABLE_KONJAKU=true`, the current build exposes its attribution in About only; the runtime layer registry remains GSI-only until ADR-006 is approved.
+- Nearby Wikipedia / Wikimedia article search and article details.
+- Shared URLs, Android Web Share Target, and pasted coordinates or map URLs.
+- An explicit action to hand a selected point to Google Maps, Apple Maps, or a `geo:` URI.
+- Offline startup of the installed app shell and a Japanese / English language toggle.
+
 ## 他の地図アプリから開く / Opening from other map apps
 
 ### 日本語
 
-地図アプリで共有した場所を chronomap に渡す方法です。共有 URL は `/share` で解析され、
-短縮 URL の展開は行われません。
+他の地図アプリから共有された場所を chronomap へ渡す方法は次のとおりです。共有値は `/share`
+で文字列として解析され、短縮 URL の展開は行いません。
 
 | 方法                 | Android                                   | iOS / iPadOS                       | Desktop                              | 手順・仕様                                                                      |
 | -------------------- | ----------------------------------------- | ---------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------- |
-| Android の共有シート | インストール済み PWA と対応ブラウザが必要 | —                                  | —                                    | [Web Share Target と `/share`](docs/issues/35-share-target-route.md)            |
-| `geo:` リンク        | 対応ブラウザでメニューから登録を要求      | v1 では未登録                      | 対応ブラウザでメニューから登録を要求 | [`geo:` protocol handler](docs/integrations/protocol-handler.md)                |
-| iOS ショートカット   | —                                         | iOS 16+ の「ショートカット」アプリ | —                                    | [iOS Shortcut レシピ](docs/integrations/ios-shortcut.md)                        |
+| Android の共有シート | 対応ブラウザとインストール済み PWA が必要 | —                                  | —                                    | [Web Share Target と `/share`](docs/issues/35-share-target-route.md)            |
+| `geo:` リンク        | インストール済み PWA は manifest 経由     | v1 では未登録                      | 対応ブラウザでメニューから登録を要求 | [`geo:` protocol handler](docs/integrations/protocol-handler.md)                |
+| iOS ショートカット   | —                                         | iOS 16+ の「ショートカット」アプリ | —                                    | [iOS ショートカットの手順](docs/integrations/ios-shortcut.md)                   |
 | 貼り付け / 手動 URL  | 利用可能                                  | 利用可能                           | 利用可能                             | [ImportSheet の貼り付けフォールバック](docs/issues/36-import-paste-fallback.md) |
 
-`geo:` の対応可否は OS・ブラウザ・PWA のインストール状態に依存します。iOS で共有シートに
-ネイティブの share target を登録する機能は v1 の対象外なので、[ショートカットの手順](docs/integrations/ios-shortcut.md)
+`geo:` の対応は OS・ブラウザ・PWA のインストール状態に依存します。iOS のネイティブ共有
+ターゲット登録は v1 の対象外なので、[ショートカットの手順](docs/integrations/ios-shortcut.md)
 または貼り付けを使ってください。
 
 ### English
@@ -25,51 +59,128 @@
 Use one of the following paths to send a location shared from another map app to chronomap.
 Shared values are parsed by `/share`; short-link expansion is not performed.
 
-| Method              | Android                                               | iOS / iPadOS         | Desktop                                               | Guide / specification                                                 |
-| ------------------- | ----------------------------------------------------- | -------------------- | ----------------------------------------------------- | --------------------------------------------------------------------- |
-| Android share sheet | Requires an installed PWA and a supporting browser    | —                    | —                                                     | [Web Share Target and `/share`](docs/issues/35-share-target-route.md) |
-| `geo:` link         | The menu requests registration in supporting browsers | Not registered in v1 | The menu requests registration in supporting browsers | [`geo:` protocol handler](docs/integrations/protocol-handler.md)      |
-| iOS Shortcut        | —                                                     | Shortcuts on iOS 16+ | —                                                     | [iOS Shortcut recipe](docs/integrations/ios-shortcut.md)              |
-| Paste / manual URL  | Available                                             | Available            | Available                                             | [ImportSheet paste fallback](docs/issues/36-import-paste-fallback.md) |
+| Method              | Android                                            | iOS / iPadOS         | Desktop                                               | Guide / specification                                                 |
+| ------------------- | -------------------------------------------------- | -------------------- | ----------------------------------------------------- | --------------------------------------------------------------------- |
+| Android share sheet | Requires a supporting browser and an installed PWA | —                    | —                                                     | [Web Share Target and `/share`](docs/issues/35-share-target-route.md) |
+| `geo:` link         | Installed PWAs use the manifest handler            | Not registered in v1 | The menu requests registration in supporting browsers | [`geo:` protocol handler](docs/integrations/protocol-handler.md)      |
+| iOS Shortcut        | —                                                  | Shortcuts on iOS 16+ | —                                                     | [iOS Shortcut recipe](docs/integrations/ios-shortcut.md)              |
+| Paste / manual URL  | Available                                          | Available            | Available                                             | [ImportSheet paste fallback](docs/issues/36-import-paste-fallback.md) |
 
 Whether a `geo:` link is handled depends on the OS, browser, and PWA installation state. Native iOS
 share-target registration is out of scope for v1; use the [Shortcut recipe](docs/integrations/ios-shortcut.md)
 or the paste fallback instead.
 
-### プライバシー（日本語）
+## プライバシー / Privacy
 
-詳細は [ADR-005: Privacy & security posture](docs/decisions/ADR-005-privacy-and-security-posture.md) を参照してください。
+### 日本語
 
-- 共有 URL は文字列として解析し、chronomap が短縮 URL を展開したり、ユーザーが渡した URL を取得したりしません。
-- iOS Shortcut は共有値を `/share?text=...` の URL に含めます。機密情報を共有しないでください。
-- 地図タイルと、明示的に有効にした POI 機能のリクエストは各提供元へ直接送信されます。アクセス解析・広告トラッキングはありません。
-- `localStorage` には言語とオンボーディング完了状態だけを保存します。
+- chronomap にアプリ用サーバー、Cookie、アクセス解析、トラッキングはありません。現行 build の地図タイルのリクエストから表示範囲が国土地理院（GSI）へ伝わります。今昔マップは現在 About の出典表示だけで、runtime layer registry には含まれないため、現行 build から ktgis.net へのタイルリクエストは発生しません。ADR-006 の許諾後に実ランタイムへ追加する場合は、その送信先を改めて明示します。POI を有効にしてズーム13以上のときは、記事検索のため地図の中心座標を Wikimedia へ送信します。
+- `localStorage` に保存するキーは `chronomap.lang` と `chronomap.onboarded` だけです。インストール後はアプリシェルがサービスワーカーの CacheStorage に残ることがあります。
+- 地図アプリへの座標の引き渡しは明示的な選択時だけ行われ、開いた先では第三者提供元の利用条件とプライバシー方針が適用されます。詳細はアプリ内の About と [ADR-005](docs/decisions/ADR-005-privacy-and-security-posture.md) を参照してください。
 
-### Privacy facts (English)
+### English
 
-See [ADR-005: Privacy & security posture](docs/decisions/ADR-005-privacy-and-security-posture.md) for the full policy.
+- chronomap has no application server, cookies, analytics, or tracking. In the current build, tile requests reveal the viewed area to GSI. Konjaku is currently an About-only attribution entry and is not included in the runtime layer registry, so the current build makes no tile requests to ktgis.net. If ADR-006 later authorizes adding it to the runtime, that destination will be disclosed again. While POI is enabled at zoom 13 or higher, the map center is sent to Wikimedia for article search.
+- The only `localStorage` keys saved are `chronomap.lang` and `chronomap.onboarded`. After installation, the app shell may remain in the service worker's CacheStorage.
+- Coordinates are handed to a map provider only after an explicit choice. The destination provider's terms and privacy policy apply. See the in-app About sheet and [ADR-005](docs/decisions/ADR-005-privacy-and-security-posture.md) for details.
 
-- The app parses shared URLs as strings; it does not expand short links or fetch user-supplied URLs.
-- The iOS Shortcut places the shared value in the `/share?text=...` URL. Do not forward secrets.
-- Map-tile and explicitly enabled POI requests go directly to their providers; chronomap sends no analytics or advertising-tracking events.
-- `localStorage` stores only language and onboarding-completion state.
+## 開発 / Development
 
-## ライセンスとデータ出典
+### 日本語
 
-このリポジトリのアプリケーションコードは MIT License です。詳細は [LICENSE](LICENSE)
-を参照してください。
+前提は `.nvmrc` に指定した Node.js と npm です。
 
-地図タイル、今昔マップ、Wikipedia / Wikimedia の記事本文には、それぞれ提供元の
-利用条件と表示義務があります。fork や再配布でも、提供元の attribution を保持してください。
+```sh
+npm ci
+npm run dev
+```
 
-必要な表示文言と参照先は [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) にまとめています。
+| コマンド                       | 内容                             |
+| ------------------------------ | -------------------------------- |
+| `npm run dev`                  | Vite の開発サーバー              |
+| `npm run lint`                 | ESLint                           |
+| `npm run typecheck`            | TypeScript 型検査                |
+| `npm run test`                 | Vitest の unit / security テスト |
+| `npm run e2e`                  | Playwright の E2E テスト         |
+| `npm run e2e:ui`               | Playwright UI モード             |
+| `npm run build`                | 型検査を含む production build    |
+| `npm run preview`              | production build の preview      |
+| `npm run format`               | Prettier による整形              |
+| `npm run format:check`         | Prettier の検証                  |
+| `npm run check:pins`           | GitHub Actions の SHA pin 検証   |
+| `npm run validate:registry`    | layer registry の検証            |
+| `npm run validate:pwa`         | production PWA artifact の検証   |
+| `npm run validate:pwa:preview` | preview PWA の検証               |
+| `npm run validate:readme`      | README のローカルリンク検証      |
+| `npm run test:watch`           | Vitest の watch モード           |
+| `npm run test:security`        | security unit / E2E テスト       |
 
-## License and data attribution
+文書の入口は [docs/README.md](docs/README.md) です。[DESIGN.md](docs/DESIGN.md) が設計正本、
+[ISSUE_PLAN.md](docs/ISSUE_PLAN.md) が issue の順序と範囲、[docs/issues/](docs/issues/) が個別の
+実装仕様です。設計中に scope を超える未知事項が見つかった場合は、既存 issue を無断で広げず、
+ISSUE_PLAN §7 のルールに従って新しい issue doc を作成します。
 
-The application code in this repository is licensed under the MIT License. See [LICENSE](LICENSE).
+### English
 
-Map tiles, Konjaku Map content, and Wikipedia / Wikimedia article content are subject to their own
-provider terms and attribution requirements. Forks and redistributions must retain provider
-attributions.
+Use the Node.js and npm versions specified by `.nvmrc`.
 
-Required credit text and source links are tracked in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+```sh
+npm ci
+npm run dev
+```
+
+| Command                        | Purpose                                        |
+| ------------------------------ | ---------------------------------------------- |
+| `npm run dev`                  | Start the Vite development server              |
+| `npm run lint`                 | Run ESLint                                     |
+| `npm run typecheck`            | Run the TypeScript checker                     |
+| `npm run test`                 | Run Vitest unit and security tests             |
+| `npm run e2e`                  | Run Playwright end-to-end tests                |
+| `npm run e2e:ui`               | Run Playwright in UI mode                      |
+| `npm run build`                | Create a production build, including typecheck |
+| `npm run preview`              | Preview the production build                   |
+| `npm run format`               | Format files with Prettier                     |
+| `npm run format:check`         | Check Prettier formatting                      |
+| `npm run check:pins`           | Check GitHub Actions SHA pins                  |
+| `npm run validate:registry`    | Validate the layer registry                    |
+| `npm run validate:pwa`         | Validate the production PWA artifact           |
+| `npm run validate:pwa:preview` | Validate a preview PWA                         |
+| `npm run validate:readme`      | Validate README local links                    |
+| `npm run test:watch`           | Run Vitest in watch mode                       |
+| `npm run test:security`        | Run security unit and E2E tests                |
+
+Start with [docs/README.md](docs/README.md). [DESIGN.md](docs/DESIGN.md) is the design source of
+truth, [ISSUE_PLAN.md](docs/ISSUE_PLAN.md) defines issue order and scope, and [docs/issues/](docs/issues/)
+contains the individual implementation specifications. When an unknown exceeds the current issue's
+scope, create a new issue document under the rule in ISSUE_PLAN §7 instead of widening the existing issue.
+
+## データ出典とライセンス / Data sources and licenses
+
+アプリに表示するデータのクレジット文言と、適用される提供元の利用条件を記録しています。
+The table records the credit text and provider terms that apply to the data shown by the app.
+
+| 出典 / Source         | 必要な表示・内容 / Required credit or content                                                                                                                                                                                                                                                                                               | 利用条件・参照先 / Terms or reference                                                  |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| GSI / 国土地理院      | ベースマップは `地理院タイル（国土地理院）`、レイヤーは registry の `attribution.text`（`全国最新写真（シームレス） / GRUS画像（© Axelspace）` を含む） / basemap is `GSI tiles (Geospatial Information Authority of Japan)`; layers use each registry `attribution.text`, including `全国最新写真（シームレス） / GRUS画像（© Axelspace）` | [GSI tile terms](https://maps.gsi.go.jp/development/ichiran.html)                      |
+| 今昔マップ / Konjaku  | 許諾 flag 有効時の `今昔マップ on the web` / when the flag is enabled                                                                                                                                                                                                                                                                       | [Konjaku tile-map service](https://ktgis.net/kjmapw/tilemapservice.html)               |
+| Wikipedia / Wikimedia | POI 本文の `Wikipedia (CC BY-SA)` / for POI text                                                                                                                                                                                                                                                                                            | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) and the source article |
+| chronomap code        | MIT License / MIT License                                                                                                                                                                                                                                                                                                                   | [LICENSE](LICENSE) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)                |
+
+About シートには、読み込まれた registry のクレジットと利用条件へのリンクを表示します。fork や再配布では提供元の表示を保持し、各提供元の利用条件に従ってください。
+
+The About sheet lists the loaded registry credits and links to these terms. Forks and redistributions
+must retain provider attribution and follow the provider's terms.
+
+## 貢献・セキュリティ / Contributing and security
+
+貢献方法は [CONTRIBUTING.md](CONTRIBUTING.md) を、脆弱性の報告は [SECURITY.md](SECURITY.md) の非公開手順を参照してください。セキュリティ報告を公開 issue に投稿しないでください。
+
+Contribution guidelines are in [CONTRIBUTING.md](CONTRIBUTING.md). Report suspected vulnerabilities
+privately through the process in [SECURITY.md](SECURITY.md); do not open a public issue for a security report.
+
+## ライセンス / License
+
+chronomap のアプリケーションコードは [MIT License](LICENSE) で配布しています。データと記事本文には各提供元の利用条件と表示義務が適用されます。
+
+Chronomap application code is distributed under the [MIT License](LICENSE). Data and article content
+remain subject to the terms and attribution requirements of their providers.
