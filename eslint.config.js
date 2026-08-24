@@ -1,7 +1,7 @@
 import eslintConfigPrettier from "eslint-config-prettier";
 import tseslint from "typescript-eslint";
 
-const typedFiles = ["src/**/*.ts", "tests/**/*.ts"];
+const typedFiles = ["src/**/*.ts", "tests/**/*.ts", "apps/mobile/**/*.{ts,tsx}"];
 const safeDomMessage = "Use textContent or safe DOM APIs instead (DESIGN §12.3).";
 const noEvalMessage = "Dynamic code evaluation is forbidden (DESIGN §12.3).";
 

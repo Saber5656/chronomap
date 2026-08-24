@@ -15,6 +15,20 @@ import { latLng, MAX_ACCURACY_METERS } from "../security/validate";
 import { metersToPixelsAtLat, type BoundingBox } from "../util/geo";
 import { recordTileFailure } from "../app/networkStatus";
 import { t } from "../ui/i18n";
+import {
+  GSI_ATTRIBUTION_TEXT,
+  GSI_ATTRIBUTION_URL,
+  GSI_BASEMAP_SOURCE_ID,
+  GSI_PALE_TILE_URL,
+} from "../providers/layers/gsiBasemap";
+
+export {
+  GSI_ATTRIBUTION_TEXT,
+  GSI_ATTRIBUTION_URL,
+  GSI_BASEMAP_SOURCE_ID,
+  GSI_PALE_TILE_URL,
+  GSI_STANDARD_TILE_URL,
+} from "../providers/layers/gsiBasemap";
 
 // Vite cannot follow MapLibre's runtime sibling import from a package URL in a Pages build. The
 // build plugin emits both stable assets; development uses the package path served by Vite.
@@ -24,12 +38,7 @@ const MAPLIBRE_WORKER_URL = import.meta.env.PROD
   : "/node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs";
 setWorkerUrl(MAPLIBRE_WORKER_URL);
 
-export const GSI_PALE_TILE_URL = "https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png";
-export const GSI_STANDARD_TILE_URL = "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png";
-export const GSI_ATTRIBUTION_URL = "https://maps.gsi.go.jp/development/ichiran.html";
-export const GSI_ATTRIBUTION_TEXT = "地理院タイル（国土地理院）";
 export const GSI_ATTRIBUTION = `<a href="${GSI_ATTRIBUTION_URL}" target="_blank" rel="noopener noreferrer">${GSI_ATTRIBUTION_TEXT}</a>`;
-export const GSI_BASEMAP_SOURCE_ID = "gsi-pale";
 
 const MAP_BACKGROUND_COLOR = "#f5f7fa";
 const LONG_PRESS_DELAY_MS = 600;
