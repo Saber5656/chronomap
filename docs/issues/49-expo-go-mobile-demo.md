@@ -11,9 +11,11 @@ registry and pure era-resolution behavior.
 ## Context
 
 Owner request dated 2026-08-24; ADR-007. This is a post-v1 demonstration extension and is not part
-of the v0.1.0 release gate. Expo SDK 57 is the selected current stable SDK. Expo Go includes the
-native code for `react-native-maps`, `expo-location`, `@react-native-community/slider`, and
-`react-native-safe-area-context`; custom native modules are forbidden in this issue.
+of the v0.1.0 release gate. The initial SDK 57 implementation was incompatible with the physical
+iPhone's App Store Expo Go client; the owner explicitly approved SDK 54 for direct App Store client
+compatibility. Expo Go includes the native code for `react-native-maps`, `expo-location`,
+`@react-native-community/slider`, and `react-native-safe-area-context`; custom native modules are
+forbidden in this issue.
 
 GitHub Issue: [#114](https://github.com/Saber5656/chronomap/issues/114)
 
@@ -23,8 +25,11 @@ GitHub Issue: [#114](https://github.com/Saber5656/chronomap/issues/114)
 
 - Add root npm workspace `apps/mobile`; continue using one committed root `package-lock.json` and
   root `npm ci`.
-- Add `apps/mobile/package.json`, `app.json`, `index.ts`, `tsconfig.json`, `App.tsx`, and a small
-  `src/` tree. Do not generate or commit `ios/` or `android/` directories.
+- Add `apps/mobile/package.json`, `app.json`, `index.ts`, `tsconfig.json`, `metro.config.js`,
+  `App.tsx`, and a small `src/` tree. The Metro config may add only the shared root `src` directory
+  to Expo's default watch folders so shared source bundles under SDK 54, and must exclude `.env*`
+  files. Do not generate or commit
+  `ios/` or `android/` directories.
 - Add root scripts:
   - `mobile:start`: Expo LAN server / QR entry for Expo Go.
   - `mobile:typecheck`: mobile TypeScript gate.
@@ -95,7 +100,7 @@ GitHub Issue: [#114](https://github.com/Saber5656/chronomap/issues/114)
 ## Acceptance Criteria
 
 - [ ] `npm ci` installs Web and mobile workspaces from the root lockfile.
-- [ ] `npm run mobile:start` starts a LAN QR entry usable by an SDK 57 Expo Go client.
+- [ ] `npm run mobile:start` starts a LAN QR entry usable by an SDK 54 Expo Go client.
 - [ ] The initial Tokyo/1965 view resolves and displays `gsi-ort-old10` over the GSI pale basemap.
 - [ ] Year changes, map movement, present reset, and opacity changes update the visible native demo.
 - [ ] Location permission is user-triggered only; granted and denied paths preserve a usable app.
@@ -129,15 +134,16 @@ Manual Expo Go matrix (owner/device tester when a physical device is available):
 
 | Platform | Launch | 1965 layer | Pan/coverage | Opacity | Present reset | Location grant | Location deny |
 |---|---|---|---|---|---|---|---|
-| iOS Expo Go SDK 57 | pending | pending | pending | pending | pending | pending | pending |
-| Android Expo Go SDK 57 | pending | pending | pending | pending | pending | pending | pending |
+| iOS Expo Go SDK 54 | pending | pending | pending | pending | pending | pending | pending |
+| Android Expo Go SDK 54 | pending | pending | pending | pending | pending | pending | pending |
 
 ## Dependencies
 
 - Existing issues 14, 15, 17, and 39: registry, GSI dataset, resolution, and JA/EN language policy.
 - Existing Web v0.1.0 baseline at `56463df1362aad36097c612348d50d252c912a38`.
-- Human-maintainer dependency approval is provided by the explicit request to add an Expo Go app;
-  no credentials or store services are approved.
+- Human-maintainer dependency approval is provided by the explicit request to add an Expo Go app
+  and the subsequent explicit request to migrate it to SDK 54; no credentials or store services are
+  approved.
 
 ## Non-goals
 

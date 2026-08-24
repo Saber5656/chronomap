@@ -45,7 +45,7 @@ GitHub Pages entry point (after Pages is enabled): <https://saber5656.github.io/
 現在地取得を iOS / Android のネイティブ UI で確認できます。GSI registry と年代解決ロジックは
 Web 版と共有しています。
 
-1. `.nvmrc` の Node.js、npm、[Expo Go](https://expo.dev/go)（SDK 57 対応版）を用意します。
+1. `.nvmrc` の Node.js、npm、SDK 54 対応 Expo Go（iOS は [App Store](https://apps.apple.com/app/expo-go/id982107779)、Android は [Google Play](https://play.google.com/store/apps/details?id=host.exp.exponent)）を用意します。
 2. Mac/PC と実機を同じ LAN に接続します。
 3. repository root で次を実行し、表示された QR code を Expo Go で読み取ります。
 
@@ -67,8 +67,9 @@ client. It starts at Tokyo Station in 1965 and demonstrates native map movement,
 overlay opacity, present-day reset, and user-triggered foreground location on iOS and Android. It
 shares the GSI registry and era resolver with the Web client.
 
-1. Install the Node.js version in `.nvmrc`, npm, and an SDK 57-compatible
-   [Expo Go](https://expo.dev/go) client.
+1. Install the Node.js version in `.nvmrc`, npm, and the SDK 54-compatible Expo Go client from the
+   [iOS App Store](https://apps.apple.com/app/expo-go/id982107779) or
+   [Android Google Play](https://play.google.com/store/apps/details?id=host.exp.exponent).
 2. Put the computer and device on the same LAN.
 3. From the repository root, run the commands below and scan the displayed QR code with Expo Go.
 

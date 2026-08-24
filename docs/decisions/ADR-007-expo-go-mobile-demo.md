@@ -13,14 +13,25 @@ The mobile demo must not weaken the existing Web architecture or require signing
 custom native modules, EAS Build, or a store release. Provider data and era-selection behavior must
 remain consistent between clients.
 
+The initial implementation selected SDK 57 as the newest stable SDK. Physical iPhone validation
+then showed that the Apple App Store Expo Go client stops at SDK 54 and rejects the SDK 57 project.
+The owner explicitly approved changing the demo to SDK 54 so the ordinary App Store client can open
+the QR without a separately signed Expo Go build.
+
 ## Decision
 
-- Add `apps/mobile` as an npm workspace using Expo SDK 57 and React Native.
+- Add `apps/mobile` as an npm workspace using Expo SDK 54 and its bundled React Native version.
+- Pin the SDK 54 peer runtime (`expo`, React, React Native, and TypeScript) at the repository root so
+  npm resolves one native runtime across the workspace. Keep the root `expo` entry as a development
+  alignment dependency; the mobile workspace remains the runtime owner.
+- Override Expo's bundled Metro `0.83.3` suite to React Native 0.81.5's patch-compatible `0.83.8`
+  suite and PostCSS to `8.5.26`. These versions remove the high-severity audit findings present in
+  the older build-tool dependencies and must continue to pass Expo Doctor plus Android/iOS export.
 - Keep the existing root Vite/PWA application as the Web production client. ADR-002 remains the
   Web renderer/UI decision and is not superseded.
 - Build a native demo UI with `react-native-maps`, `expo-location`,
   `@react-native-community/slider`, and `react-native-safe-area-context`. Every dependency must be
-  supported by the Expo Go binary for SDK 57.
+  supported by the Expo Go binary for SDK 54.
 - Reuse the root GSI registry, registry loader, layer resolver, and GSI basemap constants through
   the monorepo. Do not copy provider records or fork the resolution algorithm.
 - Start the demo over central Tokyo in a historical year so its value is visible immediately. The
@@ -36,11 +47,19 @@ remain consistent between clients.
 
 ## Consequences
 
-- A QR-driven iOS/Android demo can be run without generating native projects or credentials.
+- A QR-driven iOS/Android demo can be run with the ordinary App Store/Play Store Expo Go client,
+  without generating native projects or credentials.
 - Web and mobile add separate UI runtimes, but the provider registry and pure selection logic stay a
   single source of truth.
-- The root repository becomes an npm workspace monorepo. Expo SDK 52+ configures Metro for npm
-  workspaces automatically, so no custom `watchFolders` or module-resolution override is added.
+- The root repository becomes an npm workspace monorepo. Expo SDK 54 discovers workspace
+  dependencies automatically, but its default Metro `watchFolders` omit root application source.
+  The mobile Metro config therefore adds only the shared root `src` directory so the canonical
+  registry and resolver can be bundled directly; it preserves Expo's default resolver and module
+  paths and blocks `.env*` files from Metro resolution.
+- The direct root Expo alignment edge also makes the security overrides deterministic for npm
+  versions affected by workspace-boundary override resolution. Removing that edge or changing the
+  patched Metro/PostCSS versions requires repeating install, audit, Doctor, and both-platform export
+  validation.
 - Expo Go is intentionally not presented as the production runtime. Native extensions, background
   services, store branding, and release signing remain unavailable in this scope.
 - On iOS, MapKit cannot remove its native base map; the opaque GSI pale `UrlTile` is rendered above

@@ -60,12 +60,12 @@ native/store client and iOS share extension, 度分秒 coordinate parsing, last-
 
 ### §2.4 Post-v1 approved mobile demo (2026-08-24)
 
-Issue 49 adds an Expo SDK 57 / React Native client that can be opened with Expo Go. It reuses the
-canonical GSI registry and pure layer-resolution code while providing a native map, year/opacity
-controls, safe-area layout, and explicit foreground location. This owner-approved extension does
-not change the v0.1.0 Web release gate or replace the PWA. Store publication, custom native code,
-background location, POI/share parity, and release credentials remain separate future scope
-(ADR-007).
+Issue 49 adds an Expo SDK 54 / React Native client that can be opened with the store-distributed
+Expo Go on iOS or Android. It reuses the canonical GSI registry and pure layer-resolution code while
+providing a native map, year/opacity controls, safe-area layout, and explicit foreground location.
+This owner-approved extension does not change the v0.1.0 Web release gate or replace the PWA. Store
+publication, custom native code, background location, POI/share parity, and release credentials
+remain separate future scope (ADR-007).
 
 ## §3 UX flows
 
