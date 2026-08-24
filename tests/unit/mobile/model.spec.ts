@@ -8,6 +8,7 @@ import {
   MIN_TOUCH_TARGET,
   MOBILE_MAP_MAX_ZOOM,
   MOBILE_MAP_MIN_ZOOM,
+  MOBILE_MAP_TILE_SIZE,
   mobileYearRange,
   regionToBbox,
   regionToZoom,
@@ -16,6 +17,7 @@ import {
 } from "../../../apps/mobile/src/model";
 
 const CURRENT_YEAR = 2026;
+const PHONE_VIEWPORT_WIDTH = 390;
 const registry = createMobileRegistry(CURRENT_YEAR);
 
 describe("Expo mobile map model", () => {
@@ -23,6 +25,7 @@ describe("Expo mobile map model", () => {
     const selection = resolveMobileLayer({
       year: 1965,
       region: TOKYO_DEMO_REGION,
+      viewportWidth: PHONE_VIEWPORT_WIDTH,
       currentYear: CURRENT_YEAR,
       registry,
     });
@@ -36,6 +39,7 @@ describe("Expo mobile map model", () => {
     const selection = resolveMobileLayer({
       year: CURRENT_YEAR,
       region: TOKYO_DEMO_REGION,
+      viewportWidth: PHONE_VIEWPORT_WIDTH,
       currentYear: CURRENT_YEAR,
       registry,
     });
@@ -48,6 +52,7 @@ describe("Expo mobile map model", () => {
     const selection = resolveMobileLayer({
       year: 1965,
       region: { latitude: 0, longitude: 0, latitudeDelta: 0.02, longitudeDelta: 0.02 },
+      viewportWidth: PHONE_VIEWPORT_WIDTH,
       currentYear: CURRENT_YEAR,
       registry,
     });
@@ -79,9 +84,53 @@ describe("Expo mobile map model", () => {
   });
 
   it("clamps native region deltas to the shared zoom contract", () => {
-    expect(regionToZoom({ ...TOKYO_DEMO_REGION, longitudeDelta: 0 })).toBe(18);
-    expect(regionToZoom({ ...TOKYO_DEMO_REGION, longitudeDelta: 720 })).toBe(2);
-    expect(regionToZoom({ ...TOKYO_DEMO_REGION, longitudeDelta: Number.NaN })).toBe(2);
+    expect(regionToZoom({ ...TOKYO_DEMO_REGION, longitudeDelta: 0 }, PHONE_VIEWPORT_WIDTH)).toBe(
+      18,
+    );
+    expect(regionToZoom({ ...TOKYO_DEMO_REGION, longitudeDelta: 720 }, PHONE_VIEWPORT_WIDTH)).toBe(
+      2,
+    );
+    expect(
+      regionToZoom({ ...TOKYO_DEMO_REGION, longitudeDelta: Number.NaN }, PHONE_VIEWPORT_WIDTH),
+    ).toBe(2);
+  });
+
+  it("accounts for phone and tablet viewport widths at native zoom boundaries", () => {
+    const longitudeDeltaAtPhoneZoom14 =
+      (360 * PHONE_VIEWPORT_WIDTH) / (MOBILE_MAP_TILE_SIZE * 2 ** 14);
+    const region = { ...TOKYO_DEMO_REGION, longitudeDelta: longitudeDeltaAtPhoneZoom14 };
+
+    expect(regionToZoom(region, PHONE_VIEWPORT_WIDTH)).toBeCloseTo(14, 10);
+    expect(regionToZoom(region, PHONE_VIEWPORT_WIDTH * 2)).toBeCloseTo(15, 10);
+
+    const selection = resolveMobileLayer({
+      year: CURRENT_YEAR,
+      region,
+      viewportWidth: PHONE_VIEWPORT_WIDTH,
+      currentYear: CURRENT_YEAR,
+      registry,
+    });
+    expect(selection.zoom).toBeCloseTo(14, 10);
+    expect(selection.activeLayer?.id).toBe("gsi-seamlessphoto");
+  });
+
+  it("uses one logical tile as the fallback for invalid viewport widths", () => {
+    const expected = regionToZoom(TOKYO_DEMO_REGION, MOBILE_MAP_TILE_SIZE);
+
+    expect(regionToZoom(TOKYO_DEMO_REGION, 0)).toBe(expected);
+    expect(regionToZoom(TOKYO_DEMO_REGION, -1)).toBe(expected);
+    expect(regionToZoom(TOKYO_DEMO_REGION, Number.NaN)).toBe(expected);
+    expect(regionToZoom(TOKYO_DEMO_REGION, Number.POSITIVE_INFINITY)).toBe(expected);
+  });
+
+  it("keeps zoom finite when valid numeric inputs approach JavaScript limits", () => {
+    const zoom = regionToZoom(
+      { ...TOKYO_DEMO_REGION, longitudeDelta: Number.MAX_VALUE },
+      Number.MAX_VALUE,
+    );
+
+    expect(Number.isFinite(zoom)).toBe(true);
+    expect(zoom).toBe(2);
   });
 
   it("derives the mobile year range from the canonical registry", () => {
@@ -110,18 +159,21 @@ describe("Expo mobile map model", () => {
     expect(MIN_TOUCH_TARGET).toBeGreaterThanOrEqual(44);
     expect(MOBILE_MAP_MIN_ZOOM).toBe(5);
     expect(MOBILE_MAP_MAX_ZOOM).toBe(18);
+    expect(MOBILE_MAP_TILE_SIZE).toBe(256);
   });
 
   it("normalizes year input before resolving", () => {
     const future = resolveMobileLayer({
       year: 9999,
       region: TOKYO_DEMO_REGION,
+      viewportWidth: PHONE_VIEWPORT_WIDTH,
       currentYear: CURRENT_YEAR,
       registry,
     });
     const past = resolveMobileLayer({
       year: 1000,
       region: TOKYO_DEMO_REGION,
+      viewportWidth: PHONE_VIEWPORT_WIDTH,
       currentYear: CURRENT_YEAR,
       registry,
     });

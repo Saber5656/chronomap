@@ -27,6 +27,7 @@ import {
   MIN_TOUCH_TARGET,
   MOBILE_MAP_MAX_ZOOM,
   MOBILE_MAP_MIN_ZOOM,
+  MOBILE_MAP_TILE_SIZE,
   mobileYearRange,
   resolveMobileLayer,
   TOKYO_DEMO_REGION,
@@ -72,8 +73,8 @@ function ChronomapDemo() {
 
   const copy = STRINGS[language];
   const selection = useMemo(
-    () => resolveMobileLayer({ year, region, currentYear, registry }),
-    [currentYear, region, registry, year],
+    () => resolveMobileLayer({ year, region, viewportWidth: windowWidth, currentYear, registry }),
+    [currentYear, region, registry, windowWidth, year],
   );
   const activeLayer = selection.activeLayer;
   const attributionText = attributionLabel(activeLayer, copy.attribution);
@@ -150,7 +151,7 @@ function ChronomapDemo() {
           urlTemplate={GSI_PALE_TILE_URL}
           minimumZ={MOBILE_MAP_MIN_ZOOM}
           maximumZ={MOBILE_MAP_MAX_ZOOM}
-          tileSize={256}
+          tileSize={MOBILE_MAP_TILE_SIZE}
           zIndex={0}
         />
         {activeLayer === null ? null : (

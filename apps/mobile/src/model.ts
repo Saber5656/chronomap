@@ -33,6 +33,7 @@ export interface MobileLayerSelection {
 export interface ResolveMobileLayerInput {
   readonly year: number;
   readonly region: MobileRegion;
+  readonly viewportWidth: number;
   readonly currentYear: number;
   readonly registry: readonly LayerEntry[];
 }
@@ -48,6 +49,7 @@ export const TOKYO_DEMO_YEAR = 1965;
 export const MIN_TOUCH_TARGET = 44;
 export const MOBILE_MAP_MIN_ZOOM = 5;
 export const MOBILE_MAP_MAX_ZOOM = ZOOM_MAX;
+export const MOBILE_MAP_TILE_SIZE = 256;
 
 function finiteOr(value: number, fallback: number): number {
   return Number.isFinite(value) ? value : fallback;
@@ -71,10 +73,14 @@ export function regionToBbox(region: MobileRegion): Bbox {
   return [west, south, east, north];
 }
 
-export function regionToZoom(region: MobileRegion): number {
+export function regionToZoom(region: MobileRegion, viewportWidth: number): number {
   const delta = Math.abs(finiteOr(region.longitudeDelta, 360));
   if (delta === 0) return ZOOM_MAX;
-  return clamp(Math.log2(360 / delta), ZOOM_MIN, ZOOM_MAX);
+  const width =
+    Number.isFinite(viewportWidth) && viewportWidth > 0 ? viewportWidth : MOBILE_MAP_TILE_SIZE;
+  const zoom =
+    Math.log2(360) + Math.log2(width) - Math.log2(delta) - Math.log2(MOBILE_MAP_TILE_SIZE);
+  return clamp(zoom, ZOOM_MIN, ZOOM_MAX);
 }
 
 export function createMobileRegistry(currentYear: number): LayerEntry[] {
@@ -101,7 +107,7 @@ export function mobileYearRange(
 export function resolveMobileLayer(input: ResolveMobileLayerInput): MobileLayerSelection {
   const normalizedCurrentYear = Math.max(YEAR_MIN, Math.trunc(input.currentYear));
   const year = clamp(Math.round(input.year), YEAR_MIN, normalizedCurrentYear);
-  const zoom = regionToZoom(input.region);
+  const zoom = regionToZoom(input.region, input.viewportWidth);
   const resolution = resolve({
     year,
     viewBbox: regionToBbox(input.region),

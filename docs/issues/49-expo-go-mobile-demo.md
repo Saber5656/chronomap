@@ -44,10 +44,11 @@ GitHub Issue: [#114](https://github.com/Saber5656/chronomap/issues/114)
 - `model.ts` owns these pure mobile adapters:
   - `MobileRegion` (`latitude`, `longitude`, `latitudeDelta`, `longitudeDelta`),
   - `regionToBbox(region)` with valid latitude/longitude clamping,
-  - `regionToZoom(region)` clamped to the Web `ZOOM_MIN..ZOOM_MAX` contract,
+  - `regionToZoom(region, viewportWidth)` derives native zoom from longitude span, rendered map
+    width, and the logical 256-point tile size, then clamps to the Web `ZOOM_MIN..ZOOM_MAX` contract,
   - `createMobileRegistry(currentYear)` using `loadRegistry(..., featureFlags: {})`,
-  - `resolveMobileLayer({ year, region, currentYear, registry })` returning the root resolution and
-    resolved `LayerEntry | null`.
+  - `resolveMobileLayer({ year, region, viewportWidth, currentYear, registry })` returning the root
+    resolution and resolved `LayerEntry | null`.
 - No provider record or layer-resolution branch may be copied into the mobile app.
 
 ### Native demo behavior
