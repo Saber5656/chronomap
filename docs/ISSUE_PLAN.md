@@ -29,6 +29,7 @@ this plan.**
 | W5 Integrations | share in/out | 32, 33, 34, 36, 35, 37, 38 (36 before 35: share route falls back to ImportSheet) |
 | W6 Polish | resilience + a11y + onboarding | 40, 41, 42 |
 | W7 Security & release | harden, verify, ship | 43, 44, 45, 46, 47, 48 |
+| W8 Post-v1 mobile demo | Expo Go native proof | 49 |
 
 Within a wave, listed order is the recommended sequence; issues without mutual dependencies may
 proceed in parallel (one branch/worktree per issue).
@@ -85,6 +86,7 @@ proceed in parallel (one branch/worktree per issue).
 | 46 | 46-perf-budget-lighthouse.md | Perf budgets + Lighthouse CI | 06, 31 | §14 |
 | 47 | 47-about-credits-privacy-docs.md | About/credits/privacy + README | 22, 28 | §12.6, ADR-004 |
 | 48 | 48-release-0-1-0.md | Release v0.1.0 | all 01–47 | §16, ADR-006 |
+| 49 | 49-expo-go-mobile-demo.md | Expo Go mobile demo | 14, 15, 17, 39 | §2.4, ADR-007 |
 
 ## 4. Coverage: DESIGN.md § → issues
 
@@ -102,6 +104,7 @@ proceed in parallel (one branch/worktree per issue).
 | §12.1–12.3 | 11, 24, 34, 44 · §12.4 | 43 · §12.5 | 04, 45 · §12.6 | 47 |
 | §13 | 40 (+13, 21, 36 for their local states) |
 | §14 | 46 · §15 | 03, 07, 44, 46 · §16 | 04, 06, 48 |
+| Post-v1 §2.4 mobile extension | 49, ADR-007 |
 
 Every DESIGN section maps to ≥1 issue; issue 48's checklist re-verifies this table before release.
 
@@ -118,8 +121,11 @@ Every DESIGN section maps to ≥1 issue; issue 48's checklist re-verifies this t
 ## 6. Deferred to v2 (do not implement in v1)
 
 OpenHistoricalMap `vector-dated` provider + world basemap; geocoding search; device-local
-bookmarks; Wikidata date-filtered POIs; swipe-compare view; Capacitor wrapper + iOS native share
-target; DMS coordinate parsing; optional last-view restore; Commons strip promotion out of flag.
+bookmarks; Wikidata date-filtered POIs; swipe-compare view; production-grade native/store client,
+iOS native share target, and mobile POI/share parity beyond the Expo Go issue-49 demo; DMS
+coordinate parsing; optional last-view restore; Commons strip promotion out of flag. The earlier
+Capacitor-wrapper direction is superseded for the demo by ADR-007; any production wrapper/client
+choice needs a separate owner-approved decision.
 
 ## 7. Known unknowns → possible new issues during implementation
 

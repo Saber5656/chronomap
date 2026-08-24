@@ -19,6 +19,7 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "lcov"],
       include: [
+        "apps/mobile/src/model.ts",
         "src/util/**/*.ts",
         "src/providers/layers/resolve.ts",
         "src/state/store.ts",

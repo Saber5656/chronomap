@@ -6,4 +6,8 @@
 
 Implementation work follows the issue document in an issue-specific worktree, with focused tests and evidence recorded before review.
 
+The post-v1 Expo Go demo is specified by [issue 49](issues/49-expo-go-mobile-demo.md) and
+[ADR-007](decisions/ADR-007-expo-go-mobile-demo.md); device instructions live in
+[`apps/mobile/README.md`](../apps/mobile/README.md).
+
 If an unknown exceeds the current issue's scope, create a new `docs/issues/NN-*.md` through review as required by `ISSUE_PLAN.md` §7; do not widen the existing issue silently.

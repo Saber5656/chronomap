@@ -1,5 +1,6 @@
 node_modules/
 dist/
+.expo/
 coverage/
 .lighthouseci/
 playwright-report/
