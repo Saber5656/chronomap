@@ -14,9 +14,10 @@
 .opacity-control__trigger {
   position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.1rem;
+  gap: 0.2rem;
   width: 44px;
   min-width: 44px;
   height: 44px;
@@ -28,7 +29,7 @@
   box-shadow: var(--shadow);
   color: inherit;
   font: inherit;
-  font-size: 0.56rem;
+  font-size: 0.7rem;
   font-variant-numeric: tabular-nums;
   line-height: 1;
   cursor: pointer;

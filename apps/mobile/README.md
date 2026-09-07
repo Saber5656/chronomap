@@ -56,12 +56,21 @@ only for a trusted session and stop the server with `Ctrl+C` afterward.
 
 ## Demo flow
 
+The map uses an ivory and forest-green control palette shared with the Web client. The year is
+the primary readout. Tap an available-year chip to jump without dragging; the chips are derived
+from the canonical registry and the current viewport, not a fixed list of sample years.
+
+On mobile, **表示を調整 / Adjust view** expands the opacity, map-center coordinates, and connection
+note. Closing it preserves the opacity value. Credits remain in the main panel. When no imagery
+covers the current view, **東京の地図へ戻る / Return to Tokyo** restores the 1965 demonstration.
+On compact or enlarged-text screens the panel scrolls so its controls remain reachable.
+
 | Step             | Expected result                                                                                      |
 | ---------------- | ---------------------------------------------------------------------------------------------------- |
 | Launch           | Tokyo Station opens at 1965 with the canonical `gsi-ort-old10` overlay.                              |
 | Move / zoom      | The center coordinates and coverage-driven active layer update.                                      |
 | Year slider      | The closest canonical GSI era appears; a snap notice appears between eras.                           |
-| Opacity slider   | The historical image fades over the GSI pale basemap.                                                |
+| Opacity slider   | Open Adjust view; the historical image fades over the GSI pale basemap.                              |
 | Today / 現在     | The year moves to the current year and resolves present-day seamless imagery at a supported zoom.    |
 | Locate / 現在地  | Permission is requested only now; grant animates to the fix and denial leaves the Tokyo demo usable. |
 | 日本語 / English | All demo controls and feedback switch language.                                                      |
@@ -75,7 +84,7 @@ Run from the repository root:
 npm run mobile:doctor
 npm run mobile:typecheck
 npm run mobile:export
-npx vitest run tests/unit/mobile/model.spec.ts
+npx vitest run tests/unit/mobile tests/unit/ui/eraShortcuts.spec.ts
 ```
 
 `mobile:export` creates Android and iOS Hermes bundles without generating `android/` or `ios/`

@@ -24,7 +24,7 @@
 
 .time-slider__track {
   position: absolute;
-  inset-inline: 0;
+  inset-inline: 22px;
   inset-block-start: 50%;
   height: 28px;
   transform: translateY(-50%);
@@ -59,6 +59,7 @@
 }
 
 .time-slider__value {
+  display: none;
   position: absolute;
   inset-block-start: -1.55rem;
   min-width: 3.5rem;
@@ -106,5 +107,103 @@
 @media (prefers-reduced-motion: reduce) {
   .time-slider__era-segment {
     transition: none;
+  }
+}
+
+.time-navigation {
+  min-width: 0;
+}
+.time-navigation__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-inline-end: 52px;
+  min-height: 66px;
+}
+.time-navigation__date {
+  min-width: 0;
+}
+.time-navigation__eyebrow {
+  display: block;
+  color: color-mix(in srgb, var(--color-text) 76%, var(--color-bg));
+  font-size: 0.65rem;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+}
+.time-navigation__year {
+  display: block;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 2.4rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  line-height: 1.2;
+}
+.time-navigation__today,
+.time-navigation__era {
+  flex-shrink: 0;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--color-accent) 7%, var(--color-bg));
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.time-navigation__today {
+  border-radius: 24px;
+}
+.time-navigation__eras {
+  display: flex;
+  gap: 8px;
+  min-height: 48px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding-block: 2px;
+}
+.time-navigation__era[aria-pressed="true"] {
+  background: var(--color-text);
+  color: var(--color-bg);
+}
+.time-navigation button:focus-visible {
+  outline: 3px solid var(--focus-ring-color);
+  outline-offset: -3px;
+}
+.time-navigation button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.time-navigation button:hover:not(:disabled) {
+  border-color: var(--color-accent);
+}
+
+@media (max-width: 22rem) {
+  .time-navigation__eyebrow {
+    font-size: 0.6rem;
+    letter-spacing: 0;
+  }
+  .time-navigation__year {
+    font-size: 1.8rem;
+  }
+  .time-navigation__today {
+    padding-inline: 6px;
+    font-size: 0.7rem;
+  }
+}
+@media (max-width: 16rem) {
+  .time-navigation__heading {
+    flex-wrap: wrap;
+    padding-inline-end: 44px;
+  }
+  .time-navigation__eyebrow {
+    display: none;
+  }
+  .time-navigation__year {
+    font-size: 1.4rem;
   }
 }

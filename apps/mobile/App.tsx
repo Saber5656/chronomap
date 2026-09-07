@@ -17,6 +17,7 @@ import MapView, { Marker, UrlTile, type LatLng, type Region } from "react-native
 import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { initialLanguage, STRINGS, type Language } from "./src/i18n";
+import { eraShortcuts } from "../../src/ui/eraShortcuts";
 import {
   attributionLabel,
   createMobileRegistry,
@@ -39,13 +40,13 @@ type LocationState = "idle" | "requesting" | "granted" | "denied" | "unavailable
 type NoticeKey = "locationGranted" | "locationDenied" | "locationUnavailable" | "attributionFailed";
 
 const COLORS = {
-  ink: "#18342b",
-  muted: "#5c7068",
-  leaf: "#1f7554",
-  leafDark: "#15543d",
-  moss: "#b9d7c8",
-  paper: "rgba(250, 253, 250, 0.96)",
-  line: "rgba(24, 52, 43, 0.14)",
+  ink: "#173d35",
+  muted: "#586b62",
+  leaf: "#24634f",
+  leafDark: "#173d35",
+  moss: "#d8dfd4",
+  paper: "#fcfbf7",
+  line: "#e1e5db",
   shadow: "#102a20",
   warning: "#8a4b12",
 } as const;
@@ -70,6 +71,7 @@ function ChronomapDemo() {
   const [locationState, setLocationState] = useState<LocationState>("idle");
   const [locationCoordinate, setLocationCoordinate] = useState<LatLng | null>(null);
   const [notice, setNotice] = useState<NoticeKey | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const copy = STRINGS[language];
   const selection = useMemo(
@@ -77,6 +79,7 @@ function ChronomapDemo() {
     [currentYear, region, registry, windowWidth, year],
   );
   const activeLayer = selection.activeLayer;
+  const shortcuts = eraShortcuts(registry, selection.resolution.candidates, currentYear);
   const attributionText = attributionLabel(activeLayer, copy.attribution);
   const statusMessage =
     selection.resolution.reason === "registry-empty"
@@ -89,6 +92,12 @@ function ChronomapDemo() {
 
   const toggleLanguage = () => {
     setLanguage((value) => (value === "ja" ? "en" : "ja"));
+  };
+
+  const returnTokyo = () => {
+    setRegion(TOKYO_DEMO_REGION);
+    setYear(TOKYO_DEMO_YEAR);
+    mapRef.current?.animateToRegion(TOKYO_DEMO_REGION, 0);
   };
 
   const locate = async () => {
@@ -235,8 +244,11 @@ function ChronomapDemo() {
             left: Math.max(12, (windowWidth - 560) / 2),
             width: Math.min(windowWidth - 24, 560),
             maxHeight: Math.max(
-              180,
-              Math.min(windowHeight * 0.72, windowHeight - insets.top - headerHeight - 34),
+              100,
+              Math.min(
+                windowHeight * (settingsOpen ? 0.68 : 0.48),
+                windowHeight - insets.top - insets.bottom - headerHeight - 40,
+              ),
             ),
           },
         ]}
@@ -244,8 +256,11 @@ function ChronomapDemo() {
       >
         <View style={styles.timelineHeading}>
           <View style={styles.yearBlock}>
-            <Text style={styles.eyebrow}>{copy.year}</Text>
-            <Text style={styles.yearValue}>{selection.year}</Text>
+            <Text style={styles.eyebrow}>{copy.explore}</Text>
+            <Text style={styles.yearValue} accessibilityLabel={`${copy.year} ${selection.year}`}>
+              {selection.year}
+              <Text style={styles.yearUnit}>{language === "ja" ? " 年" : ""}</Text>
+            </Text>
           </View>
           <Pressable
             accessibilityRole="button"
@@ -277,11 +292,51 @@ function ChronomapDemo() {
           style={styles.slider}
         />
 
+        <View style={styles.rangeLabels} accessible={false}>
+          <Text style={styles.rangeLabel}>{yearRange.minimum}</Text>
+          <Text style={styles.rangeLabel}>{currentYear}</Text>
+        </View>
+
+        {shortcuts.length === 0 ? null : (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            accessibilityLabel={copy.availableEras}
+            contentContainerStyle={styles.eraChoices}
+          >
+            {shortcuts.map((choice) => (
+              <Pressable
+                key={choice.id}
+                accessibilityRole="button"
+                accessibilityLabel={`${copy.year} ${choice.year}`}
+                accessibilityState={{ selected: choice.year === selection.year }}
+                onPress={() => setYear(choice.year)}
+                style={({ pressed }) => [
+                  styles.eraChoice,
+                  choice.year === selection.year && styles.eraChoiceSelected,
+                  pressedStyle(pressed),
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.eraChoiceText,
+                    choice.year === selection.year && styles.eraChoiceTextSelected,
+                  ]}
+                >
+                  {choice.year}
+                </Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        )}
+
         <View style={styles.layerRow}>
-          <View style={styles.layerDot} />
+          <View
+            style={[styles.layerDot, activeLayer === null && { backgroundColor: COLORS.muted }]}
+          />
           <View style={styles.layerText}>
             <Text style={styles.layerTitle} numberOfLines={2}>
-              {activeLayer === null ? copy.noCoverage : layerTitle(activeLayer, language)}
+              {activeLayer === null ? copy.basemap : layerTitle(activeLayer, language)}
             </Text>
             {activeLayer === null ? null : (
               <Text style={styles.layerEra}>{eraLabel(activeLayer)}</Text>
@@ -295,40 +350,68 @@ function ChronomapDemo() {
           </Text>
         )}
 
-        <View style={styles.opacitySection}>
-          <View style={styles.opacityHeading}>
-            <Text style={styles.opacityLabel}>{copy.opacity}</Text>
-            <Text style={styles.opacityValue}>{Math.round(opacity * 100)}%</Text>
-          </View>
-          <Slider
-            accessibilityLabel={copy.opacity}
-            accessibilityValue={{ min: 0, max: 100, now: Math.round(opacity * 100) }}
-            minimumValue={0}
-            maximumValue={1}
-            step={0.05}
-            value={opacity}
-            minimumTrackTintColor={COLORS.leaf}
-            maximumTrackTintColor={COLORS.moss}
-            thumbTintColor={COLORS.leafDark}
-            onValueChange={setOpacity}
-            style={styles.opacitySlider}
-          />
-        </View>
-
-        <View style={styles.metaRow}>
-          <Text style={styles.coordinateText}>
-            {copy.coordinates} {region.latitude.toFixed(4)}, {region.longitude.toFixed(4)}
-          </Text>
-          <Pressable
-            accessibilityRole="link"
-            accessibilityLabel={attributionText}
-            onPress={() => void openAttribution()}
-            style={styles.attributionButton}
-          >
-            <Text style={styles.attributionLink}>{attributionText} ↗</Text>
+        {activeLayer === null ? (
+          <Pressable accessibilityRole="button" onPress={returnTokyo} style={styles.settingsToggle}>
+            <Text style={styles.presentButtonText}>{copy.returnTokyo} ↗</Text>
           </Pressable>
-        </View>
-        <Text style={styles.onlineText}>{copy.onlineOnly}</Text>
+        ) : null}
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ expanded: settingsOpen }}
+          onPress={() => setSettingsOpen((value) => !value)}
+          style={({ pressed }) => [styles.settingsToggle, pressedStyle(pressed)]}
+        >
+          <Text style={styles.settingsLabel}>{settingsOpen ? copy.collapse : copy.adjust}</Text>
+          <Text style={styles.settingsLabel} accessible={false}>
+            {settingsOpen ? "−" : "+"}
+          </Text>
+        </Pressable>
+
+        {settingsOpen ? (
+          <View style={styles.settingsPanel}>
+            <View style={styles.opacitySection}>
+              <View style={styles.opacityHeading}>
+                <Text style={styles.opacityLabel}>{copy.opacity}</Text>
+                <Text style={styles.opacityValue}>{Math.round(opacity * 100)}%</Text>
+              </View>
+              <Slider
+                accessibilityLabel={copy.opacity}
+                accessibilityValue={{ min: 0, max: 100, now: Math.round(opacity * 100) }}
+                minimumValue={0}
+                maximumValue={1}
+                step={0.05}
+                value={opacity}
+                disabled={activeLayer === null}
+                minimumTrackTintColor={COLORS.leaf}
+                maximumTrackTintColor={COLORS.moss}
+                thumbTintColor={COLORS.leafDark}
+                onValueChange={setOpacity}
+                style={styles.opacitySlider}
+              />
+              <View style={styles.rangeLabels}>
+                <Text style={styles.rangeLabel}>{copy.basemap}</Text>
+                <Text style={styles.rangeLabel}>{copy.imagery}</Text>
+              </View>
+            </View>
+
+            <View style={styles.metaRow}>
+              <Text style={styles.coordinateText}>
+                {copy.coordinates} {region.latitude.toFixed(4)}, {region.longitude.toFixed(4)}
+              </Text>
+            </View>
+            <Text style={styles.onlineText}>{copy.onlineOnly}</Text>
+          </View>
+        ) : null}
+
+        <Pressable
+          accessibilityRole="link"
+          accessibilityLabel={attributionText}
+          onPress={() => void openAttribution()}
+          style={styles.attributionButton}
+        >
+          <Text style={styles.attributionLink}>{attributionText} ↗</Text>
+        </Pressable>
 
         {notice === null ? null : (
           <Text style={styles.notice} accessibilityLiveRegion="polite">
@@ -351,7 +434,7 @@ export default function App() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: "#edf4ef",
+    backgroundColor: "#ecefe6",
   },
   pressed: {
     opacity: 0.72,
@@ -373,14 +456,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 9,
-    borderRadius: 16,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     backgroundColor: COLORS.paper,
     borderWidth: 1,
     borderColor: COLORS.line,
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.14,
+    shadowOpacity: 0.08,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 4 },
     elevation: 4,
@@ -388,10 +471,10 @@ const styles = StyleSheet.create({
   brandMark: {
     width: 36,
     height: 36,
-    borderRadius: 12,
+    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: COLORS.leaf,
+    backgroundColor: COLORS.ink,
   },
   brandMarkText: {
     color: "#ffffff",
@@ -405,14 +488,14 @@ const styles = StyleSheet.create({
   },
   appName: {
     color: COLORS.ink,
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "800",
-    letterSpacing: 0.3,
+    letterSpacing: -0.5,
   },
   demoLabel: {
     marginTop: 1,
     color: COLORS.muted,
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: "600",
   },
   headerActions: {
@@ -454,20 +537,20 @@ const styles = StyleSheet.create({
   },
   timelineCard: {
     position: "absolute",
-    borderRadius: 22,
+    borderRadius: 28,
     backgroundColor: COLORS.paper,
     borderWidth: 1,
     borderColor: COLORS.line,
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.12,
     shadowRadius: 18,
     shadowOffset: { width: 0, height: 7 },
     elevation: 8,
   },
   timelineContent: {
-    paddingHorizontal: 16,
-    paddingTop: 14,
-    paddingBottom: 12,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 8,
   },
   timelineHeading: {
     flexDirection: "row",
@@ -478,22 +561,21 @@ const styles = StyleSheet.create({
   },
   yearBlock: {
     flexShrink: 1,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    alignItems: "baseline",
-    gap: 8,
+    gap: 2,
   },
   eyebrow: {
     color: COLORS.muted,
     fontSize: 12,
     fontWeight: "700",
+    letterSpacing: 1.4,
   },
   yearValue: {
     color: COLORS.ink,
-    fontSize: 27,
+    fontSize: 48,
+    fontFamily: Platform.OS === "ios" ? "Georgia" : "serif",
     fontVariant: ["tabular-nums"],
-    fontWeight: "800",
-    letterSpacing: -0.5,
+    fontWeight: "400",
+    letterSpacing: -2,
   },
   presentButton: {
     flexShrink: 0,
@@ -501,9 +583,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
-    borderRadius: 13,
+    borderRadius: 24,
     paddingHorizontal: 12,
-    backgroundColor: "#e8f4ed",
+    backgroundColor: "#eef1e8",
     borderWidth: 1,
     borderColor: COLORS.moss,
   },
@@ -528,10 +610,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    borderRadius: 14,
-    paddingHorizontal: 11,
-    paddingVertical: 7,
-    backgroundColor: "#f0f6f2",
+    marginTop: 8,
+    paddingVertical: 8,
   },
   layerDot: {
     width: 10,
@@ -544,7 +624,7 @@ const styles = StyleSheet.create({
   },
   layerTitle: {
     color: COLORS.ink,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "700",
   },
   layerEra: {
@@ -573,7 +653,7 @@ const styles = StyleSheet.create({
   opacityLabel: {
     flexShrink: 1,
     color: COLORS.muted,
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: "700",
   },
   opacitySlider: {
@@ -603,7 +683,7 @@ const styles = StyleSheet.create({
   },
   attributionLink: {
     color: COLORS.leafDark,
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: "700",
     textDecorationLine: "underline",
   },
@@ -623,4 +703,52 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     lineHeight: 16,
   },
+  yearUnit: {
+    fontSize: 16,
+    fontWeight: "400",
+    letterSpacing: 0,
+  },
+  rangeLabels: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 8,
+  },
+  rangeLabel: {
+    flexShrink: 1,
+    color: COLORS.muted,
+    fontSize: 11,
+    fontVariant: ["tabular-nums"],
+  },
+  eraChoices: {
+    gap: 8,
+    paddingVertical: 8,
+  },
+  eraChoice: {
+    minHeight: MIN_TOUCH_TARGET,
+    minWidth: 60,
+    paddingHorizontal: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#eef1e8",
+    borderRadius: 14,
+  },
+  eraChoiceSelected: { backgroundColor: COLORS.ink },
+  eraChoiceText: {
+    color: COLORS.ink,
+    fontSize: 14,
+    fontWeight: "600",
+    fontVariant: ["tabular-nums"],
+  },
+  eraChoiceTextSelected: { color: "#ffffff" },
+  settingsToggle: {
+    minHeight: MIN_TOUCH_TARGET,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderTopWidth: 1,
+    borderColor: COLORS.line,
+    gap: 12,
+  },
+  settingsLabel: { color: COLORS.ink, fontSize: 13, fontWeight: "600" },
+  settingsPanel: { paddingVertical: 10, gap: 10 },
 });
