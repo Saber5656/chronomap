@@ -36,6 +36,54 @@ GitHub Pages entry point (after Pages is enabled): <https://saber5656.github.io/
 - An explicit action to hand a selected point to Google Maps, Apple Maps, or a `geo:` URI.
 - Offline startup of the installed app shell and a Japanese / English language toggle.
 
+## Expo Go モバイルデモ / Expo Go mobile demo
+
+### 日本語
+
+`apps/mobile` には、既存 Web/PWA を置き換えない React Native のデモがあります。東京駅周辺の
+1965 年から始まり、地図移動、年代変更、過去レイヤーの濃さ、現在へのリセット、明示的な
+現在地取得を iOS / Android のネイティブ UI で確認できます。GSI registry と年代解決ロジックは
+Web 版と共有しています。
+
+1. `.nvmrc` の Node.js、npm、SDK 54 対応 Expo Go（iOS は [App Store](https://apps.apple.com/app/expo-go/id982107779)、Android は [Google Play](https://play.google.com/store/apps/details?id=host.exp.exponent)）を用意します。
+2. Mac/PC と実機を同じ LAN に接続します。
+3. repository root で次を実行し、表示された QR code を Expo Go で読み取ります。
+
+```sh
+npm ci
+npm run mobile:start
+```
+
+LAN から開けない場合は `npm run mobile:start:tunnel` を使用できます。tunnel は ngrok 経由で
+development server への外部経路を作るため、信頼できる session だけで使用し、確認後は server を
+停止してください。地図画像はオンラインの GSI tile なので通信が必要です。Expo Go はデモ用 playground であり、App Store / Google Play
+向け build、署名、native share extension、background location、POI parity はこの実装の対象外です。
+詳しい確認項目は [mobile README](apps/mobile/README.md) を参照してください。
+
+### English
+
+`apps/mobile` contains a React Native demo that complements rather than replaces the Web/PWA
+client. It starts at Tokyo Station in 1965 and demonstrates native map movement, year selection,
+overlay opacity, present-day reset, and user-triggered foreground location on iOS and Android. It
+shares the GSI registry and era resolver with the Web client.
+
+1. Install the Node.js version in `.nvmrc`, npm, and the SDK 54-compatible Expo Go client from the
+   [iOS App Store](https://apps.apple.com/app/expo-go/id982107779) or
+   [Android Google Play](https://play.google.com/store/apps/details?id=host.exp.exponent).
+2. Put the computer and device on the same LAN.
+3. From the repository root, run the commands below and scan the displayed QR code with Expo Go.
+
+```sh
+npm ci
+npm run mobile:start
+```
+
+Use `npm run mobile:start:tunnel` if LAN discovery is blocked. Tunnel mode creates an externally
+reachable route to the development server through ngrok; use it only for a trusted session and stop
+the server afterward. GSI map imagery requires a network connection. Expo Go is the requested demo playground, not a store-ready binary; signing, store
+builds, native share extensions, background location, and POI parity are outside this scope. See the
+[mobile README](apps/mobile/README.md) for the device checklist.
+
 ## 他の地図アプリから開く / Opening from other map apps
 
 ### 日本語
@@ -76,12 +124,14 @@ or the paste fallback instead.
 
 - chronomap にアプリ用サーバー、Cookie、アクセス解析、トラッキングはありません。現行 build の地図タイルのリクエストから表示範囲が国土地理院（GSI）へ伝わります。今昔マップは現在 About の出典表示だけで、runtime layer registry には含まれないため、現行 build から ktgis.net へのタイルリクエストは発生しません。ADR-006 の許諾後に実ランタイムへ追加する場合は、その送信先を改めて明示します。POI を有効にしてズーム13以上のときは、記事検索のため地図の中心座標を Wikimedia へ送信します。
 - `localStorage` に保存するキーは `chronomap.lang` と `chronomap.onboarded` だけです。インストール後はアプリシェルがサービスワーカーの CacheStorage に残ることがあります。
+- Expo Go デモは利用者が「現在地」を押した場合だけ foreground location を1回取得し、座標を永続化しません。表示範囲は GSI tile request から国土地理院へ伝わります。iOS では `react-native-maps` が標準 MapKit を GSI tile の下で使用するため、Apple の map service にも表示範囲等が送信される可能性があります。Android は GSI tile 下の native basemap を無効にします。
 - 地図アプリへの座標の引き渡しは明示的な選択時だけ行われ、開いた先では第三者提供元の利用条件とプライバシー方針が適用されます。詳細はアプリ内の About と [ADR-005](docs/decisions/ADR-005-privacy-and-security-posture.md) を参照してください。
 
 ### English
 
 - chronomap has no application server, cookies, analytics, or tracking. In the current build, tile requests reveal the viewed area to GSI. Konjaku is currently an About-only attribution entry and is not included in the runtime layer registry, so the current build makes no tile requests to ktgis.net. If ADR-006 later authorizes adding it to the runtime, that destination will be disclosed again. While POI is enabled at zoom 13 or higher, the map center is sent to Wikimedia for article search.
 - The only `localStorage` keys saved are `chronomap.lang` and `chronomap.onboarded`. After installation, the app shell may remain in the service worker's CacheStorage.
+- The Expo Go demo retrieves foreground location once only after the user taps Locate and does not persist coordinates. Its GSI tile requests reveal the visible area to GSI. On iOS, `react-native-maps` uses standard MapKit below the GSI tiles, so the visible area and related request data may also reach Apple's map service. Android disables the native basemap below the GSI tiles.
 - Coordinates are handed to a map provider only after an explicit choice. The destination provider's terms and privacy policy apply. See the in-app About sheet and [ADR-005](docs/decisions/ADR-005-privacy-and-security-posture.md) for details.
 
 ## 開発 / Development
@@ -114,6 +164,11 @@ npm run dev
 | `npm run validate:readme`      | README のローカルリンク検証      |
 | `npm run test:watch`           | Vitest の watch モード           |
 | `npm run test:security`        | security unit / E2E テスト       |
+| `npm run mobile:start`         | Expo Go 用 LAN server / QR       |
+| `npm run mobile:start:tunnel`  | LAN が使えない場合の tunnel      |
+| `npm run mobile:doctor`        | Expo SDK / dependency 整合性     |
+| `npm run mobile:typecheck`     | mobile TypeScript 型検査         |
+| `npm run mobile:export`        | Android / iOS bundle export      |
 
 文書の入口は [docs/README.md](docs/README.md) です。[DESIGN.md](docs/DESIGN.md) が設計正本、
 [ISSUE_PLAN.md](docs/ISSUE_PLAN.md) が issue の順序と範囲、[docs/issues/](docs/issues/) が個別の
@@ -148,6 +203,11 @@ npm run dev
 | `npm run validate:readme`      | Validate README local links                    |
 | `npm run test:watch`           | Run Vitest in watch mode                       |
 | `npm run test:security`        | Run security unit and E2E tests                |
+| `npm run mobile:start`         | Start the Expo Go LAN server and QR            |
+| `npm run mobile:start:tunnel`  | Start through a tunnel when LAN access fails   |
+| `npm run mobile:doctor`        | Check Expo SDK/dependency compatibility        |
+| `npm run mobile:typecheck`     | Type-check the mobile client                   |
+| `npm run mobile:export`        | Export Android and iOS demo bundles            |
 
 Start with [docs/README.md](docs/README.md). [DESIGN.md](docs/DESIGN.md) is the design source of
 truth, [ISSUE_PLAN.md](docs/ISSUE_PLAN.md) defines issue order and scope, and [docs/issues/](docs/issues/)

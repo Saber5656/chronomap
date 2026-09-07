@@ -4,7 +4,10 @@ import {
   GENERATED_END,
   GENERATED_START,
   LICENSE_CHECKER_COMMAND,
+  filterProductionPackages,
+  formatLicenseSummary,
   formatPackageTable,
+  productionPackageKeys,
   replaceGeneratedSection,
   resolveGeneratedDate,
 } from "../../../scripts/update-third-party-notices.mjs";
@@ -28,6 +31,38 @@ describe("update-third-party-notices", () => {
     expect(table).toContain("@scope/package | 2.0.0");
     expect(table).toContain("MIT \\| BSD-3-Clause");
     expect(table).toContain("plain-package  | 1.0.0");
+  });
+
+  it("selects root and workspace production packages from the lockfile", () => {
+    const keys = productionPackageKeys({
+      packages: {
+        "": { name: "chronomap", version: "0.1.0" },
+        "apps/mobile": { name: "@chronomap/mobile", version: "0.1.0" },
+        "node_modules/expo": { version: "57.0.15" },
+        "node_modules/vitest": { name: "vitest", version: "4.1.10", dev: true },
+        "node_modules/workspace-link": { link: true },
+      },
+    });
+    const filtered = filterProductionPackages(
+      {
+        "expo@57.0.15": { licenses: "MIT" },
+        "vitest@4.1.10": { licenses: "MIT" },
+      },
+      keys,
+    );
+
+    expect(keys).toContain("@chronomap/mobile@0.1.0");
+    expect(filtered).toEqual({ "expo@57.0.15": { licenses: "MIT" } });
+  });
+
+  it("summarizes filtered package licenses deterministically", () => {
+    expect(
+      formatLicenseSummary({
+        "a@1.0.0": { licenses: "MIT" },
+        "b@1.0.0": { licenses: "ISC" },
+        "c@1.0.0": { licenses: "MIT" },
+      }),
+    ).toBe("├─ MIT: 2\n└─ ISC: 1");
   });
 
   it("replaces only the marked generated section", () => {

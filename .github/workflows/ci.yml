@@ -51,12 +51,27 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Validate Expo Go dependencies
+        run: npm run mobile:doctor
+
+      - name: Export Expo mobile demo bundles
+        run: npm run mobile:export
+
       - name: Upload Lighthouse build artifact
         if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: lighthouse-dist
           path: dist
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Upload Expo mobile demo bundles
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: expo-mobile-demo
+          path: apps/mobile/dist
           if-no-files-found: error
           retention-days: 1
 

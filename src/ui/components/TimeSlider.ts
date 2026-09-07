@@ -5,6 +5,7 @@ import { eraTicks } from "../../providers/layers/resolve";
 import type { EraTick, LayerEntry } from "../../providers/layers/types";
 import { el } from "../../util/dom";
 import { t, type I18nKey, type InterpolationVars, type Locale } from "../i18n";
+import { eraShortcuts } from "../eraShortcuts";
 
 export const TIME_SLIDER_SETTLE_DEBOUNCE_MS = 150;
 
@@ -149,6 +150,18 @@ export function mount(
   const ticks = eraTicks(registry);
   const translate = options.translate ?? t;
 
+  const navigation = el("div", { class: "time-navigation" });
+  const heading = el("span", { class: "time-navigation__eyebrow" });
+  const yearReadout = el("span", { class: "time-navigation__year", "aria-hidden": "true" });
+  const today = el("button", { type: "button", class: "time-navigation__today" });
+  const shortcuts = el("div", { class: "time-navigation__eras", role: "group" });
+  navigation.append(
+    el("div", { class: "time-navigation__heading" }, [
+      el("div", { class: "time-navigation__date" }, [heading, yearReadout]),
+      today,
+    ]),
+  );
+
   const root = el("div", {
     class: "time-slider",
     role: "slider",
@@ -172,7 +185,8 @@ export function mount(
   thumbHit.append(thumb);
   track.append(trackBase, segments, valueLabel, thumbHit);
   root.append(track);
-  parent.append(root);
+  navigation.append(root, shortcuts);
+  parent.append(navigation);
 
   let displayedYear = clampYear(store.get().year, YEAR_MIN, maxYear);
   let resolution = store.get().timeLayer.resolution;
@@ -183,6 +197,56 @@ export function mount(
   let dragging = false;
   let destroyed = false;
   let resizeObserver: ResizeObserver | undefined;
+
+  function renderNavigation(): void {
+    const locale = store.get().ui.lang;
+    heading.textContent = translate("slider.explore", {}, locale);
+    yearReadout.textContent = yearLabel(displayedYear, locale);
+    today.textContent = translate("slider.today", {}, locale);
+    today.disabled = disabled;
+    today.setAttribute("aria-label", `${translate("slider.today", {}, locale)} ${maxYear}`);
+    shortcuts.setAttribute("aria-label", translate("slider.eras", {}, locale));
+    const choices = eraShortcuts(registry, resolution.candidates, maxYear);
+    // Preserve focused buttons when map resolution or locale updates.
+    const signature = choices.map((choice) => `${choice.id}:${choice.year}`).join(",");
+    if (shortcuts.dataset.signature !== signature) {
+      shortcuts.dataset.signature = signature;
+      shortcuts.replaceChildren(
+        ...choices.map((choice) =>
+          el(
+            "button",
+            {
+              type: "button",
+              class: "time-navigation__era",
+              "data-era-year": choice.year,
+              "data-layer-id": choice.id,
+            },
+            String(choice.year),
+          ),
+        ),
+      );
+    }
+    for (const button of shortcuts.querySelectorAll<HTMLButtonElement>("button")) {
+      button.disabled = disabled;
+      button.setAttribute("aria-pressed", String(Number(button.dataset.eraYear) === displayedYear));
+    }
+  }
+
+  function chooseYear(value: number): void {
+    if (disabled) return;
+    cancelDragging();
+    setDisplayedYear(value);
+    commitDisplayedYear();
+  }
+
+  const handleToday = (): void => chooseYear(maxYear);
+  const handleShortcut = (event: MouseEvent): void => {
+    const button =
+      event.target instanceof Element
+        ? event.target.closest<HTMLButtonElement>("button[data-era-year]")
+        : null;
+    if (button !== null) chooseYear(Number(button.dataset.eraYear));
+  };
 
   function renderPosition(): void {
     const x = yearToX(displayedYear, YEAR_MIN, maxYear, geometry.width);
@@ -233,12 +297,14 @@ export function mount(
     root.setAttribute("aria-valuetext", valueText);
     root.setAttribute("aria-label", translate("slider.aria", {}, locale));
     valueLabel.textContent = yearLabel(displayedYear, locale);
+    renderNavigation();
   }
 
   function renderDisabled(): void {
     root.setAttribute("aria-disabled", String(disabled));
     root.dataset.disabled = String(disabled);
     root.tabIndex = disabled ? -1 : 0;
+    renderNavigation();
   }
 
   function cancelDragging(): void {
@@ -385,6 +451,8 @@ export function mount(
   );
 
   root.addEventListener("pointerdown", handlePointerDown);
+  today.addEventListener("click", handleToday);
+  shortcuts.addEventListener("click", handleShortcut);
   root.addEventListener("pointermove", handlePointerMove);
   root.addEventListener("pointerup", finishPointer);
   root.addEventListener("pointercancel", finishPointer);
@@ -417,7 +485,9 @@ export function mount(
       root.removeEventListener("pointercancel", finishPointer);
       root.removeEventListener("lostpointercapture", finishPointer);
       root.removeEventListener("keydown", handleKeyDown);
-      root.remove();
+      today.removeEventListener("click", handleToday);
+      shortcuts.removeEventListener("click", handleShortcut);
+      navigation.remove();
     },
   };
 }

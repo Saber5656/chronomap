@@ -17,6 +17,7 @@ const MODULE_PATH = import.meta.url.startsWith("file:") ? fileURLToPath(import.m
 const repositoryRoot =
   MODULE_PATH === null ? resolve(process.cwd()) : resolve(dirname(MODULE_PATH), "..");
 const noticesPath = resolve(repositoryRoot, "THIRD_PARTY_NOTICES.md");
+const lockfilePath = resolve(repositoryRoot, "package-lock.json");
 const licenseCheckerBinary = resolve(
   repositoryRoot,
   "node_modules",
@@ -65,6 +66,66 @@ export function formatPackageTable(packages) {
   const separator = `| ${widths.map((width) => "-".repeat(width)).join(" | ")} |`;
   const lines = [formatRow(header), separator, ...rows.map(formatRow)];
   return lines.join("\n");
+}
+
+export function productionPackageKeys(lockfile) {
+  if (
+    lockfile === null ||
+    typeof lockfile !== "object" ||
+    lockfile.packages === null ||
+    typeof lockfile.packages !== "object"
+  ) {
+    throw new Error("package-lock.json is missing its packages map.");
+  }
+
+  const keys = new Set();
+  for (const [packagePath, metadata] of Object.entries(lockfile.packages)) {
+    if (
+      metadata === null ||
+      typeof metadata !== "object" ||
+      metadata.dev === true ||
+      metadata.link === true ||
+      typeof metadata.version !== "string"
+    ) {
+      continue;
+    }
+    const nodeModulesMarker = "node_modules/";
+    const nodeModulesIndex = packagePath.lastIndexOf(nodeModulesMarker);
+    const packageName =
+      typeof metadata.name === "string"
+        ? metadata.name
+        : nodeModulesIndex === -1
+          ? null
+          : packagePath.slice(nodeModulesIndex + nodeModulesMarker.length);
+    if (packageName !== null && packageName.length > 0) {
+      keys.add(`${packageName}@${metadata.version}`);
+    }
+  }
+  return keys;
+}
+
+export function filterProductionPackages(packages, productionKeys) {
+  return Object.fromEntries(
+    Object.entries(packages).filter(([packageKey]) => productionKeys.has(packageKey)),
+  );
+}
+
+export function formatLicenseSummary(packages) {
+  const counts = new Map();
+  for (const metadata of Object.values(packages)) {
+    const license = String(metadata?.licenses ?? "UNKNOWN");
+    counts.set(license, (counts.get(license) ?? 0) + 1);
+  }
+  const entries = [...counts.entries()].sort(
+    ([leftLicense, leftCount], [rightLicense, rightCount]) =>
+      rightCount - leftCount || leftLicense.localeCompare(rightLicense),
+  );
+  return entries
+    .map(
+      ([license, count], index) =>
+        `${index === entries.length - 1 ? "└─" : "├─"} ${license}: ${count}`,
+    )
+    .join("\n");
 }
 
 export function replaceGeneratedSection(document, replacement) {
@@ -118,17 +179,17 @@ function generatedContent(summary, packages, generatedDate = DEFAULT_GENERATED_D
   return [
     `Generated from the production dependency tree on ${generatedDate}.`,
     "",
-    "Summary command (the summary includes the private application package as `UNLICENSED`):",
+    "Summary of non-private packages in the root and mobile production dependency graph:",
     "",
     "```text",
     summary,
     "```",
     "",
-    "The package table uses the corresponding JSON command and excludes the private application package:",
+    "The generator intersects lockfile entries without `dev: true` with installed license metadata:",
     "",
     "```sh",
-    `${LICENSE_CHECKER_COMMAND} --production --summary`,
-    `${LICENSE_CHECKER_COMMAND} --production --json --excludePrivatePackages`,
+    "npm ls --omit=dev --all",
+    `${LICENSE_CHECKER_COMMAND} --json --excludePrivatePackages`,
     "```",
     "",
     formatPackageTable(packages),
@@ -137,9 +198,10 @@ function generatedContent(summary, packages, generatedDate = DEFAULT_GENERATED_D
 
 export async function generateNotices() {
   const current = await readFile(noticesPath, "utf8");
-  const summary = await runLicenseChecker(["--production", "--summary"]);
-  const json = await runLicenseChecker(["--production", "--json", "--excludePrivatePackages"]);
-  const packages = JSON.parse(json);
+  const lockfile = JSON.parse(await readFile(lockfilePath, "utf8"));
+  const json = await runLicenseChecker(["--json", "--excludePrivatePackages"]);
+  const packages = filterProductionPackages(JSON.parse(json), productionPackageKeys(lockfile));
+  const summary = formatLicenseSummary(packages);
   const generatedDate = resolveGeneratedDate(current);
   const updated = replaceGeneratedSection(
     current,

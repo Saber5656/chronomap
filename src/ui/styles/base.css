@@ -1,32 +1,3 @@
-:root {
-  --color-bg: #f5f7fa;
-  --color-accent: #2d6cdf;
-  --color-action: #2d6cdf;
-  --color-accent-contrast: #ffffff;
-  --color-text: #17202a;
-  --focus-ring-color: #2d6cdf;
-  --focus-ring-width: 3px;
-  --focus-ring-offset: 2px;
-  --radius: 0.75rem;
-  --shadow: 0 0.5rem 1.5rem rgb(15 23 42 / 18%);
-  --z-map: 0;
-  --z-chrome: 10;
-  --z-sheet: 20;
-  --z-toast: 30;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: #161a1f;
-    --color-accent: #83b4ff;
-    --color-action: #2d6cdf;
-    --color-accent-contrast: #161a1f;
-    --color-text: #f2f5f7;
-    --focus-ring-color: #83b4ff;
-    --shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 45%);
-  }
-}
-
 *,
 *::before,
 *::after {
@@ -89,21 +60,10 @@ body {
   text-align: center;
 }
 
-.app-brand {
-  position: fixed;
-  z-index: var(--z-chrome);
-  inset-block-start: 0.75rem;
-  inset-inline-start: 0.75rem;
-  min-inline-size: 12rem;
-  padding: 1rem 1.25rem;
-  border: 1px solid color-mix(in srgb, var(--color-text) 20%, transparent);
-  border-radius: var(--radius);
-  background: color-mix(in srgb, var(--color-bg) 94%, transparent);
-  color: var(--color-text);
-  font-size: 1.75rem;
-  font-weight: 650;
-  line-height: 1.35;
-  text-align: center;
+@media (max-height: 32rem) and (min-width: 32rem) {
+  .slider-dock {
+    width: min(420px, calc(100% - 88px));
+  }
 }
 
 .shell {
@@ -117,10 +77,10 @@ body {
   );
   --top-controls-inline-size: 240px;
   --top-chrome-gap: 12px;
-  --slider-dock-max-block-size: 96px;
-  --slider-dock-control-block-size: 44px;
-  --slider-dock-padding-block-start: 8px;
-  --slider-dock-padding-block-end: 8px;
+  --slider-dock-max-block-size: 224px;
+  --slider-dock-control-block-size: 164px;
+  --slider-dock-padding-block-start: 12px;
+  --slider-dock-padding-block-end: 12px;
   --slider-dock-safe-area-budget: calc(
     var(--slider-dock-max-block-size) - var(--slider-dock-control-block-size) -
       var(--slider-dock-padding-block-start) - var(--slider-dock-padding-block-end)
@@ -378,12 +338,16 @@ body {
 }
 
 .layer-info-badge-slot {
-  inset-block-end: calc(var(--slider-dock-block-size) + 3rem);
+  inset-block-start: calc(max(12px, env(safe-area-inset-top, 0px)) + 72px);
   inset-inline-start: max(0.75rem, env(safe-area-inset-left, 0px));
 }
 
+.map-region > .layer-info-badge-slot {
+  max-width: calc(100% - 88px);
+}
+
 .maplibregl-ctrl-bottom-left {
-  inset-block-end: calc(var(--slider-dock-block-size) + 0.75rem);
+  inset-block-end: calc(var(--slider-dock-block-size) + 1.5rem);
   inset-inline-start: max(0.75rem, env(safe-area-inset-left, 0px));
   max-width: calc(
     100% - max(0.75rem, env(safe-area-inset-left, 0px)) -
@@ -398,14 +362,17 @@ body {
 }
 
 .slider-dock {
-  inset-inline: 0;
-  inset-block-end: 0;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  inset-block-end: 12px;
   z-index: var(--z-chrome);
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   align-items: center;
   gap: 0.75rem;
-  width: 100%;
+  width: min(560px, calc(100% - 24px));
+  border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent);
+  border-radius: 24px;
   height: var(--slider-dock-block-size);
   max-height: var(--slider-dock-max-block-size);
   min-height: calc(
@@ -431,6 +398,9 @@ body {
 }
 
 .opacity-control-slot {
+  position: absolute;
+  inset-inline-end: 16px;
+  inset-block-start: 18px;
   width: 44px;
   min-width: 44px;
   min-height: 44px;
@@ -438,7 +408,7 @@ body {
 
 @media (min-width: 40rem) {
   .coverage-banner-slot {
-    inset-block-start: max(0.75rem, env(safe-area-inset-top, 0px));
+    inset-block-start: max(5.5rem, env(safe-area-inset-top, 0px));
     inset-inline-end: calc(var(--top-controls-inline-size) + var(--top-chrome-gap));
   }
 }
