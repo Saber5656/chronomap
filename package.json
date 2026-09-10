@@ -28,7 +28,7 @@
     "e2e:ui": "playwright test --ui"
   },
   "dependencies": {
-    "maplibre-gl": "^6.3.0"
+    "maplibre-gl": "^6.4.1"
   },
   "devDependencies": {
     "@types/node": "^26.2.0",
